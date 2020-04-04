@@ -1,0 +1,34 @@
+SiteNumber,IslandCode,IslandName,SiteCode,SiteName,ReserveStatus,Latitude,Longitude,MeanDepth,Color,LineType,Color2
+1,SM,San Miguel Island,WL,Wyckoff Ledge,FALSE,34 01.342,120 23.248,43.27,red2,solid,slateblue4
+2,SM,San Miguel Island,HR,Hare Rock,TRUE,34 03.863,120 21.396,20.5,blue2,dashed,darkorchid1
+3,SR,Santa Rosa Island,JLNO,Johnson's Lee North,FALSE,33 54.088,120 06.178,33.18,red2,solid,deepskyblue
+4,SR,Santa Rosa Island,JLSO,Johnson's Lee South,FALSE,33 53.852,120 06.045,46.72,blue2,solid,deepskyblue4
+5,SR,Santa Rosa Island,RR,Rodes Reef,FALSE,34 01.957,120 06.420,44.77,green3,solid,blue
+6,SC,Santa Cruz Island,GI,Gull Island South,TRUE,33 56.980,119 49.655,52,red2,dashed,chartreuse
+7,SC,Santa Cruz Island,FH,Fry's Harbor,FALSE,34 06.381,119 45.309,40.82,blue2,solid,chartreuse4
+8,SC,Santa Cruz Island,PB,Pelican Bay,FALSE,34 02.093,119 42.185,21.33,green3,solid,darkolivegreen3
+9,SC,Santa Cruz Island,SA,Scorpion Anchorage,TRUE,34 02.879,119 33.084,15.45,deepskyblue2,dashed,darkgreen
+10,SC,Santa Cruz Island,YB,Yellow Banks,FALSE,33 59.390,119 33.784,50.67,yellow2,solid,forestgreen
+11,AN,Anacapa Island,AR,Admiral's Reef,FALSE,34 00.465,119 26.063,44.36,red2,solid,gold
+12,AN,Anacapa Island,CC,Cathedral Cove,TRUE,34 00.952,119 22.304,26.45,blue2,dashed,gold3
+13,AN,Anacapa Island,LC,Landing Cove,TRUE,34 01.022,119 21.668,24.25,green3,dashed,yellow
+14,SB,Santa Barbara Island,SESL,SE Sea Lion Rookery,TRUE,33 27.967,119 01.667,43.09,red2,dashed,darkred
+15,SB,Santa Barbara Island,AP,Arch Point,FALSE,33 29.252,119 01.655,24.82,blue2,solid,firebrick1
+16,SB,Santa Barbara Island,CAT,Cat Canyon,FALSE,33 27.865,119 02.350,25.91,green3,solid,violetred
+21,SM,San Miguel Island,MM,Miracle Mile,FALSE,34 01.422,120 23.708,27.55,green3,solid,darkmagenta
+22,SR,Santa Rosa Island,CP,Cluster Point,FALSE,33 55.382,120 11.242,45.33,deepskyblue2,solid,turquoise1
+23,SR,Santa Rosa Island,TC,Trancion Canyon,TRUE,33 54.513,120 09.332,42.18,yellow2,dashed,turquoise4
+24,SR,Santa Rosa Island,CSAW,Chickasaw,TRUE,33 54.022,120 08.140,36.6,darkgreen,dashed,steelblue1
+25,SR,Santa Rosa Island,SP,South Point,TRUE,33 53.540,120 07.170,41.09,darkorange3,dashed,steelblue4
+26,SC,Santa Cruz Island,DPM,Devil's Peak Member,FALSE,34 02.693,119 36.076,38.45,darkgreen,solid,lightgreen
+27,SC,Santa Cruz Island,PP,Potato Pasture,TRUE,34 03.130,119 34.927,37,darkorange3,dashed,limegreen
+28,SC,Santa Cruz Island,CVP,Cavern Point,TRUE,34 03.257,119 34.012,40,darkseagreen4,dashed,palegreen4
+29,SC,Santa Cruz Island,LS,Little Scorpion,FALSE,34 02.649,119 32.547,37.82,darkslategrey,solid,seagreen3
+30,SC,Santa Cruz Island,PRF,Pedro Reef,FALSE,34 02.302,119 31.518,29.73,black,solid,green
+31,AN,Anacapa Island,KH,Keyhole,TRUE,34 00.985,119 25.921,29.64,deepskyblue2,dotted,yellow3
+32,AN,Anacapa Island,EFC,East Fish Camp,FALSE,34 00.270,119 23.147,38.09,yellow2,solid,palegoldenrod
+33,AN,Anacapa Island,BSBR,Black Sea Bass Reef,TRUE,34 00.756,119 23.351,53.18,darkgreen,dashed,orange
+34,AN,Anacapa Island,LH,Lighthouse,FALSE,34 00.846,119 21.541,27.91,darkorange3,solid,darkgoldenrod2
+35,SB,Santa Barbara Island,WA,Webster's Arch,FALSE,33 28.791,119 03.732,48.18,deepskyblue2,solid,red
+36,SB,Santa Barbara Island,GC,Graveyard Canyon,TRUE,33 28.384,119 01.609,38.14,yellow2,dashed,deeppink
+37,SB,Santa Barbara Island,SER,Southeast Reef,TRUE,33 27.776,119 01.876,38.73,darkgreen,dashed,deeppink4

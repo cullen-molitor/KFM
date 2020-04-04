@@ -1,0 +1,984 @@
+
+
+
+
+# Define the User Interface for application 
+
+ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
+  dashboardHeader( # Dash_B_Header   ----
+    title = tags$strong("Kelp Forest Monitoring", 
+                        tags$img(height = 50, width = 100, src = "KFMshirtdesign_1.png")),
+    titleWidth = 400),
+  dashboardSidebar(# Dash_B_Side_Bar   ----
+    sidebarMenu(
+      style = "position: fixed; width: 230px",
+      # ~ About_Conditonal  ----
+      conditionalPanel(condition = "input.tabselected=='about'",
+                       tags$hr(),
+                       fluidRow(column(12,tags$img(height = 120,width = 220, src = "KelpWallSBI.jpg"))),
+                       tags$hr(),
+                       fluidRow(column(12, tags$img(height = 120, width = 220, src = "SeaLionSBI.jpg"))),
+                       tags$hr(),
+                       fluidRow(column(12, tags$img(height = 120, width = 220, src = "DiverintheKelpSBI.jpg"))),
+                       tags$hr(),
+                       fluidRow(column(12, offset = 1, tagList(tags$h5("Above Photographs by:"),
+                                                               tags$h5("Laurie Montgomery"))))
+                       
+      ),
+      # ~ oneM_Conditional  ----
+      # ...... One Species ----
+      conditionalPanel(condition = "input.tabselected=='oneM_TP' && input.oneM_allORone=='One Species by Site'",
+                       selectInput(inputId = "oneM_SiteNameOne",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "oneM_SpeciesNameOne",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(oneM_DF$CommonName)),
+                                   selected = "Bat Star"),
+                       tags$hr(),
+                       radioButtons(inputId = "oneM_GraphOne",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line", 'Boxplot')),
+                       radioButtons(inputId = "oneM_DataSummaryOne",
+                                    label = "Choose a data Summary:",
+                                    choices = c("One species at one site", "One species with island average")),
+                       radioButtons(inputId = "oneM_GraphOptionsOne",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"))
+      ),
+      # ...... By Island ----
+      conditionalPanel(condition = "input.tabselected=='oneM_TP' && input.oneM_allORone=='One Species by Island'",
+                       selectInput(inputId = "oneM_SpeciesNameIsl",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(oneM_DF$CommonName)),
+                                   selected = "Purple Urchin"),
+                       radioButtons(inputId = "oneM_GraphIsl",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "oneM_DataSummaryIsl",
+                                    label = "Choose a data Summary:",
+                                    choices = c("Island Mean", "Site Means (by Island)")),
+                       radioButtons(inputId = "oneM_FreeOrLockIsl",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales", "Single Plot")),
+                       radioButtons(inputId = "oneM_GraphOptionsIsl",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)"))
+      ),
+      # ...... By MPA ----
+      conditionalPanel(condition = "input.tabselected=='oneM_TP' && input.oneM_allORone=='One Species by MPA'",
+                       selectInput(inputId = "oneM_SpeciesNameMPA",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(oneM_DF$CommonName)),
+                                   selected = "Warty Sea Cucumber"),
+                       tags$hr(),
+                       radioButtons(inputId = "oneM_GraphMPA",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "oneM_DataSummaryMPA",
+                                    label = "Choose a data Summary:",
+                                    choices = c("MPA Mean", "Site Means (by MPA)")),
+                       radioButtons(inputId = "oneM_FreeOrLockMPA",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales")),
+                       radioButtons(inputId = "oneM_GraphOptionsMPA",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)")),
+                       tags$hr()
+      ),
+      # ...... Two Species ----
+      conditionalPanel(condition = "input.tabselected=='oneM_TP' && input.oneM_allORone=='Two Species by Site'",
+                       selectInput(inputId = "oneM_SiteNameTwo",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "oneM_SpeciesNameTwo_One",
+                                   label = "Species One:",
+                                   choices = levels(factor(oneM_DF$CommonName)),
+                                   selected = "Purple Urchin"),
+                       selectInput(inputId = "oneM_SpeciesNameTwo_Two",
+                                   label = "Species Two:",
+                                   choices = levels(factor(oneM_DF$CommonName)),
+                                   selected = "Giant Kelp (Adult)"),
+                       tags$hr(),
+                       radioButtons(inputId = "oneM_GraphTwo",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "oneM_GraphOptionsTwo",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)"
+                                    )
+                       )
+      ),
+      # ...... All Species ----
+      conditionalPanel(condition ="input.tabselected=='oneM_TP' && input.oneM_allORone=='All Species'",
+                       tags$hr(),
+                       selectInput(inputId = "oneM_SiteNameAll",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       tags$hr(),
+                       radioButtons(inputId = "oneM_GraphAll",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar")),
+                       tags$hr()
+      ),
+      # ~ fiveM_Conditional  ----
+      # ...... One Species ----
+      conditionalPanel(condition = "input.tabselected=='fiveM_TP' && input.fiveM_allORone=='One Species by Site'",
+                       selectInput(inputId = "fiveM_SiteNameOne",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "fiveM_SpeciesNameOne",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(fiveM_DF$CommonName)),
+                                   selected = "Giant Kelp (> 1 m tall)"),
+                       tags$hr(),
+                       radioButtons(inputId = "fiveM_GraphOne",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line", 'Boxplot')),
+                       radioButtons(inputId = "fiveM_DataSummaryOne",
+                                    label = "Choose a data Summary:",
+                                    choices = c("One species at one site", "One species with island average")),
+                       radioButtons(inputId = "fiveM_GraphOptionsOne",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"
+                                    )
+                       )
+      ),
+      # ...... By Island ----
+      conditionalPanel(condition = "input.tabselected=='fiveM_TP' && input.fiveM_allORone=='One Species by Island'",
+                       selectInput(inputId = "fiveM_SpeciesNameIsl",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(fiveM_DF$CommonName)),
+                                   selected = "Devil Weed (All)"),
+                       radioButtons(inputId = "fiveM_GraphIsl",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "fiveM_DataSummaryIsl",
+                                    label = "Choose a data Summary:",
+                                    choices = c("Island Mean", "Site Means (by Island)")),
+                       radioButtons(inputId = "fiveM_FreeOrLockIsl",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales", "Single Plot")),
+                       radioButtons(inputId = "fiveM_GraphOptionsIsl",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)"))
+      ),
+      # ...... By MPA ----
+      conditionalPanel(condition = "input.tabselected=='fiveM_TP' && input.fiveM_allORone=='One Species by MPA'",
+                       selectInput(inputId = "fiveM_SpeciesNameMPA",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(fiveM_DF$CommonName)),
+                                   selected = "Giant Kelp (> 1 m tall)"),
+                       tags$hr(),
+                       radioButtons(inputId = "fiveM_GraphMPA",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "fiveM_DataSummaryMPA",
+                                    label = "Choose a data Summary:",
+                                    choices = c("MPA Mean", "Site Means (by MPA)")),
+                       radioButtons(inputId = "fiveM_FreeOrLockMPA",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales")),
+                       radioButtons(inputId = "fiveM_GraphOptionsMPA",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)")),
+                       tags$hr()
+      ),
+      # ...... Two Species ----
+      conditionalPanel(condition = "input.tabselected=='fiveM_TP' && input.fiveM_allORone=='Two Species by Site'",
+                       selectInput(inputId = "fiveM_SiteNameTwo",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "fiveM_SpeciesNameTwo_One",
+                                   label = "Species One:",
+                                   choices = levels(factor(fiveM_DF$CommonName)),
+                                   selected = "Giant Kelp (> 1 m tall)"),
+                       selectInput(inputId = "fiveM_SpeciesNameTwo_Two",
+                                   label = "Species Two:",
+                                   choices = levels(factor(fiveM_DF$CommonName)),
+                                   selected = "Devil Weed (All)"),
+                       tags$hr(),
+                       radioButtons(inputId = "fiveM_GraphTwo",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "fiveM_GraphOptionsTwo",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)"
+                                    )
+                       )
+      ),
+      # ...... All Species ----
+      conditionalPanel(condition ="input.tabselected=='fiveM_TP' && input.fiveM_allORone=='All Species'",
+                       tags$hr(),
+                       selectInput(inputId = "fiveM_SiteNameAll",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       tags$hr(),
+                       radioButtons(inputId = "fiveM_GraphAll",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar")),
+                       tags$hr()
+      ),
+      # ~ bands_Conditional  ----
+      # ...... One Species ----
+      conditionalPanel(condition = "input.tabselected=='band_TP' && input.bands_allORone=='One Species by Site'",
+                       selectInput(inputId = "bands_SiteNameOne",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "bands_SpeciesNameOne",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(bands_DF$CommonName)),
+                                   selected = "Red Abalone"),
+                       tags$hr(),
+                       radioButtons(inputId = "bands_GraphOne",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line", 'Boxplot')),
+                       radioButtons(inputId = "bands_DataSummaryOne",
+                                    label = "Choose a data Summary:",
+                                    choices = c("One species at one site", "One species with island average")),
+                       radioButtons(inputId = "bands_GraphOptionsOne",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"
+                                    )
+                       )
+      ),
+      # ...... By Island ----
+      conditionalPanel(condition = "input.tabselected=='band_TP' && input.bands_allORone=='One Species by Island'",
+                       selectInput(inputId = "bands_SpeciesNameIsl",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(bands_DF$CommonName)),
+                                   selected = "Red Abalone"),
+                       radioButtons(inputId = "bands_GraphIsl",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "bands_DataSummaryIsl",
+                                    label = "Choose a data Summary:",
+                                    choices = c("Island Mean", "Site Means (by Island)")),
+                       radioButtons(inputId = "bands_FreeOrLockIsl",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales", "Single Plot")),
+                       radioButtons(inputId = "bands_GraphOptionsIsl",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)"))
+      ),
+      # ...... By MPA ----
+      conditionalPanel(condition = "input.tabselected=='band_TP' && input.bands_allORone=='One Species by MPA'",
+                       selectInput(inputId = "bands_SpeciesNameMPA",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(bands_DF$CommonName)),
+                                   selected = "Red Abalone"),
+                       tags$hr(),
+                       radioButtons(inputId = "bands_GraphMPA",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "bands_DataSummaryMPA",
+                                    label = "Choose a data Summary:",
+                                    choices = c("MPA Mean", "Site Means (by MPA)")),
+                       radioButtons(inputId = "bands_FreeOrLockMPA",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales")),
+                       radioButtons(inputId = "bands_GraphOptionsMPA",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)")),
+                       tags$hr()
+      ),
+      # ...... Two Species ----
+      conditionalPanel(condition = "input.tabselected=='band_TP' && input.bands_allORone=='Two Species by Site'",
+                       selectInput(inputId = "bands_SiteNameTwo",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "bands_SpeciesNameTwo_One",
+                                   label = "Species One:",
+                                   choices = levels(factor(bands_DF$CommonName)),
+                                   selected = "Orange Puffball Sponge"),
+                       selectInput(inputId = "bands_SpeciesNameTwo_Two",
+                                   label = "Species Two:",
+                                   choices = levels(factor(bands_DF$CommonName)),
+                                   selected = "Rock Scallop"),
+                       tags$hr(),
+                       radioButtons(inputId = "bands_GraphTwo",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "bands_GraphOptionsTwo",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)"
+                                    )
+                       )
+      ),
+      # ...... All Species ----
+      conditionalPanel(condition ="input.tabselected=='band_TP' && input.bands_allORone=='All Species'",
+                       tags$hr(),
+                       selectInput(inputId = "bands_SiteNameAll",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       tags$hr(),
+                       radioButtons(inputId = "bands_GraphAll",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar")),
+                       tags$hr()
+      ),
+      # ~ Core_Conditonals  ----
+      # ...... Two Species   ----
+      conditionalPanel(condition = "input.tabselected=='core_TP' && input.core_allORone=='Two Species by Site'",
+                       selectInput(inputId = "core_SiteNameOne",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "core_SpeciesName_One",
+                                   label = "Species One:",
+                                   choices = levels(factor(core_DF$CommonName)),
+                                   selected = "Purple Urchin"),
+                       selectInput(inputId = "core_SpeciesName_Two",
+                                   label = "Species Two:",
+                                   choices = levels(factor(core_DF$CommonName)),
+                                   selected = "Giant Kelp (> 1 m tall)"),
+                       radioButtons(inputId = "core_GraphOne",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "core_GraphOptionsOne",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)"
+                                    )
+                       )
+      ),
+      # ...... Island    ----
+      conditionalPanel(condition = "input.tabselected=='core_TP' && input.core_allORone=='Two Species by Island'",
+                       selectInput(inputId = "core_SiteName_Isl",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "core_SpeciesName_Isl_One",
+                                   label = "Species One:",
+                                   choices = levels(factor(core_DF$CommonName)),
+                                   selected = "Purple Urchin"),
+                       selectInput(inputId = "core_SpeciesName_Isl_Two",
+                                   label = "Species Two:",
+                                   choices = levels(factor(core_DF$CommonName)),
+                                   selected = "Giant Kelp (> 1 m tall)"),
+                       radioButtons(inputId = "core_Graph_Isl",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "core_FreeOrLock_Isl",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales", "Single Plot")),
+                       radioButtons(inputId = "core_GraphOptions_Isl",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)"
+                                    )
+                       )
+      ),
+      # ...... MPA   ----
+      conditionalPanel(condition = "input.tabselected=='core_TP' && input.core_allORone=='Two Species by MPA'",
+                       selectInput(inputId = "core_SiteName_MPA",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "core_SpeciesName_MPA_One",
+                                   label = "Species One:",
+                                   choices = levels(factor(core_DF$CommonName)),
+                                   selected = "Purple Urchin"),
+                       selectInput(inputId = "core_SpeciesName_MPA_Two",
+                                   label = "Species Two:",
+                                   choices = levels(factor(core_DF$CommonName)),
+                                   selected = "Giant Kelp (> 1 m tall)"),
+                       radioButtons(inputId = "core_Graph_MPA",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "core_FreeOrLock_MPA",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales", "Single Plot")),
+                       radioButtons(inputId = "core_GraphOptions_MPA",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)"
+                                    )
+                       )
+      ),
+      # ~ NHSF_Conditonals  ----
+      # ...... One Species  ----
+      conditionalPanel(condition = "input.tabselected=='nhsf' && input.allORoneNHSF=='One Species by Site'",
+                       tags$hr(),
+                       selectInput(inputId = "nhsfgraph",
+                                   label = "Choose a graph:",
+                                   choices = c("Violin", "Boxplot", "Joyplot", "Mean Sizes")),
+                       tags$hr(),
+                       selectInput(inputId = "SiteNamenhsf",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       tags$hr(),
+                       selectInput(inputId = "nhsfSpeciesName",
+                                   label = "Choose a Species:",
+                                   choices = unique(nhsfRaw$CommonName)),
+                       tags$hr()
+      ),
+      # ...... By Island  ----
+      conditionalPanel(condition = "input.tabselected=='nhsf' && input.allORoneNHSF=='One Species by Island (Free Scales)'",
+                       tags$hr(),
+                       selectInput(inputId = "nhsfgraphbyIsl",
+                                   label = "Choose a graph:",
+                                   choices = c("Violin", "Boxplot", "Mean Sizes")),
+                       tags$hr(),
+                       selectInput(inputId = "nhsfSpeciesNamebyIsl",
+                                   label = "Choose a Species:",
+                                   choices = unique(nhsfRaw$CommonName)),
+                       tags$hr()
+      ),
+      # ...... Locked   ----
+      conditionalPanel(condition = "input.tabselected=='nhsf' && input.allORoneNHSF=='One Species by Island (Locked Scales)'",
+                       tags$hr(),
+                       selectInput(inputId = "nhsfgraphLocked",
+                                   label = "Choose a graph:",
+                                   choices = c("Violin", "Boxplot", "Mean Sizes")),
+                       tags$hr(),
+                       selectInput(inputId = "nhsfSpeciesNameLocked",
+                                   label = "Choose a Species:",
+                                   choices = unique(nhsfRaw$CommonName)),
+                       tags$hr()
+      ),
+      # ~ RPC_Conditional   ----
+      # ...... One Species    ----
+      conditionalPanel(condition = "input.tabselected=='rpcs' && input.allORonerpc=='One Species by Site'",
+                       tags$hr(),
+                       selectInput(inputId = "graphrpc",
+                                   label = "Choose a graph:",
+                                   choices = c("Line", "Bar")),
+                       tags$hr(),
+                       selectInput(inputId = "SiteNamerpc",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       tags$hr(),
+                       selectInput(inputId = "SpeciesNamerpc",
+                                   label = "Choose a Species:",
+                                   choices = c(unique(rpc$CommonName), "All Substrate")),
+                       tags$hr()
+      ),
+      # ...... By Island    ----
+      conditionalPanel(condition = "input.tabselected=='rpcs' && input.allORonerpc=='One Species by Island (Free Scales)'",
+                       tags$hr(),
+                       selectInput(inputId = "graphrpcByIsl",
+                                   label = "Choose a graph:",
+                                   choices = c("Line", "Bar")),
+                       tags$hr(),
+                       selectInput(inputId = "SpeciesNamerpcByIsl",
+                                   label = "Choose a Species:",
+                                   choices = unique(rpc$CommonName)),
+                       tags$hr()
+      ),
+      # ...... Locked    ----
+      conditionalPanel(condition = "input.tabselected=='rpcs' && input.allORonerpc=='One Species by Island (Locked Scales)'",
+                       tags$hr(),
+                       selectInput(inputId = "graphrpcLocked",
+                                   label = "Choose a graph:",
+                                   choices = c("Line", "Bar")),
+                       tags$hr(),
+                       selectInput(inputId = "SpeciesNamerpcLocked",
+                                   label = "Choose a Species:",
+                                   choices = unique(rpc$CommonName)),
+                       tags$hr()
+      ),
+      # ~ Temperature_Conditional   ----
+      # ...... One Site    ----
+      conditionalPanel(condition = "input.tabselected=='temps' && input.allORonetemps=='One Site'",
+                       tags$hr(),
+                       selectInput(inputId = "SiteNameTemp",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       tags$hr(),
+                       radioButtons(inputId = "temp_minMax_One",
+                                    label = "Show the Min-Max Ribbon?",
+                                    choices = c("Yes" = 1, "No" = 0), inline = TRUE),
+                       radioButtons(inputId = "temp_Smooth_One",
+                                    label = "Show the Conditional Mean?",
+                                    choices = c("Yes" = 1, "No" = 0), inline = TRUE),
+                       radioButtons(inputId = "temp_GraphOptions_One",
+                                    label = "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)"))
+                       
+      ),
+      # ...... By Island    ----
+      conditionalPanel(condition = "input.tabselected=='temps' && input.allORonetemps=='By Island'",
+                       radioButtons(inputId = "temp_IslandName_Isl",
+                                    label = "Show the Min-Max Ribbon?",
+                                    choices = c("All Islands", IslandLevels)),
+                       tags$hr(),
+                       radioButtons(inputId = "temp_minMax_Isl",
+                                    label = "Show the Min-Max Ribbon?",
+                                    choices = c("Yes" = 1, "No" = 0), inline = TRUE),
+                       radioButtons(inputId = "temp_Smooth_Isl",
+                                    label = "Show the Conditional Mean?",
+                                    choices = c("Yes" = 1, "No" = 0), inline = TRUE),
+                       radioButtons(inputId = "temp_GraphOptions_Isl",
+                                    label = "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)"))
+                       
+      ),
+      # ...... Oceanic Nino Index  ----
+      conditionalPanel(condition = "input.tabselected=='temps' && input.allORonetemps=='Oceanic Nino Index (ONI)'",
+                       tags$hr(),
+                       selectInput(inputId = "graphONI",
+                                   label = "Choose a graph:",
+                                   choices = c("Bar", "Gradient")),
+                       tags$hr()
+      ),
+      # ...... Pacific Decadal Oscillation   ----
+      conditionalPanel(condition = "input.tabselected=='temps' && input.allORonetemps=='Pacific Decadal Oscillation (PDO)'",
+                       tags$hr(),
+                       selectInput(inputId = "graphPDO",
+                                   label = "Choose a graph:",
+                                   choices = c("Bar", "Gradient")),
+                       tags$hr(),
+                       selectInput(inputId = "dataPDO",
+                                   label = "Choose a Data Source:",
+                                   choices = c("NOAA", "University of Washington"))
+      ),
+      # ...... Scripps Institute of Oceanography   ----
+      conditionalPanel(condition = "input.tabselected=='temps' && input.allORonetemps=='Scripps Institute of Oceanography (SIO)'",
+                       tags$hr(),
+                       radioButtons(inputId = "dataSIO",
+                                   label = "Choose a Data Type:",
+                                   choices = c("Surface Temp", "Bottom Temp (~ 5 m)", "Surface Salinity", "Bottom Salinity (~ 5 m)"))
+      ),
+      # ~ Stats_Conditional   ----
+      # ...... ECD By Site  ----
+      conditionalPanel(condition = "input.tabselected=='stat' && 
+                       input.statTest=='Empirical Cumulative Distribution' && 
+                       input.SiteOrIslStat == 'By Site'",
+                       tags$hr(),
+                       selectInput(inputId = "SiteNameECD",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       uiOutput(outputId = "StatDataOut")
+                       
+      ),
+      # ...... ECD By Island  ----
+      conditionalPanel(condition = "input.tabselected=='stat' && 
+                       input.statTest=='Empirical Cumulative Distribution' &&
+                       input.SiteOrIslStat == 'By Island'",
+                       tags$hr(),
+                       selectInput(inputId = "IslNameECD",
+                                   label = "Choose an Island:",
+                                   choices = IslandLevels),
+                       uiOutput(outputId = "StatDataOut1")
+      ),
+      # ...... ECD By MPA  ----
+      conditionalPanel(condition = "input.tabselected=='stat' && 
+                       input.statTest=='Empirical Cumulative Distribution' &&
+                       input.SiteOrIslStat == 'By MPA'",
+                       tags$hr(),
+                       selectInput(inputId = "MPANameECD",
+                                   label = "Choose an MPA:",
+                                   choices = MPA_Levels),
+                       uiOutput(outputId = "StatDataOut2")
+      ),
+      # ...... ECD By All  ----
+      conditionalPanel(condition = "input.tabselected=='stat' && 
+                       input.statTest=='Empirical Cumulative Distribution' && 
+                       input.SiteOrIslStat == 'All Sites'",
+                       tags$hr(),
+                       uiOutput(outputId = "StatDataOut3"),
+                       tags$hr()
+      ),
+      # ~ Samplimg Protocol Conditional  ----
+      conditionalPanel(condition = "input.tabselected=='protocol'",
+                       tags$hr(),
+                       radioButtons(inputId = "protoChoice",
+                                    label = "Choose:",
+                                    choices = unique(Protocol_PDFs$Alt_SurveyType)),
+                       tags$hr()
+      ),
+      # ...... Survey Protocols   ----
+      # ...... Data Management and History    -----
+      # ~ Photo Conditional   ----
+      # ...... Indicator Algae  ----
+      conditionalPanel(condition = "input.tabselected=='photo' && input.photogroups=='Indicator Species' && input.class=='Algae'",
+                       tags$hr(),
+                       fluidRow(column(6, offset = 3, tags$h1(tags$strong("Algae")))),
+                       selectInput(inputId = "Algae",
+                                   label = "Choose:",
+                                   choices = ifelse(Indicators$Classification == "Algae", unique(Indicators$CommonName), "NA")),
+                       tags$hr()
+      ),
+      # ...... Indicator Invertebrates  ----
+      conditionalPanel(condition = "input.tabselected=='photo' && input.photogroups=='Indicator Species' && input.class=='Invertebrates'",
+                       tags$hr(),
+                       fluidRow(column(6, offset = 0, tags$h1(tags$strong("Invertebrates")))),
+                       selectInput(inputId = "Invertebrates",
+                                   label = "Choose:",
+                                   choices = ifelse(Indicators$Classification == "Invertebrates", unique(Indicators$CommonName), "NA"),
+                                   selected = "Other Sponges"),
+                       tags$hr()
+      ),
+      # ...... Indicator Fish   ----
+      conditionalPanel(condition = "input.tabselected=='photo' && input.photogroups=='Indicator Species' && input.class=='Fish'",
+                       tags$hr(),
+                       fluidRow(column(6, offset = 0, tags$h1(tags$strong("Fish")))),
+                       selectInput(inputId = "Fish",
+                                   label = "Choose:",
+                                   choices = unique(fish$CommonName)),
+                       tags$hr()
+      ),
+      # ...... Other Algae   ----
+      conditionalPanel(condition = "input.tabselected=='photo' && input.photogroups=='Other Species'",
+                       tags$hr(),
+                       fluidRow(column(6, offset = 3, tags$h1(tags$strong("Other")))),
+                       selectInput(inputId = "Other",
+                                   label = "Choose:",
+                                   choices = c("Other")),
+                       tags$hr()
+      ),
+      # ...... Disease   ----
+      conditionalPanel(condition = "input.tabselected=='photo' && input.photogroups=='Disease'",
+                       radioButtons(inputId = "disease",
+                                   label = "Choose:",
+                                   choices = c("Abalone", "Urchins", "Stars")),
+                                   tags$hr()
+                       
+      ),
+      # ...... Disease   ----
+      conditionalPanel(condition = "input.tabselected=='photo' && input.photogroups=='Kelp Forest Scenes'",
+                       tags$hr(),
+                       radioButtons(inputId = "Photographer",
+                                   label = "Choose a Photographer:",
+                                   choices = c("Kenan Chan", "Laurie Montgomery", "Brett Seymour")),
+                                   tags$hr()
+      ),
+      # ~ Map_Conditional  ----
+      # ...... Leaflet Maps  ----
+      conditionalPanel(condition = "input.tabselected=='maps' && input.maptype=='Leaflet Maps'",
+                       tags$hr()
+      ),
+      # ...... Static Site Maps  ----
+      conditionalPanel(condition = "input.tabselected=='maps' && input.maptype=='Satellite Site Maps'",
+                       selectInput(inputId = "SiteNameStatMaps",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       tags$hr()
+      ),
+      # ...... Bathymetry Maps  ----
+      conditionalPanel(condition = "input.tabselected=='maps' && input.maptype=='Bathymetry Maps'",
+                       tags$hr(),
+                       selectInput(inputId = "bathMaps",
+                                   label = "Choose a Site:",
+                                   choices = unique(BATHlist$SiteName)),
+                       tags$hr()
+      ),
+      # ...... ARM Maps  ----
+      conditionalPanel(condition = "input.tabselected=='maps' && input.maptype=='ARM Maps'",
+                       tags$hr(),
+                       selectInput(inputId = "armMaps",
+                                   label = "Choose a Site:",
+                                   choices = unique(ARMlist$SiteName)),
+                       tags$hr()
+      ),
+      # ...... Site Descriptions   ----
+      conditionalPanel(condition = "input.tabselected=='maps' && input.maptype=='Site Descriptions'",
+                       tags$hr(),
+                       selectInput(inputId = "SiteDesc",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       tags$hr()
+      ),
+      # ~ Datasheet Archive  ----
+      # ...... Site choice   ----
+      conditionalPanel(condition = "input.tabselected=='datasheet'", 
+                       tags$hr(),
+                       selectInput(inputId = "siteSheet",
+                                   label = "Select a Site:",
+                                   choices = SiteNames),
+                       tags$hr(),
+                       selectInput(inputId = "DSYear",
+                                   label = "Choose a year:",
+                                   choices = c("All years", 1982:2018))
+      ),
+      # ~ Report Archive  ----
+      # ...... Year choice   ----
+      conditionalPanel(condition = "input.tabselected=='reports'", 
+                       selectInput(inputId = "Reports",
+                                    label = "Choose a year to view an annual report",
+                                    choices = c(2012:1990, "1982-1989"))
+      )
+      
+    ), # End SidebarMenu   ----
+    tags$head( # ___ HTML Sidebar Colors     ----
+      tags$style(
+        HTML(
+        '/* main sidebar */
+        .skin-blue .main-sidebar {background-color: black;} 
+        
+        /* active selected tab in the sidebarmenu */
+        .skin-blue .main-sidebar .sidebar .sidebar-menu .active a{background-color: white;}'
+    ))),
+    tags$head( # ___ CSS Colors and sizes     ----
+      tags$style(
+        type='text/css', 
+        "span.irs-grid-text {font-size: 10pt; color: #f6f6f6;}",
+        "span.irs-max {font-size: 10pt; color: white;}", 
+        "span.irs-min {font-size: 10pt; color: white;}",
+        "span.irs-grid-pol {background-color: black; color: black;}",
+        ".irs-grid-pol {background-color: black; color: black;}",
+        ".control-label {font-size: 14pt; color: white; }",
+        "span {font-size: 12pt;}",
+        "ul.sidebar-menu .control-label {font-size: 11pt; color: white; }",
+        "ul.sidebar-menu span {font-size: 10pt; color: white; }",
+        ".content {margin-top: 50px;}",
+        ".main-header {position: fixed; width:100%;}",
+        "a {color: #00c0ef;}",
+        "hr {border-top: 2px solid white;}",
+        ".nav-tabs {border-bottom: 0px ;}",
+        "ul.sidebar-menu hr {border-top: 2px solid white; margin-top: 10px; margin-bottom: 10px;}"
+        ))
+  ),
+  dashboardBody( # Dash_B_Body    ----
+                 tags$head(tags$style('body {color:white;}')),
+                 setBackgroundColor(color = c("darkslategrey"), 
+                                    shinydashboard = TRUE),
+                 tags$style(HTML(".tabbable > .nav > li > a {background-color: lightslategray;  color:white}
+                     .tabbable > .nav > li[class=active]    > a {background-color: #3c8dbc; color:white}"
+                 )),
+                 tabsetPanel(id = "tabselected",  # > Tabset Panel    ----
+                             tabPanel("About", value = "about", # ** About_TP     ----
+                                      tags$hr(),
+                                      includeMarkdown(path = "about.md"),
+                                      tags$hr(),
+                                      tags$img(height = 900,
+                                               width = 1250,
+                                               src = "Kelp Forest Sites - With names.jpg"),
+                                      tags$hr()
+                             ),
+                             tabPanel("Program History", value = 'hist',   # ** History_TP    ----
+                                      fluidRow(column(10, offset = 2, tags$h1(tags$strong("History as Written in the KFM Handbook")))),
+                                      tags$hr(),
+                                      htmlOutput(outputId = "HistoryPDF"),
+                                      tags$hr(),
+                                      NPS_tagList), 
+                             tabPanel("Sampling Protocols", value = 'protocol', # ** Protocols_TP      ----
+                                      fluidRow(column(11, offset = 1, tags$h1(tags$strong("Sampling Protocols, Data Managment, and Example Datasheets")))),
+                                      radioButtons(inputId = "Proto",
+                                                   label = "What would you like to view?",
+                                                   choices = c("Survey Protocols", 
+                                                               "Protocol Guides",
+                                                               "Species Guides",
+                                                               "Data Management and History",
+                                                               "Datasheets"),
+                                                   inline = TRUE),
+                                      tags$hr(),
+                                      htmlOutput(outputId = "SurveyProtocols"),
+                                      tags$hr()), 
+                             tabPanel("1 m Quadrats", value = "oneM_TP", # ** oneM_TP         ---- 
+                                      fluidRow(column(6, offset = 2, tags$h1(tags$strong("1 m Quadrat Species Densities")))),
+                                      fluidRow(column(3, radioButtons(inputId = "oneM_allORone",
+                                                                      label = "What would you like to view?",
+                                                                      choices = c("One Species by Site",
+                                                                                  "One Species by Island",
+                                                                                  "One Species by MPA",
+                                                                                  "Two Species by Site",
+                                                                                  "All Species"),
+                                                                      inline = FALSE)),
+                                               column(2, conditionalPanel(
+                                                 condition = "input.oneM_allORone == 'One Species by Site' 
+                                                 || input.oneM_allORone == 'One Species by Island' 
+                                                 || input.oneM_allORone == 'One Species by MPA'
+                                                 || input.oneM_allORone == 'Two Species by Site'",
+                                                 imageOutput(outputId = "oneM_TopPhoto_One",
+                                                             height = 200))),
+                                               conditionalPanel(condition = "input.oneM_allORone == 'Two Species by Site'",
+                                                                column(2,imageOutput(outputId = "oneM_TopPhoto_Two",
+                                                                                     height = 200)),
+                                                                column(2, imageOutput(outputId = "oneM_TopSitePhoto_Two",
+                                                                                      height = 200))),
+                                               column(2, conditionalPanel(
+                                                 condition = "input.oneM_allORone == 'One Species by Site'",
+                                                 imageOutput(outputId = "oneM_TopSitePhoto_One",
+                                                             height = 200)))),
+                                      uiOutput(outputId = "oneM_UIout")),
+                             tabPanel("5 m Quadrats", value = "fiveM_TP", # ** fiveM_TP       ---- 
+                                      fluidRow(column(6, offset = 2, tags$h1(tags$strong("5 m Quadrat Species Densities")))),
+                                      fluidRow(column(3, radioButtons(inputId = "fiveM_allORone",
+                                                                      label = "What would you like to view?",
+                                                                      choices = c("One Species by Site",
+                                                                                  "One Species by Island",
+                                                                                  "One Species by MPA",
+                                                                                  "Two Species by Site",
+                                                                                  "All Species"),
+                                                                      inline = FALSE)),
+                                               column(2, conditionalPanel(
+                                                 condition = "input.fiveM_allORone == 'One Species by Site' 
+                                                 || input.fiveM_allORone == 'One Species by Island' 
+                                                 || input.fiveM_allORone == 'One Species by MPA'
+                                                 || input.fiveM_allORone == 'Two Species by Site'",
+                                                 imageOutput(outputId = "fiveM_TopPhoto_One",
+                                                             height = 200))),
+                                               conditionalPanel(condition = "input.fiveM_allORone == 'Two Species by Site'",
+                                                                column(2,imageOutput(outputId = "fiveM_TopPhoto_Two",
+                                                                                     height = 200)),
+                                                                column(2, imageOutput(outputId = "fiveM_TopSitePhoto_Two",
+                                                                                      height = 200))),
+                                               column(2, conditionalPanel(
+                                                 condition = "input.fiveM_allORone == 'One Species by Site'",
+                                                 imageOutput(outputId = "fiveM_TopSitePhoto_One",
+                                                             height = 200)))),
+                                      uiOutput(outputId = "fiveM_UIout")),
+                             tabPanel("Band Transects", value = "band_TP", # ** bands_TP      ---- 
+                                      fluidRow(column(6, offset = 2, tags$h1(tags$strong("Band Transect Species Densities")))),
+                                      fluidRow(column(3, radioButtons(inputId = "bands_allORone",
+                                                                      label = "What would you like to view?",
+                                                                      choices = c("One Species by Site",
+                                                                                  "One Species by Island",
+                                                                                  "One Species by MPA",
+                                                                                  "Two Species by Site",
+                                                                                  "All Species"),
+                                                                      inline = FALSE)),
+                                               column(2, conditionalPanel(
+                                                 condition = "input.bands_allORone == 'One Species by Site' 
+                                                 || input.bands_allORone == 'One Species by Island' 
+                                                 || input.bands_allORone == 'One Species by MPA'
+                                                 || input.bands_allORone == 'Two Species by Site'",
+                                                 imageOutput(outputId = "bands_TopPhoto_One",
+                                                             height = 200))),
+                                               conditionalPanel(condition = "input.bands_allORone == 'Two Species by Site'",
+                                                                column(2,imageOutput(outputId = "bands_TopPhoto_Two",
+                                                                                     height = 200)),
+                                                                column(2, imageOutput(outputId = "bands_TopSitePhoto_Two",
+                                                                                      height = 200))),
+                                               column(2, conditionalPanel(
+                                                 condition = "input.bands_allORone == 'One Species by Site'",
+                                                 imageOutput(outputId = "bands_TopSitePhoto_One",
+                                                             height = 200)))),
+                                      uiOutput(outputId = "bands_UIout")),
+                             tabPanel("Core Densities", value = "core_TP", # ** Core_TP       ----
+                                      fluidRow(column(11, offset = 1,tags$h1(tags$strong("Compare Densities Across Core Protocols (1 m, 5 m, and Bands)")))),
+                                      fluidRow(column(3, radioButtons(inputId = "core_allORone",
+                                                                      label = "What would you like to view?",
+                                                                      choices = c("Two Species by Site",
+                                                                                  "Two Species by Island",
+                                                                                  "Two Species by MPA"),
+                                                                      inline = FALSE)),
+                                               column(2, imageOutput(outputId = "core_TopPhoto_One",
+                                                                     height = 200)),
+                                               column(2, imageOutput(outputId = "core_TopPhoto_Two",
+                                                                     height = 200)),
+                                               column(2, imageOutput(outputId = "core_TopSitePhoto_Two",
+                                                                     height = 200))),
+                                      uiOutput(outputId = "core_UIout"),
+                                      tags$hr(), 
+                                      imageOutput(outputId = "core_LargeSitePhoto_One",
+                                                  height = 625)),
+                             tabPanel("NHSF", value = "nhsf", # ** NHSF_TP      ----
+                                      fluidRow(column(10, offset = 1,tags$h1(tags$strong("Natural Habitat Size Frequency Distributions")))),
+                                      radioButtons(inputId = "allORoneNHSF",
+                                                   label = "What would you like to view?",
+                                                   choices = c("One Species by Site", 
+                                                               "One Species by Island (Free Scales)",
+                                                               "One Species by Island (Locked Scales)",
+                                                               "One Species by MPA",
+                                                               "One Species by MPA (Locked Scales)"),
+                                                   inline = TRUE),
+                                      uiOutput(outputId = "outNHSF"),
+                                      tags$hr()
+                             ),
+                             tabPanel("RPCs", value = "rpcs", # ** RPCs_TP      ----
+                                      fluidRow(column(6, offset = 3,tags$h1(tags$strong("Random Point Contacts (% Cover)")))),
+                                      radioButtons(inputId = "allORonerpc",
+                                                   label = "What would you like to view?",
+                                                   choices = c("One Species by Site",
+                                                               "One Species by Island (Free Scales)", 
+                                                               "One Species by Island (Locked Scales)"),
+                                                   inline = TRUE),
+                                      tags$hr(),
+                                      uiOutput(outputId = "outrpc")
+                             ),
+                             tabPanel("Temperature", value = "temps", #** Temp_TP    ----
+                                      fluidRow(column(6, offset = 3,tags$h1(tags$strong("Water Temperatures")))),
+                                      radioButtons(inputId = "allORonetemps",
+                                                   label = "What would you like to view?",
+                                                   choices = c("One Site",
+                                                               "By Island",
+                                                               "Oceanic Nino Index (ONI)",
+                                                               "Pacific Decadal Oscillation (PDO)",
+                                                               "Scripps Institute of Oceanography (SIO)"),
+                                                   inline = TRUE),
+                                      uiOutput(outputId = "outTemp")
+                             ),
+                             tabPanel("Stats", value = 'stat', # ** Stats_TP      ----
+                                      fluidRow(column(6, offset = 3,tags$h1(tags$strong("Statistical Tests")))),
+                                      fluidRow(column(3, radioButtons(inputId = "statTest",
+                                                                      label = "What would you like to view?",
+                                                                      choices = c("Empirical Cumulative Distribution", "Other"),
+                                                                      inline = FALSE) 
+                                      ),
+                                      conditionalPanel(condition = "input.statTest == 'Empirical Cumulative Distribution'",
+                                                                 column(3, radioButtons(inputId = "SiteOrIslStat",
+                                                                              label = "Site or Island",
+                                                                              choices = c("By Site", "By Island", "By MPA", "All Sites"))
+                                                                        ),
+                                                       column(3, radioButtons(inputId = "statProtocol",
+                                                                              label = "Choose a Protocol:",
+                                                                              choices = c("NHSF", "One Meter", "Five Meter", "Bands"))
+                                                              )
+                                      )
+                                      ), 
+                                      uiOutput(outputId = "outStat")
+                             ),
+                             tabPanel("Photo Library", value = 'photo', # ** Photos_TP      ----
+                                      fluidRow(column(6, offset = 4,tags$h1(tags$strong("Photo Library")))),
+                                      radioButtons(inputId = "photogroups",
+                                                   label = "What would you like to view?",
+                                                   choices = c("Indicator Species",
+                                                               "Disease", 
+                                                               "Kelp Forest Scenes"),
+                                                   inline = TRUE),
+                                      uiOutput(outputId = "outPhoto")
+                             ),
+                             tabPanel("Site Maps", value = "maps", # ** maps_TP      ---- 
+                                      fluidRow(column(6, offset = 3,tags$h1(tags$strong("Site Maps")))),
+                                      radioButtons(inputId = "maptype",
+                                                   label = "What would you like to view?",
+                                                   choices = c("Leaflet Maps",
+                                                               "Satellite Site Maps",
+                                                               "Bathymetry Maps",
+                                                               "ARM Maps", 
+                                                               "Site Descriptions"),
+                                                   inline = TRUE),
+                                      uiOutput(outputId = "MAPS"),
+                                      tags$hr()),
+                             tabPanel("Reports", value = 'reports', # ** Reports_TP      ----
+                                      fluidRow(column(6, offset = 3,tags$h1(tags$strong("KFM Annual Reports")))),
+                                      tags$hr(),
+                                      htmlOutput(outputId = "viewReport", height = 400),
+                                      tags$hr(),
+                                      NPSreports_tagList) 
+                             
+                 )
+  )
+) #End of User Interface Section  ----
+
+
+
+
+
+
+
+
+
+

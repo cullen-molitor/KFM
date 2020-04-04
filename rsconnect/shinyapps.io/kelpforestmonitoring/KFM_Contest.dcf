@@ -1,0 +1,12 @@
+name: KFM_Contest
+title: KFM_Contest
+username:
+account: kelpforestmonitoring
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1956511
+bundleId: 2967292
+url: https://kelpforestmonitoring.shinyapps.io/KFM_Contest/
+when: 1585976656.08474
+asMultiple: FALSE
+asStatic: FALSE

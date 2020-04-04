@@ -1,0 +1,11 @@
+Species,ScientificName,CommonName,AlternateTaxonName,SpeciesName,Life_Stage,Sex
+2002.25,Macrocystis pyrifera,Giant Kelp (Adult),"Macrocystis pyrifera, adult",Macrocystis adult (haptera above the primary dicotomy),Adult,NA
+2002.75,Macrocystis pyrifera,Giant Kelp (Sub-adult),"Macrocystis pyrifera, subadult",Macrocystis subadult (over 1m tall),Subadult,NA
+2002.75,Macrocystis pyrifera,Giant Kelp (> 1 m tall),"Macrocystis pyrifera, (> 1 m tall)",Macrocystis (over 1m tall),NA,NA
+2009,Undaria pinnatifida,Wakame (Adult),"Undaria pinnatifida, adult",Undaria pinnatifida adult,Adult,NA
+2009.5,Undaria pinnatifida,Wakame (Juvenile),"Undaria pinnatifida, juvenile",Undaria pinnatifida juvenile,Juvenile,NA
+2016,Sargassum horneri,Devil Weed (Adult),"Sargassum horneri, adult",Sargassum horneri adult (>0.5m tall),Adult,NA
+2016.5,Sargassum horneri,Devil Weed (Juvenile),"Sargassum horneri, juvenile",Sargassum horneri juvenile (<0.5m tall),Juvenile,NA
+2016.5,Sargassum horneri,Devil Weed (All),"Sargassum horneri, All",Sargassum horneri juvenile (All),NA,NA
+11002,Pisaster giganteus,Giant-spined Sea Star,Pisaster giganteus,Pisaster giganteus,NA,NA
+11011,Pisaster ochraceus,Ochre Sea Star,Pisaster ochraceus,Pisaster ochraceus,NA,NA
