@@ -1,13 +1,3 @@
-SurveyType,Alt_SurveyType,Protocol,ProtocolGuide,SpeciesGuide,DataManagement,Datasheet
-1 meter Quadrats,1 m Quads,1m_Protocol.pdf,1mQuads_protocol_guide.pdf,1mQuads_species_guide.pdf,1m_Data_Management.pdf,1 METER QUADRAT Data Sheet.pdf
-5 meter Quadrats,5 m Quads,5m_Protocol.pdf,5mQuads_protocol_guide.pdf,5mQuads_species_guide.pdf,5m_Data_Management.pdf,5 METER QUADRAT Data Sheet.pdf
-Artificial Recruitment Modules,ARMs,ARM_Protocol.pdf,ARMs_protocol_guide.pdf,ARMS_species_guide.pdf,ARM_Data_Management.pdf,ARMs Datasheet.pdf
-Band Transects,Bands,Band_Protocol.pdf,Bands_protocol_guide.pdf,Bands_species_guide.pdf,Band_Data_Management.pdf,BAND Transect Data Sheet.pdf
-Fish Size Frequency,Fish Sizes,Fish_Size_Protocol.pdf,FSF_protocol_guide.pdf,FSF_species_guide.pdf,Fish_Size_Data_Management.pdf,Fish Size Frequency Summary Sheet.pdf
-Natural Habitat Size Frequency Distribution,NHSF,NHSF_Protocol.pdf,NHSF_protocol_guide.pdf,NHSF_species_guide.pdf,NHSF_Data_Management.pdf,NATSIZE Data Sheet.pdf
-Roving Diver Fish Counts,RDFC,RDFC_Protocol.pdf,RDFC_protocol_guide.pdf,RDFC_species_guide.pdf,RDFC_Data_Management.pdf,ROVING DIVER FISH COUNT.pdf
-Random Point Contacts,RPCs,RPC_Protocol.pdf,RPC_protocol_guide.pdf,RPC_species_guide.pdf,RPC_Data_Management.pdf,Random Point Contacts Datasheet_2019.pdf
-Species List,Species List,Species_List_Protocol.pdf,Species_List_protocol_guide.pdf,Species List.pdf,Species_List_Data_Management.pdf,Species list datasheet.pdf
-Temperature Logger,Temp Loggers,Temp_Logger_Protocol.pdf,Temp_protocol_guide.pdf,Temp_species_guide.pdf,Temp_Logger_Data_Management.pdf,Site Temperature LOGGER DEPLOYMENT HISTORY.pdf
-Video Taped Transects,Site Videos,Video_Transect_Protocol.pdf,Video_protocol_guide.pdf,Site_Video_guide.pdf,Video_Transect_Data_Management.pdf,VIDEO setting  INSTRUCTIONS SOP.pdf
-Visual Fish Transects,Fish Transects,Visual_Fish_Protocol.pdf,VFT_protocol_guide.pdf,VFT_species_guide.pdf,Visual_Fish_Data_Management.pdf,Fish Transect Data Sheet.pdf
+version https://git-lfs.github.com/spec/v1
+oid sha256:7135773c35eea74a05644458b46236b174e379ffb1407dc437bb357f25a45442
+size 2007
