@@ -1,6 +1,4 @@
-
-
-
+ 
 
 # Define server logic
 server <- function(input, output, session) {
@@ -231,7 +229,7 @@ server <- function(input, output, session) {
     return(dyn_ui)
   })
   
-  { # ........oneM_SERVERS........     ----
+  { # ........ oneM_SERVERS ........     ----
     
     { # oneM_Server_One_Species   ----
       
@@ -7030,7 +7028,7 @@ server <- function(input, output, session) {
     return(dyn_ui)
   })
   
-  { # ........fiveM_SERVERS........     ----
+  { # ........ fiveM_SERVERS ........     ----
     
     { # fiveM_Server_One_Species   ----
       
@@ -13827,7 +13825,7 @@ server <- function(input, output, session) {
     return(dyn_ui)
   })
   
-  { # ........bands_SERVERS........     ----
+  { # ........ bands_SERVERS ........     ----
     
     { # bands_Server_One_Species   ----
       
@@ -20428,7 +20426,7 @@ server <- function(input, output, session) {
     return(dyn_ui)
   })
   
-  { # ...................Core Servers..................  ------
+  { # ........ Core Servers ........  ------
     
     { # Core_Two_Species    ----
       
@@ -21049,7 +21047,7 @@ server <- function(input, output, session) {
     return(dyn_ui)
   })
   
-  { # NHSF_Servers   ----
+  { # ........ NHSF_Servers ........   ----
     
     { # NHSF_Server_One   ----
       
@@ -22012,7 +22010,7 @@ server <- function(input, output, session) {
     return(dyn_ui)
   })
   
-  { # RPC_Servers   ----
+  { # ........ RPC_Servers ........  ----
     
     { # RPC_Server_One   -----
       
@@ -22248,7 +22246,7 @@ server <- function(input, output, session) {
     else if (input$allORonetemps == "Pacific Decadal Oscillation (PDO)") {
       dyn_ui <- tabPanel("Temperature", value = 'temps', # Temp_TP_PDO       ----
                          plotOutput(outputId = "pdoZoom",
-                                    height = 600),
+                                    height = 400),
                          plotOutput(outputId = "pdoOverall",
                                     height = 200,
                                     brush = brushOpts(id = "brushpdo", direction = "x", opacity = 0.6)),
@@ -22258,7 +22256,7 @@ server <- function(input, output, session) {
     else if (input$allORonetemps == "Scripps Institute of Oceanography (SIO)") {
       dyn_ui <- tabPanel("Temperature", value = 'temps', # Temp_TP_SIO       ----
                          plotOutput(outputId = "sioZoom",
-                                    height = 600),
+                                    height = 400),
                          plotOutput(outputId = "sioOverall",
                                     height = 200,
                                     brush = brushOpts(id = "brushsio", direction = "x", opacity = 0.6)),
@@ -22268,7 +22266,7 @@ server <- function(input, output, session) {
     return(dyn_ui)
   })
   
-  { # Temp_Servers   ----
+  { # ........ Temp_Servers ........   ----
     
     { # Temp_OneSite   ----
       
@@ -22603,7 +22601,7 @@ server <- function(input, output, session) {
                  "Mean depth of all monitoring sites combined is {temp_Filter_Isl()$MeanDepth} ft."),
                fill = "Oceanic Nino \n Index Gradient",
                x = "Date",
-               y = NULL) +
+               y = "Temp (°C)") +
           scale_x_date(date_labels = "%b %Y", 
                        date_breaks = ifelse(input$temp_GraphOptions_Isl == "With No Index", "1 year", 
                                             ifelse(input$temp_GraphOptions_Isl == "With ONI", "2 years", "4 years")),
@@ -22633,10 +22631,10 @@ server <- function(input, output, session) {
         scale_x_date(date_labels = "%Y", date_breaks = "2 year",
                      expand = c(0.01,0)) +
         labs(title = "Oceanic Nino Index (ONI)",
-             subtitle = "Nino Region 3.4 (5N-5S,120-170W)",
+             subtitle = "Nino Region 3.4 (5°N-5°S,120°-170°W)",
              fill = "Anomaly Intensity (°C)",
              x = NULL,
-             y = "Mean Monthly Sea Surface Temperature Anomaly (°C)") +
+             y = "Sea Surface Temperature Anomaly (°C)") +
         scale_y_continuous(breaks = c(-2, -1.5, -1, -.5, 0, .5, 1, 1.5, 2, 2.5),
                            labels = c("(-2)", "Strong La Nina (-1.5)", "Moderate La Nina (-1)", 
                                       "Weak La Nina (-.5)", "Neutral (0)", "Weak El Nino (.5)",
@@ -22676,10 +22674,10 @@ server <- function(input, output, session) {
         scale_x_date(date_labels = "%b %Y", date_breaks = "2 year", 
                      expand = c(0.01,0)) +
         labs(title = "Oceanic Nino Index (ONI)",
-             subtitle = "Nino Region 3.4 (5N-5S,120-170W)",
+             subtitle = "Nino Region 3.4 (5°N-5°S,120°-170°W)",
              fill = "Anomaly Intensity (°C)",
              x = NULL,
-             y = "Mean Monthly Sea Surface Temperature Anomaly (°C)") +
+             y = "Sea Surface Temperature Anomaly (°C)") +
         scale_y_continuous(breaks = 0:1) +
         scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
         geom_vline(size = 1, xintercept = as.Date("1982-01-01", format = "%Y-%m-%d")) +
@@ -22702,14 +22700,14 @@ server <- function(input, output, session) {
       
       output$oniZoom <- renderPlot({
         if (!is.null(input$brushoni) && input$graphONI == "Bar") {
-          return({onibar <- onibar + scale_x_date(date_labels = "%b %Y", date_breaks = "6 months", 
+          return({onibar <- onibar + scale_x_date(date_labels = "%b %Y", date_breaks = "1 year", 
                                                   limits = c(as.Date("1970-01-01") + input$brushoni$xmin, 
                                                              as.Date("1970-01-01") + input$brushoni$xmax),
                                                   expand = c(0.01,0))
           })
         }
         if (!is.null(input$brushoni) && input$graphONI == "Gradient") {
-          return({onigrad <- onibar + scale_x_date(date_labels = "%b %Y", date_breaks = "6 months", 
+          return({onigrad <- onigrad + scale_x_date(date_labels = "%b %Y", date_breaks = "1 year", 
                                                    limits = c(as.Date("1970-01-01") + input$brushoni$xmin, 
                                                               as.Date("1970-01-01") + input$brushoni$xmax),
                                                    expand = c(0.01,0))
@@ -22726,7 +22724,7 @@ server <- function(input, output, session) {
       output$oniOverall <- renderPlot({
         ggplot(oni, aes(x= Date, y= Anom, fill = Anom)) +
           geom_bar(stat = "identity") +
-          scale_x_date(date_labels = "%Y", date_breaks = "1 year",
+          scale_x_date(date_labels = "%Y", date_breaks = "2 year",
                        expand = c(0.01,0)) +
           labs(title = NULL,
                x = "Date",
@@ -22765,13 +22763,13 @@ server <- function(input, output, session) {
         ggplot(data = pdoData(), aes(x= Date, y= pdoAnom, fill = pdoAnom)) +
           geom_bar(stat = "identity") +
           geom_smooth(se = FALSE, span = 0.1, color = "deeppink") +
-          scale_x_date(date_labels = "%Y", date_breaks = "2 year",
+          scale_x_date(date_labels = "%Y", date_breaks = "4 year",
                        expand = c(0.01,0)) +
           labs(title = "Pacific Decadal Oscillation (PDO)",
                subtitle = glue("Data from {unique(pdoData()$Data)}"),
                fill = "Anomaly Intensity (°C)",
                x = "Date",
-               y = "Mean Monthly Sea Surface Temperature Anomaly (°C)") +
+               y = "Sea Surface Temperature Anomaly (°C)") +
           scale_y_continuous(breaks = -4:4) +
           scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
           geom_vline(size = 1, xintercept = as.Date("1982-01-01", format = "%Y-%m-%d")) +
@@ -22781,7 +22779,7 @@ server <- function(input, output, session) {
                      vjust = 0,
                      inherit.aes = FALSE) +
           theme_dark()+
-          theme(legend.position = "right",
+          theme(legend.position = "none",
                 legend.title = element_text(angle = 270, size = 16, face = "bold"),
                 plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
                 plot.subtitle = element_text(hjust = 0.5, size = 16),
@@ -22792,6 +22790,7 @@ server <- function(input, output, session) {
                 panel.grid.minor = element_blank(),
                 axis.line = element_line(colour = "black"))
       })
+      
       pdobarzoo <- reactive({
         ggplot(data = pdoData(), aes(x= Date, y= pdoAnom, fill = pdoAnom)) +
           geom_bar(stat = "identity") +
@@ -22804,7 +22803,7 @@ server <- function(input, output, session) {
                subtitle = glue("Data from {unique(pdoData()$Data)}"),
                fill = "Anomaly Intensity (°C)",
                x = "Date",
-               y = "Mean Monthly Sea Surface Temperature Anomaly (°C)") +
+               y = "Sea Surface Temperature Anomaly (°C)") +
           scale_y_continuous(breaks = -4:4) +
           scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
           geom_vline(size = 1, xintercept = as.Date("1982-01-01", format = "%Y-%m-%d")) +
@@ -22814,7 +22813,7 @@ server <- function(input, output, session) {
                      vjust = 0,
                      inherit.aes = FALSE) +
           theme_dark()+
-          theme(legend.position = "right",
+          theme(legend.position = "none",
                 legend.title = element_text(angle = 270, size = 16, face = "bold"),
                 plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
                 plot.subtitle = element_text(hjust = 0.5, size = 16),
@@ -22825,6 +22824,7 @@ server <- function(input, output, session) {
                 panel.grid.minor = element_blank(),
                 axis.line = element_line(colour = "black"))
       })
+      
       pdograd <- reactive({
         ggplot(data = pdoData()) +
           geom_rect(aes(xmin= DateStart, xmax = DateEnd, 
@@ -22834,7 +22834,7 @@ server <- function(input, output, session) {
                                mid = "white",
                                low = "blue3", 
                                midpoint = 0) +
-          scale_x_date(date_labels = "%b %Y", date_breaks = "2 year", 
+          scale_x_date(date_labels = "%b %Y", date_breaks = "4 year", 
                        expand = c(0.01,0)) +
           labs(title = "Pacific Decadal Oscillation (PDO)",
                subtitle = glue("Data from {unique(pdoData()$Data)}"),
@@ -22850,7 +22850,7 @@ server <- function(input, output, session) {
                      vjust = 0,
                      inherit.aes = FALSE) +
           theme_classic()+
-          theme(legend.position = "bottom",
+          theme(legend.position = "none",
                 legend.title = element_text(angle = 0, size = 16, face = "bold"),
                 plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
                 plot.subtitle = element_text(hjust = 0.5, size = 16),
@@ -22861,6 +22861,7 @@ server <- function(input, output, session) {
                 panel.grid.minor = element_blank(),
                 axis.line = element_line(colour = "black"))
       })
+      
       pdogradzoo <- reactive({
         ggplot(data = pdoData()) +
           geom_rect(aes(xmin= DateStart, xmax = DateEnd, 
@@ -22878,7 +22879,7 @@ server <- function(input, output, session) {
                subtitle = glue("Data from {unique(pdoData()$Data)}"),
                fill = "Anomaly Intensity (°C)",
                x = "Date",
-               y = "Mean Monthly Sea Surface Temperature Anomaly (°C)") +
+               y = "Sea Surface Temperature Anomaly (°C)") +
           scale_y_continuous(breaks = 0:1) +
           scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
           geom_vline(size = 1, xintercept = as.Date("1982-01-01", format = "%Y-%m-%d")) +
@@ -22888,7 +22889,7 @@ server <- function(input, output, session) {
                      vjust = 0,
                      inherit.aes = FALSE) +
           theme_classic()+
-          theme(legend.position = "bottom",
+          theme(legend.position = "none",
                 legend.title = element_text(angle = 0, size = 16, face = "bold"),
                 plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
                 plot.subtitle = element_text(hjust = 0.5, size = 16),
@@ -22922,7 +22923,7 @@ server <- function(input, output, session) {
                        expand = c(0.01,0)) +
           labs(title = NULL,
                x = NULL,
-               y = NULL) +
+               y = "SST Anomaly (°C)") +
           scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
           geom_vline(size = 1, xintercept = as.Date("1982-01-01", format = "%Y-%m-%d")) + 
           theme_dark()+
@@ -22967,7 +22968,7 @@ server <- function(input, output, session) {
                 stat_smooth(data = sioData(), 
                             aes(x = year(End_of_Week), y = MeanSurfTemp, color = MeanSurfTemp),
                             se = FALSE, span = 0.75, color = "deeppink") +
-                scale_x_continuous(breaks = 1916:2019, expand = c(0.01,0)) +
+                scale_x_continuous(breaks = seq(1916, 2019, 2), expand = c(0.01,0)) +
                 labs(title = "Sea Surface Temperatures",
                      subtitle = "Scripps Institute of Oceanography (SIO)",
                      fill = "Water Temperature (°C)",
@@ -23000,7 +23001,7 @@ server <- function(input, output, session) {
               stat_smooth(data = sioData(), 
                           aes(x = year(End_of_Week), y = MeanBotTemp, color = MeanBotTemp),
                           se = FALSE, span = 0.75, color = "darkgreen") +
-              scale_x_continuous(breaks = 1916:2019, expand = c(0.01,0)) +
+              scale_x_continuous(breaks = seq(1916, 2019, 2), expand = c(0.01,0)) +
               labs(title = "Sea Surface Temperatures",
                    subtitle = "Scripps Institute of Oceanography (SIO)",
                    fill = "Water Temperature (°C)",
@@ -23104,7 +23105,7 @@ server <- function(input, output, session) {
               stat_smooth(data = sioData(), 
                           aes(x = year(End_of_Week), y = MeanSurfTemp, color = MeanSurfTemp),
                           se = FALSE, span = 0.75, color = "deeppink") +
-              scale_x_continuous(breaks = 1916:2019, expand = c(0.01,0),
+              scale_x_continuous(breaks = seq(1916, 2019, 2), expand = c(0.01,0),
                                  limits = c(input$brushsio$xmin, input$brushsio$xmax)) +
               labs(title = "Sea Surface Temperatures",
                    subtitle = "Scripps Institute of Oceanography (SIO)",
@@ -23138,7 +23139,7 @@ server <- function(input, output, session) {
               stat_smooth(data = sioData(), 
                           aes(x = year(End_of_Week), y = MeanBotTemp, color = MeanBotTemp),
                           se = FALSE, span = 0.75, color = "darkgreen") +
-              scale_x_continuous(breaks = 1916:2019, expand = c(0.01,0),
+              scale_x_continuous(breaks = seq(1916, 2019, 2), expand = c(0.01,0),
                                  limits = c(input$brushsio$xmin, input$brushsio$xmax)) +
               labs(title = "Sea Surface Temperatures",
                    subtitle = "Scripps Institute of Oceanography (SIO)",
@@ -23246,7 +23247,7 @@ server <- function(input, output, session) {
                            aes(x= year(End_of_Week), y= MeanSurfTemp, color = MeanSurfTemp, group = year(End_of_Week))) +
               stat_smooth(data = sioData(), aes(x= year(End_of_Week), y= MeanSurfTemp, color = MeanSurfTemp),
                           se = FALSE, span = 0.75, color = "deeppink") +
-              scale_x_continuous(breaks = 1916:2019, expand = c(0.01,0)) +
+              scale_x_continuous(breaks = seq(1916, 2019, 2), expand = c(0.01,0)) +
               labs(fill = "Water Temperature (°C)",
                    x = "Date",
                    y = "(°C)") +
@@ -23276,7 +23277,7 @@ server <- function(input, output, session) {
                            aes(x= year(End_of_Week), y= MeanBotTemp, color = MeanBotTemp, group = year(End_of_Week))) +
               stat_smooth(data = sioData(), aes(x= year(End_of_Week), y= MeanBotTemp, color = MeanBotTemp),
                           se = FALSE, span = 0.75, color = "darkgreen") +
-              scale_x_continuous(breaks = 1916:2019, expand = c(0.01,0)) +
+              scale_x_continuous(breaks = seq(1916, 2019, 2), expand = c(0.01,0)) +
               labs(fill = "Water Temperature (°C)",
                    x = "Date",
                    y = "(°C)") +
@@ -23307,7 +23308,7 @@ server <- function(input, output, session) {
               stat_smooth(data = sioData(), 
                           aes(x = End_of_Week, y = MeanSurfSal, color = MeanSurfSal),
                           se = FALSE, span = 0.75, color = "deeppink") +
-              scale_x_date(date_labels = "%Y", date_breaks = "2 year",
+              scale_x_date(date_labels = "%Y", date_breaks = "4 year",
                            expand = c(0.01,0)) +
               labs(x = "Date",
                    y = "(PSU)") +
@@ -23338,7 +23339,7 @@ server <- function(input, output, session) {
               stat_smooth(data = sioData(), 
                           aes(x = End_of_Week, y = MeanBotSal, color = MeanBotSal),
                           se = FALSE, span = 0.75, color = "darkgreen") +
-              scale_x_date(date_labels = "%Y", date_breaks = "2 year",
+              scale_x_date(date_labels = "%Y", date_breaks = "4 year",
                            expand = c(0.01,0)) +
               labs(x = "Date",
                    y = "(PSU)") +
@@ -23393,7 +23394,7 @@ server <- function(input, output, session) {
     return(dyn_ui)
   })
   
-  { # Stat_SideBar_UI  ----
+  { # ........ Stat_SideBar_UI ........  ----
     
     output$StatDataOut <- renderUI({ # by_Site   ----
       
@@ -23518,7 +23519,7 @@ server <- function(input, output, session) {
     })
   }
   
-  { # Stat_Servers   ----
+  { # ........ Stat_Servers ........   ----
     
     { # Stat EDC ----
       
@@ -23683,14 +23684,14 @@ server <- function(input, output, session) {
     
   }
   
-  output$HistoryPDF <- renderUI({ # Datasheet_PDF_Archive   -----
+  output$HistoryPDF <- renderUI({ # ........ Datasheet_PDF_Archive ........   -----
     
     tags$iframe(
       style="height:600px; width:100%; scrolling=yes",
       src = "Handbook/History.pdf")
   })
   
-  { # Protocol_Servers    ----
+  { # ........ Protocol_Servers ........    ----
     
     Protocol_filter <- reactive({
       Protocol_PDFs %>%
@@ -23846,7 +23847,7 @@ server <- function(input, output, session) {
     return(dyn_ui)
   })
   
-  { # Photo_Servers  ----
+  { # ........ Photo_Servers ........ ----
     
     # add actionButton for next photos
     
@@ -24132,7 +24133,7 @@ server <- function(input, output, session) {
     return(dyn_ui)
   })
   
-  { # Map_Servers    ----
+  { # ........ Map_Servers ........   ----
     
     { # Leaflet Maps     ----
       grp <- c("USGS Topo", "USGS Imagery Only", "USGS Imagery Topo",
@@ -24243,7 +24244,7 @@ server <- function(input, output, session) {
     }
   }
   
-  output$viewReport <- renderUI({ # Report_PDF_Archive   -----
+  output$viewReport <- renderUI({ # ........ Report_PDF_Archive ........   -----
     
     tags$iframe(
       style="height:800px; width:100%; scrolling=yes",

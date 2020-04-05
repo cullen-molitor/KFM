@@ -536,7 +536,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
       # ...... Oceanic Nino Index  ----
       conditionalPanel(condition = "input.tabselected=='temps' && input.allORonetemps=='Oceanic Nino Index (ONI)'",
                        tags$hr(),
-                       selectInput(inputId = "graphONI",
+                       radioButtons(inputId = "graphONI",
                                    label = "Choose a graph:",
                                    choices = c("Bar", "Gradient")),
                        tags$hr()
@@ -544,11 +544,11 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
       # ...... Pacific Decadal Oscillation   ----
       conditionalPanel(condition = "input.tabselected=='temps' && input.allORonetemps=='Pacific Decadal Oscillation (PDO)'",
                        tags$hr(),
-                       selectInput(inputId = "graphPDO",
+                       radioButtons(inputId = "graphPDO",
                                    label = "Choose a graph:",
                                    choices = c("Bar", "Gradient")),
                        tags$hr(),
-                       selectInput(inputId = "dataPDO",
+                       radioButtons(inputId = "dataPDO",
                                    label = "Choose a Data Source:",
                                    choices = c("NOAA", "University of Washington"))
       ),
