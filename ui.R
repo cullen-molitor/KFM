@@ -84,12 +84,12 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                        radioButtons(inputId = "oneM_DataSummary_MPA",
                                     label = "Choose a data Summary:",
                                     choices = c("MPA Mean", "Site Means (by MPA)")),
-                       radioButtons(inputId = "oneM_FreeOrLockMPA",
+                       radioButtons(inputId = "oneM_FreeOrLock_MPA",
                                     label =  "Axis Options:",
                                     choices = c("Locked Scales", "Free Scales")),
                        radioButtons(inputId = "oneM_GraphOptions_MPA",
                                     label =  "Graph Options:",
-                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)")),
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)")),
                        tags$hr()
       ),
       # ...... Two Species ----
