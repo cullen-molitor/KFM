@@ -10752,7 +10752,7 @@ server <- function(input, output, session) {
   output$viewReport <- renderUI({ # ........ Report_PDF_Archive ........   -----
     
     tags$iframe(
-      style="height:800px; width:100%; scrolling=yes",
+      style="height:600px; width:100%; scrolling=yes",
       src = glue("Annual_Reports/{input$Reports}.pdf"))
   })
   

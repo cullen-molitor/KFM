@@ -341,6 +341,7 @@
                 "For a video describing California’s MPA network please visit:",
                 tags$br(), tags$br(),
                 tags$a(href="https://www.youtube.com/watch?v=xB_yqcfN7DE", "MPA Video", target = "_blank"),
+                tags$br(), tags$br(),
                 "For more detailed information on California's MPA network from California's Department of Fish and Wildlife (CDFW) please visit:",
                 tags$br(), tags$br(),
                 tags$a(href="https://wildlife.ca.gov/Conservation/Marine/MPAs", "wildlife.ca.gov", target = "_blank")))

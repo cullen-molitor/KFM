@@ -755,220 +755,220 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                  tags$style(HTML(".tabbable > .nav > li > a {background-color: lightslategray;  color:white}
                      .tabbable > .nav > li[class=active]    > a {background-color: #3c8dbc; color:white}"
                  )),
-                 tabsetPanel(id = "tabselected",  # > Tabset Panel    ----
-                             tabPanel("About", value = "about", # ** About_TP     ----
-                                      tags$hr(),
-                                      includeMarkdown(path = "about.md"),
-                                      tags$hr(),
-                                      tags$img(height = 900,
-                                               width = 1250,
-                                               src = "Kelp Forest Sites - With names.jpg"),
-                                      tags$hr()
-                             ),
-                             tabPanel("Program History", value = 'hist',   # ** History_TP    ----
-                                      fluidRow(column(10, offset = 2, tags$h1(tags$strong("History as Written in the KFM Handbook")))),
-                                      tags$hr(),
-                                      htmlOutput(outputId = "HistoryPDF"),
-                                      tags$hr(),
-                                      NPS_tagList), 
-                             tabPanel("Sampling Protocols", value = 'protocol', # ** Protocols_TP      ----
-                                      fluidRow(column(11, offset = 1, tags$h1(tags$strong("Sampling Protocols, Data Managment, and Example Datasheets")))),
-                                      radioButtons(inputId = "Proto",
-                                                   label = "What would you like to view?",
-                                                   choices = c("Survey Protocols", 
-                                                               "Protocol Guides",
-                                                               "Species Guides",
-                                                               "Data Management and History",
-                                                               "Datasheets"),
-                                                   inline = TRUE),
-                                      tags$hr(),
-                                      htmlOutput(outputId = "SurveyProtocols"),
-                                      tags$hr()), 
-                             tabPanel("1 m Quadrats", value = "oneM_TP", # ** oneM_TP         ---- 
-                                      fluidRow(column(6, offset = 2, tags$h1(tags$strong("1 m Quadrat Species Densities")))),
-                                      fluidRow(column(3, radioButtons(inputId = "oneM_allORone",
-                                                                      label = "What would you like to view?",
-                                                                      choices = c("One Species by Site",
-                                                                                  "One Species by Island",
-                                                                                  "One Species by MPA",
-                                                                                  "Two Species by Site",
-                                                                                  "All Species"),
-                                                                      inline = FALSE)),
-                                               column(2, conditionalPanel(
-                                                 condition = "input.oneM_allORone == 'One Species by Site' 
+    tabsetPanel(id = "tabselected",  # > Tabset Panel    ----
+       tabPanel("About", value = "about", # ** About_TP     ----
+                         tags$hr(),
+                         includeMarkdown(path = "about.md"),
+                         tags$hr(),
+                         tags$img(height = 900,
+                                  width = 1250,
+                                  src = "Kelp Forest Sites - With names.jpg"),
+                         tags$hr()
+                ),
+       tabPanel("Program History", value = 'hist',   # ** History_TP    ----
+                fluidRow(column(10, offset = 2, tags$h1(tags$strong("History as Written in the KFM Handbook")))),
+                tags$hr(),
+                htmlOutput(outputId = "HistoryPDF"),
+                tags$hr(),
+                NPS_tagList), 
+       tabPanel("Sampling Protocols", value = 'protocol', # ** Protocols_TP      ----
+                fluidRow(column(11, offset = 1, tags$h1(tags$strong("Sampling Protocols, Data Managment, and Example Datasheets")))),
+                radioButtons(inputId = "Proto",
+                             label = "What would you like to view?",
+                             choices = c("Survey Protocols", 
+                                         "Protocol Guides",
+                                         "Species Guides",
+                                         "Data Management and History",
+                                         "Datasheets"),
+                             inline = TRUE),
+                tags$hr(),
+                htmlOutput(outputId = "SurveyProtocols"),
+                tags$hr()), 
+       tabPanel("1 m Quadrats", value = "oneM_TP", # ** oneM_TP         ---- 
+                fluidRow(column(6, offset = 2, tags$h1(tags$strong("1 m Quadrat Species Densities")))),
+                fluidRow(column(3, radioButtons(inputId = "oneM_allORone",
+                                                label = "What would you like to view?",
+                                                choices = c("One Species by Site",
+                                                            "One Species by Island",
+                                                            "One Species by MPA",
+                                                            "Two Species by Site",
+                                                            "All Species"),
+                                                inline = FALSE)),
+                         column(2, conditionalPanel(
+                           condition = "input.oneM_allORone == 'One Species by Site' 
                                                  || input.oneM_allORone == 'One Species by Island' 
                                                  || input.oneM_allORone == 'One Species by MPA'
                                                  || input.oneM_allORone == 'Two Species by Site'",
-                                                 imageOutput(outputId = "oneM_TopPhoto_One",
-                                                             height = 200))),
-                                               conditionalPanel(condition = "input.oneM_allORone == 'Two Species by Site'",
-                                                                column(2,imageOutput(outputId = "oneM_TopPhoto_Two",
-                                                                                     height = 200)),
-                                                                column(2, imageOutput(outputId = "oneM_TopSitePhoto_Two",
-                                                                                      height = 200))),
-                                               column(2, conditionalPanel(
-                                                 condition = "input.oneM_allORone == 'One Species by Site'",
-                                                 imageOutput(outputId = "oneM_TopSitePhoto_One",
-                                                             height = 200)))),
-                                      uiOutput(outputId = "oneM_UIout")),
-                             tabPanel("5 m Quadrats", value = "fiveM_TP", # ** fiveM_TP       ---- 
-                                      fluidRow(column(6, offset = 2, tags$h1(tags$strong("5 m Quadrat Species Densities")))),
-                                      fluidRow(column(3, radioButtons(inputId = "fiveM_allORone",
-                                                                      label = "What would you like to view?",
-                                                                      choices = c("One Species by Site",
-                                                                                  "One Species by Island",
-                                                                                  "One Species by MPA",
-                                                                                  "Two Species by Site",
-                                                                                  "All Species"),
-                                                                      inline = FALSE)),
-                                               column(2, conditionalPanel(
-                                                 condition = "input.fiveM_allORone == 'One Species by Site' 
+                           imageOutput(outputId = "oneM_TopPhoto_One",
+                                       height = 200))),
+                         conditionalPanel(condition = "input.oneM_allORone == 'Two Species by Site'",
+                                          column(2,imageOutput(outputId = "oneM_TopPhoto_Two",
+                                                               height = 200)),
+                                          column(2, imageOutput(outputId = "oneM_TopSitePhoto_Two",
+                                                                height = 200))),
+                         column(2, conditionalPanel(
+                           condition = "input.oneM_allORone == 'One Species by Site'",
+                           imageOutput(outputId = "oneM_TopSitePhoto_One",
+                                       height = 200)))),
+                uiOutput(outputId = "oneM_UIout")),
+       tabPanel("5 m Quadrats", value = "fiveM_TP", # ** fiveM_TP       ---- 
+                fluidRow(column(6, offset = 2, tags$h1(tags$strong("5 m Quadrat Species Densities")))),
+                fluidRow(column(3, radioButtons(inputId = "fiveM_allORone",
+                                                label = "What would you like to view?",
+                                                choices = c("One Species by Site",
+                                                            "One Species by Island",
+                                                            "One Species by MPA",
+                                                            "Two Species by Site",
+                                                            "All Species"),
+                                                inline = FALSE)),
+                         column(2, conditionalPanel(
+                           condition = "input.fiveM_allORone == 'One Species by Site' 
                                                  || input.fiveM_allORone == 'One Species by Island' 
                                                  || input.fiveM_allORone == 'One Species by MPA'
                                                  || input.fiveM_allORone == 'Two Species by Site'",
-                                                 imageOutput(outputId = "fiveM_TopPhoto_One",
-                                                             height = 200))),
-                                               conditionalPanel(condition = "input.fiveM_allORone == 'Two Species by Site'",
-                                                                column(2,imageOutput(outputId = "fiveM_TopPhoto_Two",
-                                                                                     height = 200)),
-                                                                column(2, imageOutput(outputId = "fiveM_TopSitePhoto_Two",
-                                                                                      height = 200))),
-                                               column(2, conditionalPanel(
-                                                 condition = "input.fiveM_allORone == 'One Species by Site'",
-                                                 imageOutput(outputId = "fiveM_TopSitePhoto_One",
-                                                             height = 200)))),
-                                      uiOutput(outputId = "fiveM_UIout")),
-                             tabPanel("Band Transects", value = "bands_TP", # ** bands_TP      ---- 
-                                      fluidRow(column(6, offset = 2, tags$h1(tags$strong("Band Transect Species Densities")))),
-                                      fluidRow(column(3, radioButtons(inputId = "bands_allORone",
-                                                                      label = "What would you like to view?",
-                                                                      choices = c("One Species by Site",
-                                                                                  "One Species by Island",
-                                                                                  "One Species by MPA",
-                                                                                  "Two Species by Site",
-                                                                                  "All Species"),
-                                                                      inline = FALSE)),
-                                               column(2, conditionalPanel(
-                                                 condition = "input.bands_allORone == 'One Species by Site' 
+                           imageOutput(outputId = "fiveM_TopPhoto_One",
+                                       height = 200))),
+                         conditionalPanel(condition = "input.fiveM_allORone == 'Two Species by Site'",
+                                          column(2,imageOutput(outputId = "fiveM_TopPhoto_Two",
+                                                               height = 200)),
+                                          column(2, imageOutput(outputId = "fiveM_TopSitePhoto_Two",
+                                                                height = 200))),
+                         column(2, conditionalPanel(
+                           condition = "input.fiveM_allORone == 'One Species by Site'",
+                           imageOutput(outputId = "fiveM_TopSitePhoto_One",
+                                       height = 200)))),
+                uiOutput(outputId = "fiveM_UIout")),
+       tabPanel("Band Transects", value = "bands_TP", # ** bands_TP      ---- 
+                fluidRow(column(6, offset = 2, tags$h1(tags$strong("Band Transect Species Densities")))),
+                fluidRow(column(3, radioButtons(inputId = "bands_allORone",
+                                                label = "What would you like to view?",
+                                                choices = c("One Species by Site",
+                                                            "One Species by Island",
+                                                            "One Species by MPA",
+                                                            "Two Species by Site",
+                                                            "All Species"),
+                                                inline = FALSE)),
+                         column(2, conditionalPanel(
+                           condition = "input.bands_allORone == 'One Species by Site' 
                                                  || input.bands_allORone == 'One Species by Island' 
                                                  || input.bands_allORone == 'One Species by MPA'
                                                  || input.bands_allORone == 'Two Species by Site'",
-                                                 imageOutput(outputId = "bands_TopPhoto_One",
-                                                             height = 200))),
-                                               conditionalPanel(condition = "input.bands_allORone == 'Two Species by Site'",
-                                                                column(2,imageOutput(outputId = "bands_TopPhoto_Two",
-                                                                                     height = 200)),
-                                                                column(2, imageOutput(outputId = "bands_TopSitePhoto_Two",
-                                                                                      height = 200))),
-                                               column(2, conditionalPanel(
-                                                 condition = "input.bands_allORone == 'One Species by Site'",
-                                                 imageOutput(outputId = "bands_TopSitePhoto_One",
-                                                             height = 200)))),
-                                      uiOutput(outputId = "bands_UIout")),
-                             tabPanel("Core Densities", value = "core_TP", # ** Core_TP       ----
-                                      fluidRow(column(11, offset = 1,tags$h1(tags$strong("Compare Densities Across Core Protocols (1 m, 5 m, and Bands)")))),
-                                      fluidRow(column(3, radioButtons(inputId = "core_allORone",
-                                                                      label = "What would you like to view?",
-                                                                      choices = c("Two Species by Site",
-                                                                                  "Two Species by Island",
-                                                                                  "Two Species by MPA"),
-                                                                      inline = FALSE)),
-                                               column(2, imageOutput(outputId = "core_TopPhoto_One",
-                                                                     height = 200)),
-                                               column(2, imageOutput(outputId = "core_TopPhoto_Two",
-                                                                     height = 200)),
-                                               column(2, imageOutput(outputId = "core_TopSitePhoto_Two",
-                                                                     height = 200))),
-                                      uiOutput(outputId = "core_UIout"),
-                                      tags$hr(), 
-                                      imageOutput(outputId = "core_LargeSitePhoto_One",
-                                                  height = 625)),
-                             tabPanel("NHSF", value = "nhsf", # ** NHSF_TP      ----
-                                      fluidRow(column(10, offset = 1,tags$h1(tags$strong("Natural Habitat Size Frequency Distributions")))),
-                                      radioButtons(inputId = "allORoneNHSF",
-                                                   label = "What would you like to view?",
-                                                   choices = c("One Species by Site", 
-                                                               "One Species by Island (Free Scales)",
-                                                               "One Species by Island (Locked Scales)",
-                                                               "One Species by MPA",
-                                                               "One Species by MPA (Locked Scales)"),
-                                                   inline = TRUE),
-                                      uiOutput(outputId = "outNHSF"),
-                                      tags$hr()
-                             ),
-                             tabPanel("RPCs", value = "rpcs", # ** RPCs_TP      ----
-                                      fluidRow(column(6, offset = 3,tags$h1(tags$strong("Random Point Contacts (% Cover)")))),
-                                      radioButtons(inputId = "allORonerpc",
-                                                   label = "What would you like to view?",
-                                                   choices = c("One Species by Site",
-                                                               "One Species by Island (Free Scales)", 
-                                                               "One Species by Island (Locked Scales)"),
-                                                   inline = TRUE),
-                                      tags$hr(),
-                                      uiOutput(outputId = "outrpc")
-                             ),
-                             tabPanel("Temperature", value = "temps", #** Temp_TP    ----
-                                      fluidRow(column(6, offset = 3,tags$h1(tags$strong("Water Temperatures")))),
-                                      radioButtons(inputId = "allORonetemps",
-                                                   label = "What would you like to view?",
-                                                   choices = c("One Site",
-                                                               "By Island",
-                                                               "Oceanic Nino Index (ONI)",
-                                                               "Pacific Decadal Oscillation (PDO)",
-                                                               "Scripps Institute of Oceanography (SIO)"),
-                                                   inline = TRUE),
-                                      uiOutput(outputId = "outTemp")
-                             ),
-                             tabPanel("Stats", value = 'stat', # ** Stats_TP      ----
-                                      fluidRow(column(6, offset = 3,tags$h1(tags$strong("Statistical Tests")))),
-                                      fluidRow(column(3, radioButtons(inputId = "statTest",
-                                                                      label = "What would you like to view?",
-                                                                      choices = c("Empirical Cumulative Distribution", "Other"),
-                                                                      inline = FALSE) 
-                                      ),
-                                      conditionalPanel(condition = "input.statTest == 'Empirical Cumulative Distribution'",
-                                                                 column(3, radioButtons(inputId = "SiteOrIslStat",
-                                                                              label = "Site or Island",
-                                                                              choices = c("By Site", "By Island", "By MPA", "All Sites"))
-                                                                        ),
-                                                       column(3, radioButtons(inputId = "statProtocol",
-                                                                              label = "Choose a Protocol:",
-                                                                              choices = c("NHSF", "One Meter", "Five Meter", "Bands"))
-                                                              )
-                                      )
-                                      ), 
-                                      uiOutput(outputId = "outStat")
-                             ),
-                             tabPanel("Photo Library", value = 'photo', # ** Photos_TP      ----
-                                      fluidRow(column(6, offset = 4,tags$h1(tags$strong("Photo Library")))),
-                                      radioButtons(inputId = "photogroups",
-                                                   label = "What would you like to view?",
-                                                   choices = c("Indicator Species",
-                                                               "Disease", 
-                                                               "Kelp Forest Scenes"),
-                                                   inline = TRUE),
-                                      uiOutput(outputId = "outPhoto")
-                             ),
-                             tabPanel("Site Maps", value = "maps", # ** maps_TP      ---- 
-                                      fluidRow(column(6, offset = 3,tags$h1(tags$strong("Site Maps")))),
-                                      radioButtons(inputId = "maptype",
-                                                   label = "What would you like to view?",
-                                                   choices = c("Leaflet Maps",
-                                                               "Satellite Site Maps",
-                                                               "Bathymetry Maps",
-                                                               "ARM Maps", 
-                                                               "Site Descriptions"),
-                                                   inline = TRUE),
-                                      uiOutput(outputId = "MAPS"),
-                                      tags$hr()),
-                             tabPanel("Reports", value = 'reports', # ** Reports_TP      ----
-                                      fluidRow(column(6, offset = 3,tags$h1(tags$strong("KFM Annual Reports")))),
-                                      tags$hr(),
-                                      htmlOutput(outputId = "viewReport", height = 400),
-                                      tags$hr(),
-                                      NPSreports_tagList) 
-                             
-                 )
+                           imageOutput(outputId = "bands_TopPhoto_One",
+                                       height = 200))),
+                         conditionalPanel(condition = "input.bands_allORone == 'Two Species by Site'",
+                                          column(2,imageOutput(outputId = "bands_TopPhoto_Two",
+                                                               height = 200)),
+                                          column(2, imageOutput(outputId = "bands_TopSitePhoto_Two",
+                                                                height = 200))),
+                         column(2, conditionalPanel(
+                           condition = "input.bands_allORone == 'One Species by Site'",
+                           imageOutput(outputId = "bands_TopSitePhoto_One",
+                                       height = 200)))),
+                uiOutput(outputId = "bands_UIout")),
+       tabPanel("Core Densities", value = "core_TP", # ** Core_TP       ----
+                fluidRow(column(11, offset = 1,tags$h1(tags$strong("Compare Densities Across Core Protocols (1 m, 5 m, and Bands)")))),
+                fluidRow(column(3, radioButtons(inputId = "core_allORone",
+                                                label = "What would you like to view?",
+                                                choices = c("Two Species by Site",
+                                                            "Two Species by Island",
+                                                            "Two Species by MPA"),
+                                                inline = FALSE)),
+                         column(2, imageOutput(outputId = "core_TopPhoto_One",
+                                               height = 200)),
+                         column(2, imageOutput(outputId = "core_TopPhoto_Two",
+                                               height = 200)),
+                         column(2, imageOutput(outputId = "core_TopSitePhoto_Two",
+                                               height = 200))),
+                uiOutput(outputId = "core_UIout"),
+                tags$hr(), 
+                imageOutput(outputId = "core_LargeSitePhoto_One",
+                            height = 625)),
+       tabPanel("NHSF", value = "nhsf", # ** NHSF_TP      ----
+                fluidRow(column(10, offset = 1,tags$h1(tags$strong("Natural Habitat Size Frequency Distributions")))),
+                radioButtons(inputId = "allORoneNHSF",
+                             label = "What would you like to view?",
+                             choices = c("One Species by Site", 
+                                         "One Species by Island (Free Scales)",
+                                         "One Species by Island (Locked Scales)",
+                                         "One Species by MPA",
+                                         "One Species by MPA (Locked Scales)"),
+                             inline = TRUE),
+                uiOutput(outputId = "outNHSF"),
+                tags$hr()
+       ),
+       tabPanel("RPCs", value = "rpcs", # ** RPCs_TP      ----
+                fluidRow(column(6, offset = 3,tags$h1(tags$strong("Random Point Contacts (% Cover)")))),
+                radioButtons(inputId = "allORonerpc",
+                             label = "What would you like to view?",
+                             choices = c("One Species by Site",
+                                         "One Species by Island (Free Scales)", 
+                                         "One Species by Island (Locked Scales)"),
+                             inline = TRUE),
+                tags$hr(),
+                uiOutput(outputId = "outrpc")
+       ),
+       tabPanel("Temperature", value = "temps", #** Temp_TP    ----
+                fluidRow(column(6, offset = 3,tags$h1(tags$strong("Water Temperatures")))),
+                radioButtons(inputId = "allORonetemps",
+                             label = "What would you like to view?",
+                             choices = c("One Site",
+                                         "By Island",
+                                         "Oceanic Nino Index (ONI)",
+                                         "Pacific Decadal Oscillation (PDO)",
+                                         "Scripps Institute of Oceanography (SIO)"),
+                             inline = TRUE),
+                uiOutput(outputId = "outTemp")
+       ),
+       tabPanel("Stats", value = 'stat', # ** Stats_TP      ----
+                fluidRow(column(6, offset = 3,tags$h1(tags$strong("Statistical Tests")))),
+                fluidRow(column(3, radioButtons(inputId = "statTest",
+                                                label = "What would you like to view?",
+                                                choices = c("Empirical Cumulative Distribution", "Other"),
+                                                inline = FALSE) 
+                ),
+                conditionalPanel(condition = "input.statTest == 'Empirical Cumulative Distribution'",
+                                 column(3, radioButtons(inputId = "SiteOrIslStat",
+                                                        label = "Site or Island",
+                                                        choices = c("By Site", "By Island", "By MPA", "All Sites"))
+                                 ),
+                                 column(3, radioButtons(inputId = "statProtocol",
+                                                        label = "Choose a Protocol:",
+                                                        choices = c("NHSF", "One Meter", "Five Meter", "Bands"))
+                                 )
+                )
+                ), 
+                uiOutput(outputId = "outStat")
+       ),
+       tabPanel("Photo Library", value = 'photo', # ** Photos_TP      ----
+                fluidRow(column(6, offset = 4,tags$h1(tags$strong("Photo Library")))),
+                radioButtons(inputId = "photogroups",
+                             label = "What would you like to view?",
+                             choices = c("Indicator Species",
+                                         "Disease", 
+                                         "Kelp Forest Scenes"),
+                             inline = TRUE),
+                uiOutput(outputId = "outPhoto")
+       ),
+       tabPanel("Site Maps", value = "maps", # ** maps_TP      ---- 
+                fluidRow(column(6, offset = 3,tags$h1(tags$strong("Site Maps")))),
+                radioButtons(inputId = "maptype",
+                             label = "What would you like to view?",
+                             choices = c("Leaflet Maps",
+                                         "Satellite Site Maps",
+                                         "Bathymetry Maps",
+                                         "ARM Maps", 
+                                         "Site Descriptions"),
+                             inline = TRUE),
+                uiOutput(outputId = "MAPS"),
+                tags$hr()),
+       tabPanel("Reports", value = 'reports', # ** Reports_TP      ----
+                fluidRow(column(6, offset = 3,tags$h1(tags$strong("KFM Annual Reports")))),
+                tags$hr(),
+                htmlOutput(outputId = "viewReport", height = 600),
+                tags$hr(),
+                NPSreports_tagList) 
+       
+    )
   )
 ) #End of User Interface Section  ----
 
