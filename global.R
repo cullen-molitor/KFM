@@ -176,8 +176,8 @@
 
 { # .. RPC_DF   ----
   
-  rpc <- read_csv("RPC_Summary.csv")
-  rpc$IslandName <- factor(rpc$IslandName, levels = IslandLevels)
+  rpcs_DF <- read_csv("rpcs_Summary.csv")
+  rpcs_DF$IslandName <- factor(rpcs_DF$IslandName, levels = IslandLevels)
   
 }
 

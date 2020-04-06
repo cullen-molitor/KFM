@@ -6890,13 +6890,13 @@ server <- function(input, output, session) {
                                      step = 1,
                                      value = 1,
                                      width = "100%"),
-                         conditionalPanel("input.core_GraphOne == 'Line' || input.core_GraphOne == 'Bar'",
+                         conditionalPanel("input.core_Graph_Two == 'Line' || input.core_Graph_Two == 'Bar'",
                                           radioButtons(inputId = "core_EB_Two",
                                                        label = "Show error bars?",
                                                        choices = c("Yes" = 1, "No" = 0),
                                                        inline = TRUE),
                                           tags$hr()),
-                         conditionalPanel("input.core_GraphOne == 'Smooth Line'",
+                         conditionalPanel("input.core_Graph_Two == 'Smooth Line'",
                                           sliderInput(inputId = "core_SmoothSlide_Two",
                                                       label = "Span: Controls the amount of smoothing for the loess smoother. 
                                                       Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
@@ -6937,7 +6937,7 @@ server <- function(input, output, session) {
       
       core_Filter_One <- reactive({
         core_DF %>%
-          filter(SiteName == input$core_SiteNameOne,
+          filter(SiteName == input$core_SiteName_One,
                  CommonName == input$core_SpeciesName_One) %>%
           select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
                  StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
@@ -6946,7 +6946,7 @@ server <- function(input, output, session) {
       
       core_Filter_Two <- reactive({
         core_DF %>%
-          filter(SiteName == input$core_SiteNameOne,
+          filter(SiteName == input$core_SiteName_One,
                  CommonName == input$core_SpeciesName_Two) %>%
           select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
                  StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
@@ -7096,14 +7096,80 @@ server <- function(input, output, session) {
         }
       }, deleteFile = FALSE)
       
+      core_alphaONI_Two <- reactive({
+        if(input$core_GraphOptions_Two == "With No Index"){
+          return(0)
+        }
+        else if(input$core_GraphOptions_Two == "With ONI"){
+          return(1)
+        }
+        else if(input$core_GraphOptions_Two == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$core_GraphOptions_Two == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      core_alphaPDO_NOAA_Two <- reactive({
+        if(input$core_GraphOptions_Two == "With No Index"){
+          return(0)
+        }
+        if(input$core_GraphOptions_Two == "With ONI"){
+          return(0)
+          
+        }
+        if(input$core_GraphOptions_Two == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$core_GraphOptions_Two == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      core_alphaPDO_UW_Two <- reactive({
+        if(input$core_GraphOptions_Two == "With No Index"){
+          return(0)
+        }
+        if(input$core_GraphOptions_Two == "With ONI"){
+          return(0)
+          
+        }
+        if(input$core_GraphOptions_Two == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$core_GraphOptions_Two == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$core_ONIpdoPIC_Two <- renderImage({
+        if(input$core_GraphOptions_Two == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$core_GraphOptions_Two == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$core_GraphOptions_Two == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
       output$core_Plot_Two <- renderPlot({
         
-        if (is.null(input$core_GraphOne))
+        if (is.null(input$core_Graph_Two))
           return(NULL) 
         
-        else if(input$core_GraphOne == "Line" && input$core_GraphOptionsOne == "With No Index"){
+        else if(input$core_Graph_Two == "Line"){
           return({
             ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(core_alphaONI_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(core_alphaPDO_UW_Two()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
               geom_line(data = core_Filter_One(), 
                         aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName),
                         size = 1) +
@@ -7146,115 +7212,17 @@ server <- function(input, output, session) {
                     axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
           })}
-        else if(input$core_GraphOne == "Line" && input$core_GraphOptionsOne == "With ONI") {
+        else if(input$core_Graph_Two == "Bar") {
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,
-                                        ymin = 0, ymax = Inf, fill = Anom),
-                        position = "identity", alpha = 1) +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(core_alphaONI_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(core_alphaPDO_UW_Two()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = core_Filter_One(), 
-                        aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName), 
-                        size = 1) +
-              geom_errorbar(data = core_Filter_One(),
-                            aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
-                            width = 2, color = "black", alpha = as.numeric(input$core_EB_Two)) +
-              geom_line(data = core_Filter_Two(), 
-                        aes(x = Date, y = MeanDensity_sqm*input$core_Y_Slide_Two, group = ScientificName, color = CommonName),
-                        size = 1) +
-              geom_errorbar(data = core_Filter_Two(),
-                            aes(x = Date, ymin = MeanDensity_sqm*input$core_Y_Slide_Two - StandardError*input$core_Y_Slide_Two, 
-                                ymax = MeanDensity_sqm*input$core_Y_Slide_Two + StandardError*input$core_Y_Slide_Two),
-                            width = 2, color = "black", alpha = as.numeric(input$core_EB_Two)) +
-              scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Two, 
-                                                     name = glue("{unique(core_Filter_Two()$CommonName)} per square meter"))) +
-              scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_One()$Date),
-                           limits = c(min(as.Date(core_Filter_One()$Date))-365,
-                                      max(as.Date(core_Filter_One()$Date))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(core_Filter_One()$ScientificName)
-                              } and {unique(core_Filter_Two()$ScientificName)}"),
-                   subtitle = glue("{unique(core_Filter_One()$IslandName)} {unique(core_Filter_One()$SiteName)}"),
-                   color = "Common Name",
-                   fill = "Oceanic Nino\nIndex Gradient",
-                   caption =
-                     glue(
-                       "{core_Filter_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(core_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
-                     } and has a mean depth of {round(mean(core_Filter_One()$MeanDepth), 2)} ft"),
-                   x = "Year",
-                   y = glue('{unique(core_Filter_One()$CommonName)} per square meter')) +
-              scale_color_manual(guide = guide_legend(nrow = 2), values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
-            
-          })}
-        else if(input$core_GraphOne == "Line" && input$core_GraphOptionsOne == "With PDO (NOAA)") {
-          return({
-            ggplot() +
-              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
-                                             ymin = 0, ymax = Inf, fill = pdoAnom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              scale_y_continuous(limits = c(0, max(core_Filter_One()$MeanDensity_sqm + core_Filter_One()$StandardError)),
-                                 expand = c(0.01,0)) +
-              geom_line(data = core_Filter_One(), 
-                        aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName),
-                        size = 1) +
-              geom_errorbar(data = core_Filter_One(),
-                            aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
-                            width = 2, color = "black", alpha = as.numeric(input$core_EB_Two)) +
-              geom_line(data = core_Filter_Two(), 
-                        aes(x = Date, y = MeanDensity_sqm*input$core_Y_Slide_Two, group = ScientificName, color = CommonName),
-                        size = 1) +
-              geom_errorbar(data = core_Filter_Two(),
-                            aes(x = Date, ymin = MeanDensity_sqm*input$core_Y_Slide_Two - StandardError*input$core_Y_Slide_Two, 
-                                ymax = MeanDensity_sqm*input$core_Y_Slide_Two + StandardError*input$core_Y_Slide_Two),
-                            width = 2, color = "black", alpha = as.numeric(input$core_EB_Two)) +
-              scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Two, 
-                                                     name = glue("{unique(core_Filter_Two()$CommonName)} per square meter"))) +
-              scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_One()$Date),
-                           limits = c(min(as.Date(core_Filter_One()$Date))-365,
-                                      max(as.Date(core_Filter_One()$Date))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(core_Filter_One()$ScientificName)}"),
-                   subtitle = glue("{unique(core_Filter_One()$IslandName)} {unique(core_Filter_One()$SiteName)}"),
-                   color = "Common Name",
-                   fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)",
-                   caption =
-                     glue(
-                       "{core_Filter_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(core_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
-                     } and has a mean depth of {round(mean(core_Filter_One()$MeanDepth), 2)} ft"),
-                   x = "Year",
-                   y = glue('{unique(core_Filter_One()$CommonName)} per square meter')) +
-              scale_color_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
-            
-          })}
-        
-        
-        
-        else if(input$core_GraphOne == "Bar" && input$core_GraphOptionsOne== "With No Index") {
-          return({
-            ggplot() +
+              new_scale_fill() +
               geom_col(data = core_Filter_One(), 
                        aes(x = Date - 50, y = MeanDensity_sqm, fill = CommonName),
                        position = "dodge",
@@ -7299,132 +7267,19 @@ server <- function(input, output, session) {
                     axis.text.y = element_text(size = 12, face = "bold", color = "black"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
           })}
-        else if(input$core_GraphOne == "Bar" && input$core_GraphOptionsOne== "With ONI") {
+        if(input$core_Graph_Two == "Smooth Line"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,
-                                        ymin = 0, ymax = Inf, fill = Anom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3",
-                                   mid = "white",
-                                   low = "blue3",
-                                   midpoint = 0) +
-              labs(fill = "Oceanic Nino \nIndex Gradient") +
-              scale_y_continuous(limits = c(0, max(core_Filter_One()$MeanDensity_sqm))) +
-              new_scale_fill() +
-              geom_col(data = core_Filter_One(), 
-                       aes(x = Date - 50, y = MeanDensity_sqm, fill = CommonName),
-                       position = "dodge",
-                       # fill = SpeciesColor[SpeciesColor = input$core_SpeciesName_One],
-                       width = 100) +
-              geom_col(data = core_Filter_Two(), 
-                       aes(x = Date + 50, y = MeanDensity_sqm*input$core_Y_Slide_Two, fill = CommonName),
-                       position = "dodge",
-                       width = 100) +
-              geom_errorbar(data = core_Filter_One(),
-                            aes(x = Date - 50, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
-                            width = 2, color = "black", alpha = as.numeric(input$core_EB_Two)) +
-              geom_errorbar(data = core_Filter_Two(),
-                            aes(x = Date + 50, ymin = MeanDensity_sqm*input$core_Y_Slide_Two - StandardError*input$core_Y_Slide_Two, 
-                                ymax = MeanDensity_sqm*input$core_Y_Slide_Two + StandardError*input$core_Y_Slide_Two),
-                            width = 2, color = "black", alpha = as.numeric(input$core_EB_Two)) +
-              scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Two, 
-                                                     name = glue("{unique(core_Filter_Two()$CommonName)} per square meter"))) +
-              scale_fill_manual(guide = guide_legend(nrow = 2), values = SpeciesColor) +
-              scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_One()$Date),
-                           limits = c(min(as.Date(core_Filter_One()$Date))-365,
-                                      max(as.Date(core_Filter_One()$Date))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(core_Filter_One()$ScientificName)
-                              } and {unique(core_Filter_Two()$ScientificName)}"),
-                   subtitle = glue("{unique(core_Filter_One()$IslandName)} {unique(core_Filter_One()$SiteName)}"),
-                   fill = "Common Name",
-                   # fill = "Oceanic Nino \nIndex Gradient",
-                   caption =
-                     glue(
-                       "{core_Filter_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(core_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
-                     } and has a mean depth of {round(mean(core_Filter_One()$MeanDepth), 2)} ft"),
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
-          })}
-        else if(input$core_GraphOne == "Bar" && input$core_GraphOptionsOne== "With PDO (NOAA)") {
-          return({
-            ggplot() +
-              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
-                                             ymin = 0, ymax = Inf, fill = pdoAnom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3",
-                                   mid = "white",
-                                   low = "blue3",
-                                   midpoint = 0) +
-              scale_y_continuous(limits = c(0, max(core_Filter_One()$MeanDensity_sqm))) +
-              geom_col(data = core_Filter_One(), 
-                       aes(x = Date - 50, y = MeanDensity_sqm, color = CommonName),
-                       position = "dodge",
-                       fill = SpeciesColor[SpeciesColor = input$core_SpeciesName_One],
-                       width = 100) +
-              geom_col(data = core_Filter_Two(), 
-                       aes(x = Date + 50, y = MeanDensity_sqm*input$core_Y_Slide_Two, fill = CommonName),
-                       position = "dodge",
-                       width = 100) +
-              geom_errorbar(data = core_Filter_One(),
-                            aes(x = Date - 50, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
-                            width = 2, color = "black", alpha = as.numeric(input$core_EB_Two)) +
-              geom_errorbar(data = core_Filter_Two(),
-                            aes(x = Date + 50, ymin = MeanDensity_sqm*input$core_Y_Slide_Two - StandardError*input$core_Y_Slide_Two, 
-                                ymax = MeanDensity_sqm*input$core_Y_Slide_Two + StandardError*input$core_Y_Slide_Two),
-                            width = 2, color = "black", alpha = as.numeric(input$core_EB_Two)) +
-              scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Two, 
-                                                     name = glue("{unique(core_Filter_Two()$CommonName)} per square meter"))) +
-              scale_color_manual(guide = guide_legend(nrow = 2), values = SpeciesColor) +
-              scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_One()$Date),
-                           limits = c(min(as.Date(core_Filter_One()$Date))-365,
-                                      max(as.Date(core_Filter_One()$Date))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(core_Filter_One()$ScientificName)}"),
-                   subtitle = glue("{unique(core_Filter_One()$IslandName)} {unique(core_Filter_One()$SiteName)}"),
-                   color = "Common Name",
-                   fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)",
-                   caption =
-                     glue(
-                       "{core_Filter_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(core_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
-                     } and has a mean depth of {round(mean(core_Filter_One()$MeanDepth), 2)} ft"),
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
-          })}
-        
-        
-        
-        if(input$core_GraphOne == "Smooth Line" && input$core_GraphOptionsOne == "With No Index"){
-          return({
-            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(core_alphaONI_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(core_alphaPDO_UW_Two()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
               stat_smooth(data = core_Filter_One(), 
                           aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName),
-                          size = 1,
-                          span = input$core_SmoothSlide_Two,
-                          se = as.logical(input$core_SmoothSE_Two)) +
+                          size = 1, span = input$core_SmoothSlide_Two, se = as.logical(input$core_SmoothSE_Two)) +
               geom_point(data = core_Filter_One(),
                          aes(x = Date, y = MeanDensity_sqm, color = CommonName),
                          size = 1, alpha = as.numeric(input$core_SmoothPoint_Two)) +
@@ -7446,9 +7301,7 @@ server <- function(input, output, session) {
                               } and {unique(core_Filter_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(core_Filter_One()$IslandName)} {unique(core_Filter_One()$SiteName)}"),
                    color = "Common Name",
-                   caption = 
-                     glue(
-                       "{core_Filter_One()$SiteName} is typically surveyed in {
+                   caption = glue("{core_Filter_One()$SiteName} is typically surveyed in {
                      month(round(mean(month(core_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(core_Filter_One()$MeanDepth), 2)} ft"),
                    x = "Year",
@@ -8484,94 +8337,1233 @@ server <- function(input, output, session) {
     
   }
   
-  output$outrpc <- renderUI({ # RPC_UI ----
-    if (is.null(input$allORonerpc))
+  output$rpcs_UIout <- renderUI({ # rpcs_UI   ----
+    if (is.null(input$rpcs_allORone))
       return(NULL)
     
-    if(input$allORonerpc == "One Species by Site") {
-      dyn_ui <- tabPanel("RPCs", value = 'rpcs', # RPC_TP_one      ----
-                         plotOutput(outputId = "rpc1",
+    else if(input$rpcs_allORone == "One Species by Site") { #  rpcs_TP_One     ----
+      dyn_ui <- tabPanel("RPCs", value = 'rpcs_TP',  
+                         tags$hr(),
+                         plotOutput(outputId = "rpcs_Plot_One",
                                     height = 500),
+                         tags$hr(),
+                         fluidRow(
+                           column(3, conditionalPanel("input.rpcs_Graph_One == 'Line' || input.rpcs_Graph_One == 'Bar'",
+                                                      radioButtons(inputId = "rpcs_EB_one",
+                                                                   label = "Show error bars?",
+                                                                   choices = c("Yes" = 1, "No" = 0),
+                                                                   inline = TRUE))),
+                           column(3, conditionalPanel("input.rpcs_Graph_One == 'Bar'",
+                                                      radioButtons(inputId = "rpcs_Bar_Text_One",
+                                                                   label = "Show density value?",
+                                                                   choices = c("Yes" = 1, "No" = 0), selected = 0,
+                                                                   inline = TRUE))),
+                           column(6, conditionalPanel("input.rpcs_GraphOptions_One == 'With ONI' ||
+                                                      input.rpcs_GraphOptions_One == 'With PDO (NOAA)' ||
+                                                      input.rpcs_GraphOptions_One == 'With PDO (UW)'",
+                                                      imageOutput(outputId = "rpcs_ONIpdoPIC_One",
+                                                                  height = 75)))),
+                         conditionalPanel("input.rpcs_Graph_One == 'Smooth Line'",
+                                          sliderInput(inputId = "rpcs_SmoothSlide_One",
+                                                      label = "Span: Controls the amount of smoothing for the loess smoother. 
+                                                      Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
+                                                      min = 0, max = 1, step = .05, value = .5, width = "100%"),
+                                          fluidRow(column(3, radioButtons(inputId = "rpcs_SmoothSE_One",
+                                                                          label = "Show the standard error?",
+                                                                          choices = c("Yes" = TRUE, "No" = FALSE),
+                                                                          inline = TRUE)),
+                                                   column(3, radioButtons(inputId = "rpcs_SmoothPoint_One",
+                                                                          label = "Show the mean values?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE)))),
+                         conditionalPanel("input.rpcs_GraphOptions_One == 'With ONI'",
+                                          tags$hr(),
+                                          ONI_tagList),
+                         conditionalPanel("input.rpcs_GraphOptions_One == 'With PDO (NOAA)'",
+                                          tags$hr(),
+                                          PDO_NOAA_tagList),
+                         conditionalPanel("input.rpcs_GraphOptions_One == 'With PDO (UW)'",
+                                          tags$hr(),
+                                          PDO_UW_tagList),
+                         conditionalPanel("input.rpcs_Graph_One == 'Boxplot'",
+                                          tags$hr(),
+                                          imageOutput(outputId = "rpcs_BoxplotDescription_One")),
+                         tags$hr(),
+                         fluidRow(column(4, tags$h2(tags$strong(input$rpcs_SpeciesName_One)),
+                                         imageOutput(outputId = "rpcs_LargeSpPhoto_One",
+                                                     height = 500)),
+                                  column(3, tags$h2(tags$strong("Species Classification")),
+                                         DTOutput(outputId = "rpcs_DToutClass_One",
+                                                  height = 500)),
+                                  column(5, tags$h2(tags$strong("Species Description")),
+                                         DTOutput(outputId = "rpcs_DToutDesc_One",
+                                                  height = 500))),
+                         
+                         tags$hr(),
+                         DTOutput(outputId = "rpcs_DToutData_One",
+                                  height = 550),
+                         tags$hr(), tags$hr(),
+                         imageOutput(outputId = "rpcs_LargeSitePhoto_One",
+                                     height = 625),
+                         tags$hr()
+      )
+    } 
+    else if(input$rpcs_allORone == "One Species by Island") { #  rpcs_TP_by_Isl      ---- 
+      dyn_ui <- tabPanel("RPCs", value = 'rpcs_TP',
+                         tags$hr(),
+                         conditionalPanel("input.rpcs_FreeOrLock_Isl == 'Locked Scales' ||
+                                          input.rpcs_FreeOrLock_Isl == 'Free Scales'",
+                                          plotOutput(outputId = "rpcs_Plot_Isl1",
+                                                     height = 1000)),
+                         conditionalPanel("input.rpcs_FreeOrLock_Isl == 'Single Plot'", 
+                                          plotOutput(outputId = "rpcs_Plot_Isl2",
+                                                     height = 500)),
+                         tags$hr(),
+                         fluidRow(conditionalPanel("input.rpcs_Graph_Isl == 'Line' || (input.rpcs_Graph_Isl == 'Bar' && 
+                                                   input.rpcs_DataSummary_Isl == 'Island Mean' && 
+                                                   input.rpcs_FreeOrLock_Isl != 'Single Plot')",
+                                                   column(3, radioButtons(inputId = "rpcs_EB_Isl",
+                                                                          label = "Show error bars?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE))),
+                                  conditionalPanel("input.rpcs_Graph_Isl == 'Bar' && 
+                                                   input.rpcs_DataSummary_Isl == 'Island Mean' && 
+                                                   input.rpcs_FreeOrLock_Isl != 'Single Plot'",
+                                                   column(3, radioButtons(inputId = "rpcs_Bar_Text_Isl",
+                                                                          label = "Show density value?",
+                                                                          choices = c("Yes" = 1, "No" = 0), selected = 0,
+                                                                          inline = TRUE))),
+                                  conditionalPanel("(input.rpcs_Graph_Isl == 'Bar' && 
+                                                   input.rpcs_DataSummary_Isl == 'Island Mean' && 
+                                                   input.rpcs_FreeOrLock_Isl != 'Locked Scales' && 
+                                                   input.rpcs_FreeOrLock_Isl != 'Free Scales') ||
+                                                   (input.rpcs_Graph_Isl == 'Bar' && 
+                                                   input.rpcs_DataSummary_Isl == 'Site Means (by Island)')",
+                                                   column(3, radioButtons(inputId = "rpcs_BarOptions_Isl",
+                                                                          label =  "Bar Graph Options:",
+                                                                          choices = c("Stack" = "stack", "Fill" = "fill", "Dodge" = "dodge"),
+                                                                          inline = TRUE))),
+                                  conditionalPanel("input.rpcs_GraphOptions_Isl == 'With ONI' ||
+                                                      input.rpcs_GraphOptions_Isl == 'With PDO (NOAA)' ||
+                                                      input.rpcs_GraphOptions_Isl == 'With PDO (UW)'",
+                                                   column(6, imageOutput(outputId = "rpcs_ONIpdoPIC_Isl",
+                                                                         height = 75)))),
+                         fluidRow(conditionalPanel("input.rpcs_Graph_Isl == 'Line' || input.rpcs_Graph_Isl == 'Bar'",
+                                                   tags$hr())),
+                         conditionalPanel("input.rpcs_Graph_Isl == 'Smooth Line'",
+                                          sliderInput(inputId = "rpcs_SmoothSlide_Isl",
+                                                      label = "Span: Controls the amount of smoothing for the loess smoother. 
+                                                      Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
+                                                      min = 0, max = 1, step = .05, value = .5, width = "100%"),
+                                          fluidRow(column(3, radioButtons(inputId = "rpcs_SmoothSE_Isl",
+                                                                          label = "Show the standard error?",
+                                                                          choices = c("Yes" = TRUE, "No" = FALSE),
+                                                                          inline = TRUE)),
+                                                   column(3, radioButtons(inputId = "rpcs_SmoothPoint_Isl",
+                                                                          label = "Show the mean values?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE))),
+                                          tags$hr()),
+                         conditionalPanel("input.rpcs_GraphOptions_Isl == 'With ONI'",
+                                          ONI_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.rpcs_GraphOptions_Isl == 'With PDO (NOAA)'",
+                                          PDO_NOAA_tagList,
+                                          tags$hr())
+      )
+    } 
+    else if(input$rpcs_allORone == "One Species by MPA") { #  rpcs_TP_byMPA     ---- 
+      dyn_ui <- tabPanel("RPCs", value = 'rpcs_TP',  
+                         tags$hr(),
+                         plotOutput(outputId = "rpcs_Plot_MPA",
+                                    height = 850),
+                         tags$hr(),
+                         fluidRow(conditionalPanel("input.rpcs_Graph_MPA == 'Line' || (input.rpcs_Graph_MPA == 'Bar' && 
+                                                   input.rpcs_DataSummary_MPA == 'MPA Mean')",
+                                                   column(3, radioButtons(inputId = "rpcs_EB_MPA",
+                                                                          label = "Show error bars?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE))),
+                                  conditionalPanel("input.rpcs_Graph_MPA == 'Bar' && input.rpcs_DataSummary_MPA == 'MPA Mean'",
+                                                   column(3, radioButtons(inputId = "rpcs_Bar_Text_MPA",
+                                                                          label = "Show density value?",
+                                                                          choices = c("Yes" = 1, "No" = 0), selected = 0,
+                                                                          inline = TRUE))),
+                                  conditionalPanel("input.rpcs_GraphOptions_MPA == 'With ONI' ||
+                                                      input.rpcs_GraphOptions_MPA == 'With PDO (NOAA)' ||
+                                                      input.rpcs_GraphOptions_MPA == 'With PDO (UW)'",
+                                                   column(6, imageOutput(outputId = "rpcs_ONIpdoPIC_MPA",
+                                                                         height = 75)))),
+                         fluidRow(conditionalPanel("input.rpcs_Graph_MPA == 'Line' || input.rpcs_Graph_MPA == 'Bar'",
+                                                   tags$hr())),
+                         conditionalPanel("input.rpcs_Graph_MPA == 'Smooth Line'",
+                                          sliderInput(inputId = "rpcs_SmoothSlide_MPA",
+                                                      label = "Span: Controls the amount of smoothing for the loess smoother. 
+                                                      Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
+                                                      min = 0, max = 1, step = .05, value = .5, width = "100%"),
+                                          fluidRow(column(3, radioButtons(inputId = "rpcs_SmoothSE_MPA",
+                                                                          label = "Show the standard error?",
+                                                                          choices = c("Yes" = TRUE, "No" = FALSE),
+                                                                          inline = TRUE)),
+                                                   column(3, radioButtons(inputId = "rpcs_SmoothPoint_MPA",
+                                                                          label = "Show the mean values?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE))),
+                                          tags$hr()),
+                         conditionalPanel("input.rpcs_GraphOptions_MPA == 'With ONI'",
+                                          ONI_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.rpcs_GraphOptions_MPA == 'With PDO (NOAA)'",
+                                          PDO_NOAA_tagList,
+                                          tags$hr()),
+                         MPA_tagList,
+                         tags$hr())
+    }
+    else if(input$rpcs_allORone == "Two Species by Site") { #  rpcs_TP_Two     ----
+      dyn_ui <- tabPanel("RPCs", value = 'rpcs_TP',  
+                         tags$hr(),
+                         plotOutput(outputId = "rpcs_Plot_Two",
+                                    height = 500),
+                         tags$hr(),
+                         sliderInput(inputId = "rpcs_Y_Slide_Two",
+                                     label = "Adjust the second y-axis by a multiple of:",
+                                     min = 1, max = 50, step = 1, value = 1, width = "100%", ticks = T),
+                         conditionalPanel("input.rpcs_Graph_Two == 'Smooth Line'",
+                                          sliderInput(inputId = "rpcs_SmoothSlide_Two",
+                                                      label = "Span: Controls the amount of smoothing for the loess smoother. 
+                                                      Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
+                                                      min = 0, max = 1, step = .05, value = .5, width = "100%"),
+                                          fluidRow(column(3, radioButtons(inputId = "rpcs_SmoothSE_Two",
+                                                                          label = "Show the standard error?",
+                                                                          choices = c("Yes" = TRUE, "No" = FALSE),
+                                                                          inline = TRUE)),
+                                                   column(3, radioButtons(inputId = "rpcs_SmoothPoint_Two",
+                                                                          label = "Show the mean values?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE)))),
+                         fluidRow(
+                           conditionalPanel("input.rpcs_Graph_Two == 'Line' || input.rpcs_Graph_Two == 'Bar'",
+                                            column(3, radioButtons(inputId = "rpcs_EB_Two",
+                                                                   label = "Show error bars?",
+                                                                   choices = c("Yes" = 1, "No" = 0),
+                                                                   inline = TRUE))),
+                           conditionalPanel("input.rpcs_GraphOptions_Two == 'With ONI' ||
+                                                      input.rpcs_GraphOptions_Two == 'With PDO (NOAA)' ||
+                                                      input.rpcs_GraphOptions_Two == 'With PDO (UW)'",
+                                            column(6, imageOutput(outputId = "rpcs_ONIpdoPIC_Two",
+                                                                  height = 75)))),
+                         tags$hr(),
+                         conditionalPanel("input.rpcs_GraphOptions_Two == 'With ONI'",
+                                          ONI_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.rpcs_GraphOptions_Two == 'With PDO (NOAA)'",
+                                          PDO_NOAA_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.rpcs_GraphOptions_Two == 'With PDO (UW)'",
+                                          PDO_UW_tagList,
+                                          tags$hr()),
+                         fluidRow(column(6, tags$h1(tags$strong(input$rpcs_SpeciesName_Two_One)),
+                                         imageOutput(outputId = "rpcs_LargeSpPhoto_Two_1",
+                                                     height = 450)),
+                                  column(6, tags$h1(tags$strong(input$rpcs_SpeciesName_Two_Two)),
+                                         imageOutput(outputId = "rpcs_LargeSpPhoto_Two_2",
+                                                     height = 450))),
+                         tags$hr(),
+                         fluidRow(column(6, tags$h1(tags$strong(input$rpcs_SpeciesName_Two_One)),
+                                         DTOutput(outputId = "rpcs_DToutData_Two_1")),
+                                  column(6, tags$h1(tags$strong(input$rpcs_SpeciesName_Two_Two)),
+                                         DTOutput(outputId = "rpcs_DToutData_Two_2"))),
+                         tags$hr(),
+                         imageOutput(outputId = "rpcs_LargeSitePhoto_Two",
+                                     height = 625),
                          tags$hr()
       )
     }
-    else if (input$allORonerpc == "One Species by Island (Free Scales)") {
-      dyn_ui <- tabPanel("RPCs", value = 'rpcs', # RPC_TP_byISL  ----
-                         plotOutput(outputId = "rpcBYisl1"),
-                         plotOutput(outputId = "rpcBYisl2"),
-                         plotOutput(outputId = "rpcBYisl3"),
-                         plotOutput(outputId = "rpcBYisl4"),
-                         plotOutput(outputId = "rpcBYisl5"),
-                         tags$hr()
-      )
-    }
-    else if (input$allORonerpc == "One Species by Island (Locked Scales)") {
-      dyn_ui <- tabPanel("RPCs", value = 'rpcs', # RPC_TP_byISL  ----
-                         plotOutput(outputId = "rpcLocked",
-                                    height = 1200),
-                         tags$hr()
-      )
+    else if(input$rpcs_allORone == "All Species") { # rpcs_TP_all   ----
+      dyn_ui <- tabPanel("RPCs", value = 'rpcs_TP',  
+                         fluidRow(column(12, tags$h1(tags$strong(
+                           "This section has the species in the order they appear on the datasheet")))),
+                         plotOutput(outputId = "rpcs_Plot_All",
+                                    height = 7000))
     }
     return(dyn_ui)
   })
   
-  { # ........ RPC_Servers ........  ----
+  { # ........ rpcs_SERVERS ........     ----
     
-    { # RPC_Server_One   -----
+    { # rpcs_Server_One_Species   ----
       
-      rpcone <- reactive({
-        rpc %>%
-          filter(SiteName == input$SiteNamerpc,
-                 CommonName == input$SpeciesNamerpc)
-      })
-      rpcSub <- reactive({
-        rpc %>% 
-          filter(SiteName == input$SiteNamerpc,
-                 Species == 15002 |
-                   Species == 15003 |
-                   Species == 15004)
-      })
+      rpcs_Filter_One <- reactive({ 
+        rpcs_DF %>%
+          filter(SiteName == input$rpcs_SiteName_One,
+                 CommonName == input$rpcs_SpeciesName_One) %>%
+          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                 Species, SiteNumber, IslandCode, SiteCode, IslandSE) 
+      }) # filtered one meter summary table
       
-      rpcdata <- reactive({
-        if(input$SpeciesNamerpc == "All Substrate") {
-          return(rpcSub())
-        }
-        rpcone()
-      })
+      rpcs_RawFilter_One <- reactive({ 
+        rpcs_DFRaw %>%
+          filter(SiteName == input$rpcs_SiteName_One,
+                 CommonName == input$rpcs_SpeciesName_One) %>% 
+          group_by(SurveyYear) %>% 
+          mutate(Mean = mean(Count))
+      }) # filtered  one Meter raw table
       
-      output$rpc1 <- renderPlot({
+      rpcs_SpeciesClass_One <- reactive({ 
+        SpeciesName %>%
+          filter(CommonName == input$rpcs_SpeciesName_One) %>%
+          select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
+                 Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
+          pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
+          select(Rank, Name)
+      }) # filtered Species classification table
+      
+      rpcs_SpeciesDescription_One <- reactive({
+        SpeciesName %>%
+          filter(CommonName == input$rpcs_SpeciesName_One) %>%
+          select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
+          pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
+          select(Category, Information)
+      }) # filtered Species Description table  
+      
+      output$rpcs_TopPhoto_One <- renderImage({
         
-        if (is.null(input$graphrpc))
+        if (input$rpcs_allORone ==  'One Species by Site' && input$rpcs_SpeciesName_One == unique(rpcs_Filter_One()$CommonName)) {
+          return(list(
+            src = glue("www/Indicator_Species/{unique(rpcs_Filter_One()$Species)}.jpg"),
+            contentType = "image/jpg",
+            alt = glue("{unique(rpcs_Filter_One()$CommonName)}"),
+            width = 200,
+            height = 200
+          ))
+        }
+        else if (input$rpcs_allORone ==  'One Species by Island' && input$rpcs_SpeciesName_Isl == unique(rpcs_FilterByIsl_Isl()$CommonName)) {
+          return(list(
+            src = glue("www/Indicator_Species/{unique(rpcs_FilterByIsl_Isl()$Species)}.jpg"),
+            contentType = "image/jpg",
+            alt = glue("{unique(rpcs_FilterByIsl_Isl()$CommonName)}"),
+            width = 200,
+            height = 200
+          ))
+        }
+        else if (input$rpcs_allORone ==  'One Species by MPA' && input$rpcs_SpeciesName_MPA == unique(rpcs_Filter_MPA()$CommonName)) {
+          return(list(
+            src = glue("www/Indicator_Species/{unique(rpcs_Filter_MPA()$Species)}.jpg"),
+            contentType = "image/jpg",
+            alt = glue("{unique(rpcs_Filter_MPA()$CommonName)}"),
+            width = 200,
+            height = 200
+          ))
+        }
+        else if (input$rpcs_allORone ==  'Two Species by Site' && input$rpcs_SpeciesName_Two_One == unique(rpcs_Filter_Two_One()$CommonName)) {
+          return(list(
+            src = glue("www/Indicator_Species/{unique(rpcs_Filter_Two_One()$Species)}.jpg"),
+            contentType = "image/jpg",
+            alt = glue("{unique(rpcs_Filter_Two_One()$CommonName)}"),
+            width = 200,
+            height = 200
+          ))
+        }
+      }, deleteFile = FALSE) # Small species photo above plot
+      
+      output$rpcs_TopPhoto_Two <- renderImage({
+        
+        if (input$rpcs_allORone ==  'Two Species by Site' && input$rpcs_SpeciesName_Two_Two == unique(rpcs_Filter_Two_Two()$CommonName)) {
+          return(list(
+            src = glue("www/Indicator_Species/{unique(rpcs_Filter_Two_Two()$Species)}.jpg"),
+            contentType = "image/jpg",
+            alt = glue("{unique(rpcs_Filter_Two_Two()$CommonName)}"),
+            width = 200,
+            height = 200
+          ))
+        }
+      }, deleteFile = FALSE) # 2nd Small species photo above plot
+      
+      output$rpcs_LargeSpPhoto_One <- renderImage({
+        list(src = glue("www/Indicator_Species/{unique(rpcs_Filter_One()$Species)}.jpg"),
+             contentType = "image/jpg", width = 400, height = 400)
+      }, deleteFile = FALSE) # Large species photo below plot
+      
+      output$rpcs_TopSitePhoto_One <- renderImage({
+        list(src = glue("www/Sat_Imagery/{unique(rpcs_Filter_One()$SiteCode)}.png"),
+             contentType = "image/png", width = 430, height = 210)
+      }, deleteFile = FALSE) # Small Site photo above plot
+      
+      output$rpcs_LargeSitePhoto_One <- renderImage({
+        list(src = glue("www/Sat_Imagery/{unique(rpcs_Filter_One()$SiteCode)}.png"),
+             contentType = "image/png", width = 1287, height = 625)
+      }, deleteFile = FALSE) # Large Site photo below plot
+      
+      output$rpcs_DToutClass_One <- renderDT({
+        datatable(rpcs_SpeciesClass_One(), 
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    searching = FALSE,
+                    lengthChange = FALSE,
+                    paging = FALSE,
+                    ordering = FALSE,
+                    info = FALSE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(rpcs_SpeciesClass_One()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      }) # Species Classification data table
+      
+      output$rpcs_DToutDesc_One <- renderDT({
+        datatable(rpcs_SpeciesDescription_One(), 
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    searching = FALSE,
+                    lengthChange = FALSE,
+                    paging = FALSE,
+                    ordering = FALSE,
+                    info = FALSE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(rpcs_SpeciesDescription_One()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      }) # Species Description data table
+      
+      rpcs_alphaONI_one <- reactive({
+        if(input$rpcs_GraphOptions_One == "With No Index"){
+          return(0)
+        }
+        else if(input$rpcs_GraphOptions_One == "With ONI"){
+          return(1)
+        }
+        else if(input$rpcs_GraphOptions_One == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$rpcs_GraphOptions_One == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      rpcs_alphaPDO_NOAA_one <- reactive({
+        if(input$rpcs_GraphOptions_One == "With No Index"){
+          return(0)
+        }
+        if(input$rpcs_GraphOptions_One == "With ONI"){
+          return(0)
+          
+        }
+        if(input$rpcs_GraphOptions_One == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$rpcs_GraphOptions_One == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      rpcs_alphaPDO_UW_one <- reactive({
+        if(input$rpcs_GraphOptions_One == "With No Index"){
+          return(0)
+        }
+        if(input$rpcs_GraphOptions_One == "With ONI"){
+          return(0)
+          
+        }
+        if(input$rpcs_GraphOptions_One == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$rpcs_GraphOptions_One == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$rpcs_ONIpdoPIC_One <- renderImage({
+        if(input$rpcs_GraphOptions_One == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$rpcs_GraphOptions_One == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$rpcs_GraphOptions_One == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
+      rpcs_LinePlot_One <- reactive({
+        ggplot() +
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                    position = "identity", alpha = as.numeric(rpcs_alphaONI_one()), show.legend = FALSE) +
+          geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                    position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_one()), show.legend = FALSE) +
+          geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                    position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_one()), show.legend = FALSE) +
+          scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+          geom_line(data = rpcs_Filter_One(),
+                    aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName), 
+                    size = 1) +
+          geom_errorbar(data = rpcs_Filter_One(),
+                        aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
+                        width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_one)) +
+          scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_One()$Date),
+                       limits = c(min(as.Date(rpcs_Filter_One()$Date))-365, max(as.Date(rpcs_Filter_One()$Date))+365),
+                       expand = c(0.01, 0)) +
+          labs(title = glue("{unique(rpcs_Filter_One()$ScientificName)}"),
+               subtitle = glue("{unique(rpcs_Filter_One()$IslandName)} {unique(rpcs_Filter_One()$SiteName)}"),
+               color = "Common Name",
+               fill = "Oceanic Nino \nIndex Gradient",
+               caption = glue("{rpcs_Filter_One()$SiteName} is typically surveyed in {
+                       month(round(mean(month(rpcs_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       } and has a mean depth of {round(mean(rpcs_Filter_One()$MeanDepth), 2)} ft"),
+               x = "Year",
+               y = "Percent Cover") +
+          scale_color_manual(values = SpeciesColor) +
+          theme_classic() +
+          theme(legend.position = "bottom",
+                legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                legend.text = element_text(size = 14, vjust = .5),
+                plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                plot.subtitle = element_text(hjust = 0.5, size = 18),
+                plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                axis.title = element_text(size = 16, face = "bold"),
+                axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+                axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
+      }) # Main Line Plot
+      
+      rpcs_BarPlot_One <- reactive({
+        ggplot() +
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                    position = "identity", alpha = as.numeric(rpcs_alphaONI_one()), show.legend = FALSE) +
+          geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                    position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_one()), show.legend = FALSE) +
+          geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                    position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_one()), show.legend = FALSE) +
+          scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+          new_scale_fill() +
+          geom_col(data = rpcs_Filter_One(), aes(x = Date - ifelse(input$rpcs_DataSummary_One == "One species at one site", 0, 50),
+                                                 y = MeanDensity_sqm, fill = CommonName), 
+                   position = "dodge", width = ifelse(input$rpcs_DataSummary_One == "One species at one site", 250, 100)) +
+          geom_errorbar(data = rpcs_Filter_One(),
+                        aes(x = Date - ifelse(input$rpcs_DataSummary_One == "One species at one site", 0, 50), 
+                            ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
+                        width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_one)) +
+          geom_text(data = rpcs_Filter_One(),
+                    aes(x = Date - ifelse(input$rpcs_DataSummary_One == "One species at one site", 0, 50),
+                        y = MeanDensity_sqm, label = round(MeanDensity_sqm, digits = 2)),
+                    vjust = -.2, hjust = .5, alpha = as.numeric(input$rpcs_Bar_Text_One)) +
+          scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_One()$Date),
+                       limits = c(min(as.Date(rpcs_Filter_One()$Date))-365,  max(as.Date(rpcs_Filter_One()$Date))+365),
+                       expand = c(0.01, 0)) +
+          labs(title = glue("{unique(rpcs_Filter_One()$ScientificName)}"),
+               subtitle = glue("{unique(rpcs_Filter_One()$IslandName)} {unique(rpcs_Filter_One()$SiteName)}"),
+               color = "Common Name",
+               fill = "Common Name",
+               caption = glue("{rpcs_Filter_One()$SiteName} is typically surveyed in {
+                 month(round(mean(month(rpcs_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                 } and has a mean depth of {round(mean(rpcs_Filter_One()$MeanDepth), 2)} ft"),
+               x = "Year",
+               y = "Percent Cover") +
+          scale_fill_manual(values = SpeciesColor) +
+          theme_classic() +
+          theme(legend.position = "bottom",
+                legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                legend.text = element_text(size = 14, vjust = .5),
+                plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                plot.subtitle = element_text(hjust = 0.5, size = 18),
+                plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                axis.title = element_text(size = 16, face = "bold"),
+                axis.text.y = element_text(size = 12, face = "bold", color = "black"),
+                axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
+      }) # Main Bar Plot
+      
+      rpcs_SmoothPlot_One <- reactive({
+        ggplot() +
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                    position = "identity", alpha = as.numeric(rpcs_alphaONI_one()), show.legend = FALSE) +
+          geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                    position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_one()), show.legend = FALSE) +
+          geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                    position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_one()), show.legend = FALSE) +
+          scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+          stat_smooth(data = rpcs_Filter_One(), 
+                      aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName), 
+                      size = 1, span = input$rpcs_SmoothSlide_One, se = as.logical(input$rpcs_SmoothSE_One)) +
+          scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 1)) +
+          geom_point(data = rpcs_Filter_One(), aes(x = Date, y = MeanDensity_sqm, color = CommonName), 
+                     size = 2, alpha = as.numeric(input$rpcs_SmoothPoint_One)) +
+          scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_One()$Date), 
+                       limits = c(min(as.Date(rpcs_Filter_One()$Date))-365, 
+                                  max(as.Date(rpcs_Filter_One()$Date))+365),
+                       expand = c(0.01, 0)) +
+          labs(title = glue("{unique(rpcs_Filter_One()$ScientificName)}"), 
+               subtitle = glue("{unique(rpcs_Filter_One()$IslandName)} {unique(rpcs_Filter_One()$SiteName)}"),
+               color = "Common Name",
+               caption = glue("{rpcs_Filter_One()$SiteName} is typically surveyed in {
+                       month(round(mean(month(rpcs_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       } and has a mean depth of {round(mean(rpcs_Filter_One()$MeanDepth), 2)} ft"),
+               x = "Year", y = "Smoothed Conditional Mean Values") +
+          theme_classic() +
+          theme(legend.position = "bottom",
+                legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                legend.text = element_text(size = 14, vjust = .5),
+                plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                plot.subtitle = element_text(hjust = 0.5, size = 18),
+                plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                axis.title = element_text(size = 16, face = "bold"),
+                axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+                axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
+      }) # Main Smooth Line Plot
+      
+      rpcs_BoxPlot_One <- reactive({
+        ggplot() +
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                    position = "identity", alpha = as.numeric(rpcs_alphaONI_one()), show.legend = FALSE) +
+          geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                    position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_one()), show.legend = FALSE) +
+          geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                    position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_one()), show.legend = FALSE) +
+          scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+          geom_boxplot(data = rpcs_RawFilter_One(), 
+                       aes(x = Date, y = Count, group = SurveyYear, color = CommonName)) +
+          scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 1)) +
+          geom_point(data = rpcs_RawFilter_One(), aes(x = Date, y = Mean),
+                     size = 2, color = "black") +
+          scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_RawFilter_One()$Date), 
+                       limits = c(min(as.Date(rpcs_RawFilter_One()$Date))-365, max(as.Date(rpcs_RawFilter_One()$Date))+365),
+                       expand = c(0.01, 0)) +
+          labs(title = glue("{unique(rpcs_RawFilter_One()$ScientificName)}"), 
+               subtitle = glue("{unique(rpcs_RawFilter_One()$IslandName)} {unique(rpcs_RawFilter_One()$SiteName)}"),
+               color = "Common Name",
+               caption = glue("{rpcs_RawFilter_One()$SiteName} is typically surveyed in {
+                       month(round(mean(month(rpcs_RawFilter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       } and has a mean depth of {round(mean(rpcs_RawFilter_One()$MeanDepth), 2)} ft"),
+               x = "Year",
+               y = "Count per Quadrat") +
+          theme_classic() +
+          theme(legend.position = "bottom",
+                legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                legend.text = element_text(size = 14, vjust = .5),
+                plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                plot.subtitle = element_text(hjust = 0.5, size = 18),
+                plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                axis.title = element_text(size = 16, face = "bold"),
+                axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+                axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
+      }) # Main Boxplot Plot
+      
+      output$rpcs_Plot_One <- renderPlot({
+        
+        if (is.null(input$rpcs_Graph_One))
           return(NULL) 
         
-        if (input$graphrpc == "Line") {
+        else if(input$rpcs_Graph_One == "Line" && input$rpcs_DataSummary_One == "One species at one site")
+        {
+          p <- rpcs_LinePlot_One()
+        } 
+        else if(input$rpcs_Graph_One == "Line" && input$rpcs_DataSummary_One == "One species with island average")
+        {
+          p <- rpcs_LinePlot_One() +
+            new_scale_color() +
+            geom_line(data = rpcs_Filter_One(),
+                      aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName),
+                      size = 1) +
+            geom_errorbar(data = rpcs_Filter_One(),
+                          aes(x = Date, ymin = Island_Mean_Density - IslandSE,ymax = Island_Mean_Density + IslandSE),
+                          width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_one)) +
+            labs(color = "Island Average") +
+            scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2))
+        }
+        else if(input$rpcs_Graph_One == "Bar" && input$rpcs_DataSummary_One == "One species at one site") 
+        {
+          p <- rpcs_BarPlot_One()
+        }
+        else if(input$rpcs_Graph_One == "Bar" && input$rpcs_DataSummary_One == "One species with island average") 
+        {
+          p <- rpcs_BarPlot_One() +
+            new_scale_fill() +
+            geom_col(data = rpcs_Filter_One(),
+                     aes(x = Date + 50, y = Island_Mean_Density, fill = IslandName),
+                     position = "dodge",
+                     width = 100) +
+            geom_errorbar(data = rpcs_Filter_One(),
+                          aes(x = Date + 50, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
+                          width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_one)) +
+            scale_fill_manual(values = SpeciesColor, guide = guide_legend(order = 2)) +
+            labs(fill = "Island Mean")
+        } 
+        else if(input$rpcs_Graph_One == "Smooth Line" && input$rpcs_DataSummary_One == "One species at one site")
+        {
+          p <- rpcs_SmoothPlot_One()
+        }
+        else if(input$rpcs_Graph_One == "Smooth Line" && input$rpcs_DataSummary_One == "One species with island average")
+        {
+          p <- rpcs_SmoothPlot_One() +
+            new_scale_color() +
+            stat_smooth(data = rpcs_Filter_One(), 
+                        aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName), 
+                        size = 1,
+                        span = input$rpcs_SmoothSlide_One,
+                        se = as.logical(input$rpcs_SmoothSE_One)) +
+            geom_point(data = rpcs_Filter_One(), aes(x = Date, y = Island_Mean_Density, color = IslandName), 
+                       size = 2, alpha = as.numeric(input$rpcs_SmoothPoint_One)) +
+            labs(color = "Island Average") +
+            scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2)) 
+        }
+        else if(input$rpcs_Graph_One == "Boxplot" && input$rpcs_DataSummary_One == "One species at one site")
+        {
+          p <- rpcs_BoxPlot_One()  
+        }
+        else if(input$rpcs_Graph_One == "Boxplot" && input$rpcs_DataSummary_One == "One species with island average")
+        {
+          p <- rpcs_BoxPlot_One() +
+            new_scale_color() +
+            geom_point(data = rpcs_Filter_One(), aes(x = Date, y = Island_Mean_Density, color = IslandName), 
+                       size = 2) +
+            labs(color = "Island Average") +
+            scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2)) 
+        }
+        return(p)
+      }) # Main Plot for rpcs_Quadrats with one species 
+      
+      output$rpcs_BoxplotDescription_One <- renderImage({
+        list(src = glue("www/Boxplot_Description.jpg"), contentType = "image/jpg", width = 550, height = 400)
+      }, deleteFile = FALSE) # Boxplot drawing/explanation
+      
+      output$rpcs_DToutData_One <- renderDT({
+        datatable(rpcs_Filter_One(),
+                  extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    scrollY = "500px",
+                    scrollX = TRUE, 
+                    paging = FALSE,
+                    ordering = TRUE,
+                    info = FALSE,
+                    dom = 'Bfrtip',
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    columnDefs = c(list(list(visible = FALSE, targets = c(10, 12, 13, 14, 15))), 
+                                   list(list(className = 'dt-center', targets = 0:11))),
+                    colReorder = TRUE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(rpcs_Filter_One()),
+                      color = "black",
+                      backgroundColor = 'white'
+          )
+      }) # Filtered data table output
+      
+    }
+    
+    { # rpcs_Server_by_Island   ----
+      
+      rpcs_Filter_Isl <- reactive({
+        rpcs_DF <- rpcs_DF %>%
+          filter(CommonName == input$rpcs_SpeciesName_Isl) %>%
+          group_by(SurveyYear, IslandName) %>%
+          mutate(Date = mean(Date),
+                 MaxSumBar = sum(MeanDensity_sqm)) %>%
+          ungroup() %>%
+          group_by(SiteName, SurveyYear) %>%
+          mutate(MaxSum = max(sum(MeanDensity_sqm)))
+        
+      })
+      
+      rpcs_FilterByIsl_Isl <- reactive({
+        rpcs_DF %>%
+          filter(CommonName == input$rpcs_SpeciesName_Isl) %>%
+          group_by(IslandDate, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          distinct(IslandDate, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear, 
+                   Island_Mean_Density, IslandSD, IslandSE, IslandQuads, IslandAreaSurveyed, IslandTotalCount) %>%
+          ungroup() %>%
+          group_by(SurveyYear) %>%
+          mutate(IslandDate = mean(IslandDate))
+      })
+      
+      rpcs_yValue_Isl <- reactive({
+        if(input$rpcs_BarOptions_Isl == "stack"){
+          return({
+            max(rpcs_Filter_Isl()$MaxSumBar)
+          }) 
+        }
+        else if(input$rpcs_BarOptions_Isl == "dodge"){
+          return({
+            max(rpcs_Filter_Isl()$MeanDensity_sqm)
+          })
+        }
+        else if(input$rpcs_BarOptions_Isl == "fill"){
+          return(1)
+        }
+      })
+      
+      rpcs_yLabel_Isl <- reactive({
+        if(input$rpcs_BarOptions_Isl == "stack"){
+          y <- "Combined Densities"
+        }
+        else if(input$rpcs_BarOptions_Isl == "dodge"){
+          y <- "Seperated Densities"
+        }
+        else if(input$rpcs_BarOptions_Isl == "fill"){
+          y <- "Normalized Densities"
+        }
+        y
+      })
+      
+      rpcs_alphaONI_Isl <- reactive({
+        if(input$rpcs_GraphOptions_Isl == "With No Index"){
+          return(0)
+        }
+        else if(input$rpcs_GraphOptions_Isl == "With ONI"){
+          return(1)
+        }
+        else if(input$rpcs_GraphOptions_Isl == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$rpcs_GraphOptions_Isl == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      rpcs_alphaPDO_NOAA_Isl <- reactive({
+        if(input$rpcs_GraphOptions_Isl == "With No Index"){
+          return(0)
+        }
+        if(input$rpcs_GraphOptions_Isl == "With ONI"){
+          return(0)
+          
+        }
+        if(input$rpcs_GraphOptions_Isl == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$rpcs_GraphOptions_Isl == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      rpcs_alphaPDO_UW_Isl <- reactive({
+        if(input$rpcs_GraphOptions_Isl == "With No Index"){
+          return(0)
+        }
+        if(input$rpcs_GraphOptions_Isl == "With ONI"){
+          return(0)
+          
+        }
+        if(input$rpcs_GraphOptions_Isl == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$rpcs_GraphOptions_Isl == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$rpcs_ONIpdoPIC_Isl <- renderImage({
+        if(input$rpcs_GraphOptions_Isl == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$rpcs_GraphOptions_Isl == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$rpcs_GraphOptions_Isl == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
+      rpcs_AxisScale_Isl <- reactive({
+        if(input$rpcs_FreeOrLock_Isl == "Locked Scales"){
+          return("fixed")
+        }
+        if(input$rpcs_FreeOrLock_Isl == "Free Scales"){
+          return("free")
+        }
+      }) # Facet Plot Axis Scale free or fixed 
+      
+      output$rpcs_Plot_Isl1 <- renderPlot({ # Facet plots    ---- 
+        
+        if (is.null(input$rpcs_Graph_Isl))
+          return(NULL) 
+        
+        else if(input$rpcs_Graph_Isl == "Line" && input$rpcs_DataSummary_Isl == "Island Mean") { # Line   ----
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_line(data = rpcs_FilterByIsl_Isl(), 
+                        aes(x = IslandDate, y = Island_Mean_Density, group = IslandName, color = IslandName),
+                        size = 1) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365,
+                                      max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              geom_errorbar(data = rpcs_FilterByIsl_Isl(), 
+                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
+                            width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Isl)) +
+              labs(title = glue("{unique(rpcs_FilterByIsl_Isl()$ScientificName)}"), 
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Percent Cover") +
+              facet_grid(rows = vars(IslandName), scales = rpcs_AxisScale_Isl()) +
+              scale_color_manual(values = SpeciesColor) +
+              theme_classic() +
+              theme(legend.position = "none",
+                    legend.justification = c(0,0.5),
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        } 
+        else if(input$rpcs_Graph_Isl == "Line" && input$rpcs_DataSummary_Isl == "Site Means (by Island)") {
+          return({
+            out <- by(data = rpcs_Filter_Isl(), INDICES = rpcs_Filter_Isl()$IslandName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() + 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_Isl()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+                geom_line(data = m, 
+                          aes(Date, MeanDensity_sqm, group = SiteName, colour = SiteName, linetype = SiteName),
+                          size = 1) +
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
+                             limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365),
+                             expand = c(0.01, 0)) +
+                scale_y_continuous(limits = c(0, ifelse(input$rpcs_FreeOrLock_Isl == "Locked Scales", 
+                                                        max(rpcs_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm))),
+                                   expand = c(0.01, 0)) +
+                geom_errorbar(data = m, 
+                              aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
+                              width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Isl)) +
+                labs(title = m$IslandName,
+                     color = "Site Name",
+                     linetype ="Site Name",
+                     caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
+                     x = NULL,
+                     y = "Mean Density") +
+                scale_color_manual(values = SiteColor, breaks = as.character(m$SiteName)) +
+                scale_linetype_manual(values = SiteLine, breaks = as.character(m$SiteName)) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.key.width = unit(1, "cm"),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 12, colour = "black"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+            })
+            
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
+                                          labels = glue("{unique(rpcs_Filter_Isl()$ScientificName)}"),
+                                          label_size = 20, label_fontface = "bold.italic"
+            ))
+          })
+        } 
+        else if(input$rpcs_Graph_Isl == "Bar" && input$rpcs_DataSummary_Isl == "Island Mean") { # Bar   ----
           return({
             ggplot() +
-              geom_line(data = rpcdata(), 
-                        aes(x = Date , y = PercentCover, group = CommonName, color = CommonName),
-                        size = 1) +
-              geom_errorbar(data = rpcdata(), 
-                            aes(x = Date , ymin = PercentCover - StandardError,
-                                ymax = PercentCover + StandardError),
-                            position = position_dodge(width = 0.9),
-                            width = 1,
-                            color = "black") +
-              scale_x_date(date_labels = "%b %Y", breaks = unique(rpcdata()$Date), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_col(data = rpcs_FilterByIsl_Isl(), 
+                       aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
+                       position = "dodge",
+                       width = 280) +
+              facet_grid(rows = vars(IslandName), scales = rpcs_AxisScale_Isl()) +
+              geom_text(data = rpcs_FilterByIsl_Isl(),
+                        aes(x = IslandDate, y = Island_Mean_Density, label = round(Island_Mean_Density, digits = 2)),
+                        position = position_dodge(1), vjust = -.2, hjust = .5, angle = 0, alpha = as.numeric(input$rpcs_Bar_Text_Isl)) +
+              geom_errorbar(data = rpcs_FilterByIsl_Isl(), 
+                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
+                            width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Isl)) +
+              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_x_date(date_labels = "%b %Y", date_breaks = "1 year", 
+                           limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365, 
+                                      max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
                            expand = c(0.01, 0)) +
-              labs(title = glue("{unique(rpcdata()$ScientificName)}"), 
-                   subtitle = glue("{unique(rpcdata()$IslandName)} {unique(rpcdata()$SiteName)}"),
+              labs(title = glue("{unique(rpcs_FilterByIsl_Isl()$ScientificName)}"),
+                   subtitle = glue("{unique(rpcs_FilterByIsl_Isl()$CommonName)}"),
+                   color = "Common Name",
+                   fill = "Common Name",
+                   x = "Year",
+                   y = "Mean Density") +
+              scale_fill_manual(values = SpeciesColor) +
+              theme_classic() +
+              theme(legend.position = "none",
+                    legend.justification = c(0,0.5),
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$rpcs_Graph_Isl == "Bar" && input$rpcs_DataSummary_Isl == "Site Means (by Island)") {
+          return({
+            out <- by(data = rpcs_Filter_Isl(), INDICES = rpcs_Filter_Isl()$IslandName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() +
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_Isl()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+                new_scale_fill() +
+                geom_col(data = m, aes(x = Date, y = MeanDensity_sqm, fill = SiteName),
+                         position = input$rpcs_BarOptions_Isl, width = 280) +
+                coord_cartesian(ylim = c(0, ifelse(input$rpcs_FreeOrLock_Isl == "Locked Scales", 
+                                                   rpcs_yValue_Isl(), max(m$MaxSumBar)))) +
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = c(0.01, 0),
+                             limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365)) +
+                labs(title = m$IslandName,
+                     color = "Site Name",
+                     fill = "Site Name",
+                     x = "Year",
+                     y = rpcs_yLabel_Isl()) +
+                scale_fill_manual(values = SiteColor) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.key.width = unit(1, "cm"),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 12, colour = "black"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+            })
+            
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
+                                          labels = glue("{unique(rpcs_Filter_Isl()$ScientificName)}"),
+                                          label_size = 20, label_fontface = "bold.italic"
+            ))
+          })
+        } 
+        else if(input$rpcs_Graph_Isl == "Smooth Line" && input$rpcs_DataSummary_Isl == "Island Mean") { # Smooth   -----
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_smooth(data = rpcs_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
+                          se = as.logical(input$rpcs_SmoothSE_Isl),
+                          span = input$rpcs_SmoothSlide_Isl) +
+              geom_point(data = rpcs_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
+                         size = 1, alpha = as.numeric(input$rpcs_SmoothPoint_Isl),inherit.aes = FALSE) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365, 
+                                      max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(rpcs_FilterByIsl_Isl()$ScientificName)}"), 
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Percent Cover") +
+              facet_grid(rows = vars(IslandName), scales = rpcs_AxisScale_Isl()) +
+              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
+              theme_classic() +
+              theme(legend.position = "none",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$rpcs_Graph_Isl == "Smooth Line" && input$rpcs_DataSummary_Isl == "Site Means (by Island)") { 
+          return({
+            out <- by(data = rpcs_Filter_Isl(), INDICES = rpcs_Filter_Isl()$IslandName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() +
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_Isl()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+                geom_point(data = m, aes(x = Date, y = MeanDensity_sqm, color = SiteName),
+                           size = 1, alpha = as.numeric(input$rpcs_SmoothPoint_Isl), inherit.aes = FALSE) +
+                geom_smooth(data = m, aes(x = Date, y = MeanDensity_sqm, color = SiteName),
+                            se = as.logical(input$rpcs_SmoothSE_Isl),
+                            span = input$rpcs_SmoothSlide_Isl) +
+                scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                             limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365, 
+                                        max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
+                             expand = c(0.01, 0)) +
+                scale_y_continuous(limits = c(0, ifelse(input$rpcs_FreeOrLock_Isl == "Locked Scales", 
+                                                        max(rpcs_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm))),
+                                   expand = c(0.01, 0)) +
+                labs(title = glue("{unique(m$IslandName)}"), 
+                     color = "Site Name",
+                     x = "Year",
+                     y = "Percent Cover") +
+                scale_color_manual(values = SiteColor) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+            })
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
+                                          labels = glue("{unique(rpcs_Filter_Isl()$ScientificName)}"),
+                                          label_size = 20, label_fontface = "bold.italic"
+            ))
+          })
+        }
+        
+      })
+      
+      output$rpcs_Plot_Isl2 <- renderPlot({  # Single plot    ----
+        
+        if (is.null(input$rpcs_Graph_Isl))
+          return(NULL) 
+        
+        else if(input$rpcs_Graph_Isl == "Line" && input$rpcs_DataSummary_Isl == "Island Mean") { # Line   ----
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_line(data = rpcs_FilterByIsl_Isl(), 
+                        aes(x = IslandDate, y = Island_Mean_Density, group = IslandName, color = IslandName),
+                        size = 1) +
+              scale_x_date(date_labels = "%Y", breaks = rpcs_FilterByIsl_Isl()$IslandDate, 
+                           limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365,
+                                      max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              geom_errorbar(data = rpcs_FilterByIsl_Isl(), 
+                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
+                            width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Isl)) +
+              labs(title = glue("{unique(rpcs_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
                    y = "Percent Cover") +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
-              theme(legend.position = "bottom",
+              theme(legend.position = "right",
+                    legend.justification = c(0,0.5),
                     legend.background = element_rect(),
-                    legend.key.width = unit(1, "cm"),
-                    legend.title = element_text(size = 18, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 18, colour = "black"),
-                    plot.title = element_text(hjust = 0.5, size = 26, face = "bold"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 20),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        } 
+        else if(input$rpcs_Graph_Isl == "Line" && input$rpcs_DataSummary_Isl == "Site Means (by Island)") {
+          return({
+            ggplot() + 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_line(data = rpcs_Filter_Isl(), 
+                        aes(Date, MeanDensity_sqm, group = SiteName, colour = SiteName, linetype = SiteName),
+                        size = 1) +
+              scale_x_date(date_labels = "%Y", date_breaks = "1 year",
+                           limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365,
+                                      max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              scale_y_continuous(limits = c(0, max(rpcs_Filter_Isl()$MaxSum)), expand = c(0.01, 0)) +
+              geom_errorbar(data = rpcs_Filter_Isl(), 
+                            aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
+                            width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Isl)) +
+              labs(title = rpcs_Filter_Isl()$IslandName,
+                   color = "Site Name",
+                   linetype ="Site Name",
+                   caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
+                   x = NULL,
+                   y = "Mean Density") +
+              geom_vline(size = 1, xintercept = as.Date("2005-07-01", format = "%Y-%m-%d")) +
+              geom_text(x = as.Date("2005-07-01", format = "%Y-%m-%d"), 
+                        y= Inf, aes(label = "16 New Sites Added"),
+                        hjust = 0,
+                        vjust = 1,
+                        inherit.aes = FALSE) +
+              geom_vline(size = 1, xintercept = as.Date("2001-06-01", format = "%Y-%m-%d")) +
+              geom_text(x = as.Date("2001-06-01", format = "%Y-%m-%d"), 
+                        y= Inf, aes(label = "Miracle Mile Added"),
+                        hjust = 1,
+                        vjust = 1,
+                        inherit.aes = FALSE) +
+              scale_color_manual(values = SiteColor2, guide = guide_legend(ncol = 10)) +
+              scale_linetype_manual(values = SiteLine, guide = guide_legend(ncol = 10)) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.justification = c(0,0.5),
+                    legend.background = element_rect(),
+                    legend.key.width = unit(1.5, "cm"),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 12, colour = "black"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold"),
@@ -8579,112 +9571,1057 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
           })
         }
-        else if (input$graphrpc == "Bar") {
+        else if(input$rpcs_Graph_Isl == "Bar" && input$rpcs_DataSummary_Isl == "Island Mean") { # Bar -----
           return({
             ggplot() +
-              geom_col(data = rpcdata(), 
-                       aes(x = Date, y = PercentCover, group = CommonName, fill = CommonName),
-                       width = 130) +
-              scale_x_date(date_labels = "%b %Y", breaks = unique(rpcdata()$Date), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_col(data = rpcs_FilterByIsl_Isl(), 
+                       aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
+                       position = input$rpcs_BarOptions_Isl,
+                       width = 280) +
+              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_x_date(date_labels = "%Y", breaks = rpcs_FilterByIsl_Isl()$IslandDate, 
+                           limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365, 
+                                      max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
                            expand = c(0.01, 0)) +
-              labs(title = glue("{unique(rpcdata()$ScientificName)}"), 
-                   subtitle = glue("{unique(rpcdata()$IslandName)} {unique(rpcdata()$SiteName)}"),
+              labs(title = glue("{unique(rpcs_FilterByIsl_Isl()$ScientificName)}"),
+                   subtitle = glue("{unique(rpcs_FilterByIsl_Isl()$CommonName)}"),
+                   color = "Common Name",
                    fill = "Common Name",
+                   x = "Year",
+                   y = rpcs_yLabel_Isl()) +
+              scale_fill_manual(values = SpeciesColor) +
+              theme_classic() +
+              theme(legend.position = "right",
+                    legend.justification = c(0,0.5),
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$rpcs_Graph_Isl == "Bar" && input$rpcs_DataSummary_Isl == "Site Means (by Island)") {
+          return({
+            ggplot() +
+              geom_col(data = rpcs_Filter_Isl() %>% group_by(SurveyYear) %>% mutate(Date = mean(Date)), 
+                       aes(x = Date-75, y = MeanDensity_sqm, fill = SiteName),
+                       position = input$rpcs_BarOptions_Isl,
+                       width = 280) +
+              scale_x_date(date_labels = "%Y", date_breaks = "1 year",
+                           limits = c(min(as.Date(rpcs_Filter_Isl()$Date))-365,
+                                      max(as.Date(rpcs_Filter_Isl()$Date))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = rpcs_Filter_Isl()$IslandName,
+                   color = "Site Name",
+                   fill = "Site Name",
+                   x = "Year",
+                   y = rpcs_yLabel_Isl()) +
+              geom_vline(size = 1, xintercept = as.Date("2005-01-01", format = "%Y-%m-%d")) +
+              geom_text(x = as.Date("2005-01-01", format = "%Y-%m-%d"), 
+                        y= Inf, aes(label = "16 New Sites Added"),
+                        hjust = 0,
+                        vjust = 1,
+                        inherit.aes = FALSE) +
+              geom_vline(size = 1, xintercept = as.Date("2001-01-01", format = "%Y-%m-%d")) +
+              geom_text(x = as.Date("2001-01-01", format = "%Y-%m-%d"), 
+                        y= Inf, aes(label = "Miracle Mile Added"),
+                        hjust = 1,
+                        vjust = 1,
+                        inherit.aes = FALSE) +
+              scale_fill_manual(values = SiteColor2, guide = guide_legend(ncol = 10)) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.justification = c(0,0.5),
+                    legend.background = element_rect(),
+                    legend.key.width = unit(1, "cm"),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 12, colour = "black"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        } 
+        else if(input$rpcs_Graph_Isl == "Smooth Line" && input$rpcs_DataSummary_Isl == "Island Mean") { # Smooth   ----
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_point(data = rpcs_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName), 
+                         size = 2, alpha = as.numeric(input$rpcs_SmoothPoint_Isl)) +
+              geom_smooth(data = rpcs_FilterByIsl_Isl(), aes(x= IslandDate, y = Island_Mean_Density, color = IslandName),
+                          se = as.logical(input$rpcs_SmoothSE_Isl), span = input$rpcs_SmoothSlide_Isl) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365, 
+                                      max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(rpcs_FilterByIsl_Isl()$ScientificName)}"), 
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Percent Cover") +
+              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
+              theme_classic() +
+              theme(legend.position = "right",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$rpcs_Graph_Isl == "Smooth Line" && input$rpcs_DataSummary_Isl == "Site Means (by Island)") {
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_point(data = rpcs_Filter_Isl(), aes(x = Date, y = MeanDensity_sqm, color = CommonName), 
+                         size = 2, alpha = as.numeric(input$rpcs_SmoothPoint_Isl)) +
+              geom_smooth(data = rpcs_Filter_Isl(), aes(x= Date, y = MeanDensity_sqm, color = SiteName),
+                          se = as.logical(input$rpcs_SmoothSE_Isl), span = input$rpcs_SmoothSlide_Isl) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(rpcs_Filter_Isl()$Date))-365, 
+                                      max(as.Date(rpcs_Filter_Isl()$Date))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(rpcs_Filter_Isl()$ScientificName)}"), 
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Percent Cover") +
+              scale_color_manual(values = SiteColor2, guide = guide_legend(nrow = 5)) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+      })
+      
+    }
+    
+    { # rpcs_Server_byMPA ----
+      
+      rpcs_Filter_MPA <- reactive({
+        rpcs_DFMPA %>%
+          filter(CommonName == input$rpcs_SpeciesName_MPA) %>%
+          group_by(IslandCode, SurveyYear) %>%
+          mutate(Date = mean(Date),
+                 MaxSumBar = max(sum(MeanDensity_sqm))) %>%
+          ungroup() %>%
+          group_by(SiteName, SurveyYear) %>%
+          mutate(MaxSum = max(sum(MeanDensity_sqm))) %>%
+          arrange(SiteName)
+      })
+      
+      rpcs_FilterBarSite_MPA <-reactive({
+        rpcs_DFMPA %>%
+          filter(CommonName == input$rpcs_SpeciesName_MPA,
+                 SiteName != "Keyhole") %>%
+          group_by(IslandCode, SurveyYear) %>%
+          mutate(Date = mean(Date),
+                 MaxSumBar = max(sum(MeanDensity_sqm))) %>%
+          ungroup() %>%
+          group_by(SiteName, SurveyYear) %>%
+          mutate(MaxSum = max(sum(MeanDensity_sqm)))
+      })
+      
+      rpcs_Inside_MPA <- reactive({
+        rpcs_DFMPA %>% 
+          filter(CommonName == input$rpcs_SpeciesName_MPA,
+                 ReserveStatus == "Inside",
+                 SiteName != "Keyhole") %>%
+          group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
+                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
+      })
+      
+      rpcs_Outside_MPA <- reactive({
+        rpcs_DFMPA %>%
+          filter(CommonName == input$rpcs_SpeciesName_MPA,
+                 ReserveStatus == "Outside",
+                 SiteName != "Keyhole") %>%
+          group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
+                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
+      })
+      
+      rpcs_alphaONI_MPA <- reactive({
+        if(input$rpcs_GraphOptions_MPA == "With No Index"){
+          return(0)
+        }
+        else if(input$rpcs_GraphOptions_MPA == "With ONI"){
+          return(1)
+        }
+        else if(input$rpcs_GraphOptions_MPA == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$rpcs_GraphOptions_MPA == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      rpcs_alphaPDO_NOAA_MPA <- reactive({
+        if(input$rpcs_GraphOptions_MPA == "With No Index"){
+          return(0)
+        }
+        if(input$rpcs_GraphOptions_MPA == "With ONI"){
+          return(0)
+          
+        }
+        if(input$rpcs_GraphOptions_MPA == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$rpcs_GraphOptions_MPA == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      rpcs_alphaPDO_UW_MPA <- reactive({
+        if(input$rpcs_GraphOptions_MPA == "With No Index"){
+          return(0)
+        }
+        if(input$rpcs_GraphOptions_MPA == "With ONI"){
+          return(0)
+          
+        }
+        if(input$rpcs_GraphOptions_MPA == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$rpcs_GraphOptions_MPA == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$rpcs_ONIpdoPIC_MPA <- renderImage({
+        if(input$rpcs_GraphOptions_MPA == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$rpcs_GraphOptions_MPA == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$rpcs_GraphOptions_MPA == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
+      rpcs_AxisScale_MPA <- reactive({
+        if(input$rpcs_FreeOrLock_MPA == "Locked Scales"){
+          return("fixed")
+        }
+        if(input$rpcs_FreeOrLock_MPA == "Free Scales"){
+          return("free")
+        }
+      }) # Facet Plot Axis Scale free or fixed 
+      
+      output$rpcs_Plot_MPA <- renderPlot({
+        if (is.null(input$rpcs_Graph_MPA))
+          return(NULL)
+        
+        else if(input$rpcs_Graph_MPA == "Line" && input$rpcs_DataSummary_MPA == "MPA Mean") {  # Line    ----
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaONI_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_MPA()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_line(data = rpcs_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+                        aes(x = MPA_Date, y = MPA_Mean, group = ReserveStatus, color = ReserveStatus, linetype = ReserveStatus),
+                        size = 1) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(rpcs_Filter_MPA()$MPA_Date)), 
+                                      max(as.Date(rpcs_Filter_MPA()$MPA_Date))),
+                           expand = c(0.01, 0)) +
+              geom_errorbar(data = rpcs_Filter_MPA(), 
+                            aes(x = MPA_Date, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
+                            width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_MPA)) +
+              labs(title = glue("{unique(rpcs_Filter_MPA()$ScientificName)}"),
+                   subtitle = glue("{unique(rpcs_Filter_MPA()$CommonName)}"),
+                   color = "Reserve Status",
+                   linetype = "Reserve Status",
+                   x = "Year",
+                   y = "Percent Cover") +
+              scale_color_manual(values=c(Inside = "green3", Outside = "red3")) +
+              scale_linetype_manual(values = c(Inside = "dashed", Outside = "solid")) +
+              facet_grid(rows = vars(IslandName), scales = rpcs_AxisScale_MPA()) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                    legend.text = element_text(size = 14, vjust = .5),
+                    legend.key.width = unit(2, "cm"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
+                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$rpcs_Graph_MPA == "Line" && input$rpcs_DataSummary_MPA == "Site Means (by MPA)") {
+          return({
+            out <- by(data = rpcs_Filter_MPA(), INDICES = rpcs_Filter_MPA()$IslandName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() + 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaONI_MPA()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_MPA()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+                geom_line(data = m, 
+                          aes(x = Date, MeanDensity_sqm, group = SiteName, color = SiteName, linetype = SiteName),
+                          size = 1) +
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
+                             limits = c(min(as.Date(m$Date)), max(as.Date(m$Date))),
+                             expand = c(0.01, 0)) +
+                scale_y_continuous(limits = c(0, ifelse(input$rpcs_FreeOrLock_MPA == "Locked Scales", 
+                                                        max(rpcs_Filter_MPA()$MaxSum), max(m$MeanDensity_sqm))), 
+                                   expand = c(0.01, 0)) +
+                geom_errorbar(data = m, 
+                              aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
+                              width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_MPA)) +
+                labs(title = m$IslandName,
+                     color = "Site Name",
+                     linetype = "Site Name",
+                     caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
+                     x = "Year",
+                     y = "Mean Density") +
+                scale_color_manual(values = SiteColor, breaks = as.character(m$SiteName)) +
+                scale_linetype_manual(values = SiteLine, breaks = as.character(m$SiteName)) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.key.width = unit(1, "cm"),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 12, colour = "black"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+            })
+            
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
+                                          labels = glue("{unique(rpcs_Filter_MPA()$ScientificName)}"),
+                                          label_size = 20,
+                                          label_fontface = "bold.italic"
+            ))
+          })
+        }
+        else if(input$rpcs_Graph_MPA == "Bar" && input$rpcs_DataSummary_MPA == "MPA Mean") { # Bar    -----
+          return({ 
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaONI_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_MPA()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_col(data = rpcs_Inside_MPA(), 
+                       aes(x = MPA_Date - 60, y = MPA_Mean, group = ReserveStatus, fill = ReserveStatus),
+                       width = 120) +
+              geom_text(data = rpcs_Inside_MPA(),
+                        aes(x = MPA_Date - 60, y = MPA_Mean, label = round(MPA_Mean, digits = 2)),
+                        vjust = -.2, hjust = .5, angle = 0, alpha = as.numeric(input$rpcs_Bar_Text_MPA)) +
+              geom_errorbar(data = rpcs_Inside_MPA(), 
+                            aes(x = MPA_Date - 60, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
+                            width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_MPA)) +
+              geom_col(data = rpcs_Outside_MPA(), 
+                       aes(x = MPA_Date + 60, y = MPA_Mean, group = ReserveStatus, fill = ReserveStatus),
+                       width = 120) +
+              geom_text(data = rpcs_Outside_MPA(),
+                        aes(x = MPA_Date + 60, y = MPA_Mean, label = round(MPA_Mean, digits = 2)),
+                        vjust = -.2, hjust = .5, angle = 0, alpha = as.numeric(input$rpcs_Bar_Text_MPA)) +
+              geom_errorbar(data = rpcs_Outside_MPA(), 
+                            aes(x = MPA_Date + 60, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
+                            width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_MPA)) +
+              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(rpcs_Filter_MPA()$MPA_Date)) - 150, 
+                                      max(as.Date(rpcs_Filter_MPA()$MPA_Date))),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(rpcs_Filter_MPA()$ScientificName)}"),
+                   subtitle = glue("{unique(rpcs_Filter_MPA()$CommonName)}"),
+                   color = "Reserve Status",
+                   linetype = "Reserve Status",
+                   x = "Year",
+                   y = "Percent Cover") +
+              scale_fill_manual(values = c(Inside = "green3", Outside = "red3")) +
+              facet_grid(rows = vars(IslandName), scales = rpcs_AxisScale_MPA()) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                    legend.text = element_text(size = 14, vjust = .5),
+                    legend.key.width = unit(2, "cm"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
+                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$rpcs_Graph_MPA == "Bar" &&  input$rpcs_DataSummary_MPA == "Site Means (by MPA)") {
+          return({
+            out <- by(data = rpcs_FilterBarSite_MPA(), INDICES = rpcs_FilterBarSite_MPA()$IslandName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() +
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaONI_MPA()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_MPA()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+                new_scale_fill() +
+                geom_col(data = m %>% filter(ReserveStatus == "Inside"), 
+                         aes(x = Date - 70, y = MeanDensity_sqm, fill = SiteName),
+                         position = "stack", width = 140) +
+                geom_text(data = m %>% filter(ReserveStatus == "Inside") %>% 
+                            group_by(IslandName, SurveyYear) %>% mutate(SumBar = sum(MeanDensity_sqm)),
+                          aes(x = Date - 70, y = SumBar, label = "In"),
+                          vjust = -.2, hjust = .5, angle = 0) +
+                scale_fill_manual(values = SiteColor) +
+                labs(fill = "Inside") +
+                new_scale_fill() +
+                geom_col(data = m %>% filter(ReserveStatus == "Outside") , 
+                         aes(x = Date + 70, y = MeanDensity_sqm, fill = SiteName),
+                         position = "stack", width = 140) +
+                geom_text(data = m %>% filter(ReserveStatus == "Outside") %>%
+                            group_by(IslandName, SurveyYear) %>%
+                            mutate(SumBar = sum(MeanDensity_sqm)),
+                          aes(x = Date + 70, y = SumBar, label = "Out"),
+                          vjust = -.2, hjust = .5, angle = 0) +
+                scale_y_continuous(limits = c(0, max(rpcs_Filter_MPA()$MaxSumBar)), expand = c(0.01, 0)) +
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
+                             limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
+                             expand = c(0.01, 0)) +
+                labs(title = m$IslandName,
+                     fill = "Outside",
+                     x = "Year",
+                     y = "Mean Density") +
+                scale_fill_manual(values = SiteColor) +
+                scale_color_manual(values = SiteColor) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.key.width = unit(1, "cm"),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 12, colour = "black"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+            })
+            
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
+                                          labels = glue("{unique(rpcs_Filter_MPA()$ScientificName)}"),
+                                          label_size = 20,
+                                          label_fontface = "bold.italic"
+            ))
+          })
+        } 
+        else if(input$rpcs_Graph_MPA == "Smooth Line" && input$rpcs_DataSummary_MPA == "MPA Mean") {  # Smooth       ----
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaONI_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_MPA()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_point(data = rpcs_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+                         aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
+                         size = 1, alpha = as.numeric(input$rpcs_SmoothPoint_MPA), show.legend = FALSE) +
+              geom_smooth(data = rpcs_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+                          aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
+                          se = as.logical(input$rpcs_SmoothSE_MPA),
+                          span = input$rpcs_SmoothSlide_MPA) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(rpcs_Filter_MPA()$MPA_Date)), 
+                                      max(as.Date(rpcs_Filter_MPA()$MPA_Date))),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(rpcs_Filter_MPA()$ScientificName)}"),
+                   subtitle = glue("{unique(rpcs_Filter_MPA()$CommonName)}"),
+                   color = "Reserve Status",
+                   linetype = "Reserve Status",
+                   x = "Year",
+                   y = "Percent Cover") +
+              scale_color_manual(values=c(Inside = "green3", Outside = "red3")) +
+              scale_linetype_manual(values = c(Inside = "dashed", Outside = "solid")) +
+              facet_grid(rows = vars(IslandName), scales = rpcs_AxisScale_MPA()) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                    legend.text = element_text(size = 14, vjust = .5),
+                    legend.key.width = unit(2, "cm"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
+                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$rpcs_Graph_MPA == "Smooth Line" && input$rpcs_DataSummary_MPA == "Site Means (by MPA)") {
+          return({
+            out <- by(data = rpcs_Filter_MPA(), INDICES = rpcs_Filter_MPA()$IslandName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() + 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaONI_MPA()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_MPA()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+                geom_point(data = m, aes(x = Date, MeanDensity_sqm, color = SiteName),
+                           size = 1, alpha = as.numeric(input$rpcs_SmoothPoint_MPA), show.legend = FALSE) +
+                geom_smooth(data = m, aes(x = Date, MeanDensity_sqm, color = SiteName, linetype = SiteName),
+                            se = as.logical(input$rpcs_SmoothSE_MPA),
+                            span = input$rpcs_SmoothSlide_MPA) +
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
+                             limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
+                             expand = c(0.01, 0)) +
+                scale_y_continuous(limits = c(0, max(rpcs_Filter_MPA()$MaxSum)), expand = c(0.01, 0)) +
+                labs(title = m$IslandName,
+                     color = "Site Name",
+                     linetype = "Site Name",
+                     caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
+                     x = "Year",
+                     y = "Mean Density") +
+                scale_color_manual(values = SiteColor) +
+                scale_linetype_manual(values = SiteLine) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.key.width = unit(1, "cm"),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 12, colour = "black"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+            })
+            
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
+                                          labels = glue("{unique(rpcs_Filter_MPA()$ScientificName)}"),
+                                          label_size = 20,
+                                          label_fontface = "bold.italic"
+            ))
+          })
+        }
+      })
+      
+    }
+    
+    { # rpcs_Server_Two_Species    ----
+      
+      rpcs_Filter_Two_One <- reactive({
+        rpcs_DF %>%
+          filter(SiteName == input$rpcs_SiteName_Two,
+                 CommonName == input$rpcs_SpeciesName_Two_One) %>%
+          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                 Species, SiteNumber, IslandCode, SiteCode) 
+      })
+      
+      rpcs_Filter_Two_Two <- reactive({
+        rpcs_DF %>%
+          filter(SiteName == input$rpcs_SiteName_Two,
+                 CommonName == input$rpcs_SpeciesName_Two_Two) %>%
+          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                 Species, SiteNumber, IslandCode, SiteCode) 
+      })
+      
+      output$rpcs_LargeSpPhoto_Two_1 <- renderImage({
+        
+        if (is.null(input$rpcs_SpeciesName_Two_One))
+          return(NULL) 
+        
+        if (input$rpcs_SpeciesName_Two_One == unique(rpcs_Filter_Two_One()$CommonName)) {
+          return(list(
+            src = glue("www/Indicator_Species/{unique(rpcs_Filter_Two_One()$Species)}.jpg"),
+            contentType = "image/jpg",
+            alt = glue("{unique(rpcs_Filter_Two_One()$CommonName)}"),
+            width = 450,
+            height = 450
+          ))
+        }
+      }, deleteFile = FALSE)
+      
+      output$rpcs_LargeSpPhoto_Two_2 <- renderImage({
+        
+        if (input$rpcs_SpeciesName_Two_Two == unique(rpcs_Filter_Two_Two()$CommonName)) {
+          return(list(
+            src = glue("www/Indicator_Species/{unique(rpcs_Filter_Two_Two()$Species)}.jpg"),
+            contentType = "image/jpg",
+            alt = glue("{unique(rpcs_Filter_Two_Two()$CommonName)}"),
+            width = 450,
+            height = 450
+          ))
+        }
+      }, deleteFile = FALSE)
+      
+      output$rpcs_TopSitePhoto_Two <- renderImage({
+        if (is.null(input$rpcs_SpeciesName_Two_One))
+          return(NULL)
+        
+        if (input$rpcs_SiteName_Two == unique(rpcs_Filter_Two_One()$SiteName)) {
+          return(list(
+            src = glue("www/Sat_Imagery/{unique(rpcs_Filter_Two_One()$SiteCode)}.png"),
+            contentType = "image/png",
+            alt = glue("{unique(rpcs_Filter_Two_One()$SiteName)}"),
+            width = 430,
+            height = 210
+          ))
+        }
+      }, deleteFile = FALSE)
+      
+      output$rpcs_LargeSitePhoto_Two <- renderImage({
+        if (is.null(input$rpcs_SpeciesName_Two_One))
+          return(NULL)
+        
+        if (input$rpcs_SiteName_Two == unique(rpcs_Filter_Two_One()$SiteName)) {
+          return(list(
+            src = glue("www/Sat_Imagery/{unique(rpcs_Filter_Two_One()$SiteCode)}.png"),
+            contentType = "image/png",
+            alt = glue("{unique(rpcs_Filter_Two_One()$SiteName)}"),
+            width = 1287,
+            height = 625
+          ))
+        }
+      }, deleteFile = FALSE)
+      
+      rpcs_alphaONI_Two <- reactive({
+        if(input$rpcs_GraphOptions_Two == "With No Index"){
+          return(0)
+        }
+        else if(input$rpcs_GraphOptions_Two == "With ONI"){
+          return(1)
+        }
+        else if(input$rpcs_GraphOptions_Two == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$rpcs_GraphOptions_Two == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      rpcs_alphaPDO_NOAA_Two <- reactive({
+        if(input$rpcs_GraphOptions_Two == "With No Index"){
+          return(0)
+        }
+        if(input$rpcs_GraphOptions_Two == "With ONI"){
+          return(0)
+          
+        }
+        if(input$rpcs_GraphOptions_Two == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$rpcs_GraphOptions_Two == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      rpcs_alphaPDO_UW_Two <- reactive({
+        if(input$rpcs_GraphOptions_Two == "With No Index"){
+          return(0)
+        }
+        if(input$rpcs_GraphOptions_Two == "With ONI"){
+          return(0)
+          
+        }
+        if(input$rpcs_GraphOptions_Two == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$rpcs_GraphOptions_Two == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$rpcs_ONIpdoPIC_Two <- renderImage({
+        if(input$rpcs_GraphOptions_Two == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$rpcs_GraphOptions_Two == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$rpcs_GraphOptions_Two == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
+      output$rpcs_Plot_Two <- renderPlot({
+        
+        if (is.null(input$rpcs_Graph_Two))
+          return(NULL) 
+        
+        else if(input$rpcs_Graph_Two == "Line"){
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaONI_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_Two()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_line(data = rpcs_Filter_Two_One(), 
+                        aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName),
+                        size = 1) +
+              geom_errorbar(data = rpcs_Filter_Two_One(),
+                            aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
+                            width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Two)) + 
+              geom_line(data = rpcs_Filter_Two_Two(), 
+                        aes(x = Date, y = MeanDensity_sqm*input$rpcs_Y_Slide_Two, group = ScientificName, color = CommonName),
+                        size = 1) +
+              geom_errorbar(data = rpcs_Filter_Two_Two(),
+                            aes(x = Date, ymin = MeanDensity_sqm*input$rpcs_Y_Slide_Two - StandardError*input$rpcs_Y_Slide_Two, 
+                                ymax = MeanDensity_sqm*input$rpcs_Y_Slide_Two + StandardError*input$rpcs_Y_Slide_Two),
+                            width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Two)) + 
+              scale_y_continuous(sec.axis = sec_axis(~./input$rpcs_Y_Slide_Two, 
+                                                     name = glue("{unique(rpcs_Filter_Two_Two()$CommonName)} per square meter"))) +
+              scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_Two_One()$Date), 
+                           limits = c(min(as.Date(rpcs_Filter_Two_One()$Date))-365, 
+                                      max(as.Date(rpcs_Filter_Two_One()$Date))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(rpcs_Filter_Two_One()$ScientificName)
+                              } and {unique(rpcs_Filter_Two_Two()$ScientificName)}"), 
+                   subtitle = glue("{unique(rpcs_Filter_Two_One()$IslandName)} {unique(rpcs_Filter_Two_One()$SiteName)}"),
+                   color = "Common Name",
+                   caption = 
+                     glue(
+                       "{rpcs_Filter_Two_One()$SiteName} is typically surveyed in {
+                     month(round(mean(month(rpcs_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     } and has a mean depth of {round(mean(rpcs_Filter_Two_One()$MeanDepth), 2)} ft"),
+                   x = "Year",
+                   y = glue('{unique(rpcs_Filter_Two_One()$CommonName)} per square meter')) +
+              scale_color_manual(values = SpeciesColor) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                    legend.text = element_text(size = 14, vjust = .5),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
+          })}
+        else if(input$rpcs_Graph_Two == "Bar") {
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaONI_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_Two()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_col(data = rpcs_Filter_Two_One(), 
+                       aes(x = Date - 50, y = MeanDensity_sqm, fill = CommonName),
+                       position = "dodge",
+                       width = 100) +
+              geom_col(data = rpcs_Filter_Two_Two(), 
+                       aes(x = Date + 50, y = MeanDensity_sqm*input$rpcs_Y_Slide_Two, fill = CommonName),
+                       position = "dodge",
+                       width = 100) +
+              geom_errorbar(data = rpcs_Filter_Two_One(),
+                            aes(x = Date - 50, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
+                            width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Two)) + 
+              geom_errorbar(data = rpcs_Filter_Two_Two(),
+                            aes(x = Date + 50, ymin = MeanDensity_sqm*input$rpcs_Y_Slide_Two - StandardError*input$rpcs_Y_Slide_Two, 
+                                ymax = MeanDensity_sqm*input$rpcs_Y_Slide_Two + StandardError*input$rpcs_Y_Slide_Two),
+                            width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Two)) + 
+              scale_y_continuous(sec.axis = sec_axis(~./input$rpcs_Y_Slide_Two, 
+                                                     name = glue("{unique(rpcs_Filter_Two_Two()$CommonName)} per square meter"))) +
+              scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_Two_One()$Date),
+                           limits = c(min(as.Date(rpcs_Filter_Two_One()$Date))-365,
+                                      max(as.Date(rpcs_Filter_Two_One()$Date))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(rpcs_Filter_Two_One()$ScientificName)
+                              } and {unique(rpcs_Filter_Two_Two()$ScientificName)}"),
+                   subtitle = glue("{unique(rpcs_Filter_Two_One()$IslandName)} {unique(rpcs_Filter_Two_One()$SiteName)}"),
+                   color = "Common Name",
+                   caption =
+                     glue(
+                       "{rpcs_Filter_Two_One()$SiteName} is typically surveyed in {
+                     month(round(mean(month(rpcs_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     } and has a mean depth of {round(mean(rpcs_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = "Percent Cover") +
               scale_fill_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
-                    legend.background = element_rect(),
-                    legend.key.width = unit(1, "cm"),
-                    legend.title = element_text(size = 18, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 18, colour = "black"),
-                    plot.title = element_text(hjust = 0.5, size = 26, face = "bold"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 20),
+                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                    legend.text = element_text(size = 14, vjust = .5),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
                     axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
+                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
+          })}
+        else if(input$rpcs_Graph_Two == "Smooth Line"){
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaONI_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_Two()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_smooth(data = rpcs_Filter_Two_One(), 
+                          aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName),
+                          size = 1,  span = input$rpcs_SmoothSlide_Two, se = as.logical(input$rpcs_SmoothSE_Two)) +
+              geom_point(data = rpcs_Filter_Two_One(),
+                         aes(x = Date, y = MeanDensity_sqm, color = CommonName),
+                         size = 1, alpha = as.numeric(input$rpcs_SmoothPoint_Two)) +
+              geom_smooth(data = rpcs_Filter_Two_Two(), 
+                          aes(x = Date, y = MeanDensity_sqm*input$rpcs_Y_Slide_Two, group = ScientificName, color = CommonName),
+                          size = 1,  span = input$rpcs_SmoothSlide_Two, se = as.logical(input$rpcs_SmoothSE_Two)) +
+              geom_point(data = rpcs_Filter_Two_Two(),
+                         aes(x = Date, y = MeanDensity_sqm*input$rpcs_Y_Slide_Two, color = CommonName),
+                         size = 1, alpha = as.numeric(input$rpcs_SmoothPoint_Two)) +
+              scale_y_continuous(sec.axis = sec_axis(~./input$rpcs_Y_Slide_Two, 
+                                                     name = glue("{unique(rpcs_Filter_Two_Two()$CommonName)} per square meter"))) +
+              scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_Two_One()$Date), 
+                           limits = c(min(as.Date(rpcs_Filter_Two_One()$Date))-365, 
+                                      max(as.Date(rpcs_Filter_Two_One()$Date))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(rpcs_Filter_Two_One()$ScientificName)
+                              } and {unique(rpcs_Filter_Two_Two()$ScientificName)}"), 
+                   subtitle = glue("{unique(rpcs_Filter_Two_One()$IslandName)} {unique(rpcs_Filter_Two_One()$SiteName)}"),
+                   color = "Common Name",
+                   caption = 
+                     glue(
+                       "{rpcs_Filter_Two_One()$SiteName} is typically surveyed in {
+                     month(round(mean(month(rpcs_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     } and has a mean depth of {round(mean(rpcs_Filter_Two_One()$MeanDepth), 2)} ft"),
+                   x = "Year",
+                   y = glue('{unique(rpcs_Filter_Two_One()$CommonName)} per square meter')) +
+              scale_color_manual(values = SpeciesColor) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                    legend.text = element_text(size = 14, vjust = .5),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
+          })}
       })
+      
+      output$rpcs_DToutData_Two_1 <- renderDT({
+        datatable(rpcs_Filter_Two_One(),
+                  extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    scrollY = "500px",
+                    paging = FALSE,
+                    ordering = TRUE,
+                    info = FALSE,
+                    dom = 'Bfrtip',
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    columnDefs = c(list(list(visible = FALSE, targets = c(1, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15))), 
+                                   list(list(className = 'dt-center', targets = 0:6))),
+                    colReorder = TRUE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(rpcs_Filter_Two_One()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      })
+      
+      output$rpcs_DToutData_Two_2 <- renderDT({
+        datatable(rpcs_Filter_Two_Two(),
+                  extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    scrollY = "500px",
+                    paging = FALSE,
+                    ordering = TRUE,
+                    info = FALSE,
+                    dom = 'Bfrtip',
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    columnDefs = c(list(list(visible = FALSE, targets = c(1, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15))), 
+                                   list(list(className = 'dt-center', targets = 0:6))),
+                    colReorder = TRUE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(rpcs_Filter_Two_Two()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      })
+      
     }
     
-    { # RPC_Server_byIsl  -----
+    { # rpcs_Server_all   ----
       
-      output$rpcBYisl1 <- renderPlot({
-        if (is.null(input$graphrpcByIsl))
+      rpcs_Filter_All <- reactive({
+        rpcs_DF %>%
+          filter(SiteName == input$rpcs_SiteNameAll) %>%
+          drop_na()
+      })
+      
+      output$rpcs_Plot_All <- renderPlot({
+        if (is.null(input$rpcs_GraphAll))
           return(NULL)
         
-        if (input$graphrpcByIsl == "Line") {
-          return({rpcSM <-reactive({
-            rpcBYisland %>%
-              filter(IslandCode == "SM",
-                     CommonName == input$SpeciesNamerpcByIsl)
+        if (input$rpcs_GraphAll == "Line") {
+          return({
+            out <- by(data = rpcs_Filter_All(), INDICES = rpcs_Filter_All()$CommonName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() + 
+                geom_line(data = m, 
+                          aes(Date, MeanDensity_sqm, group = CommonName, colour = CommonName, linetype = SiteName),
+                          size = 1) +
+                scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
+                             expand = c(0.01, 0)) +
+                geom_errorbar(data = m, 
+                              aes(x = Date, ymin = MeanDensity_sqm - StandardError,
+                                  ymax = MeanDensity_sqm + StandardError),
+                              width = 0.25,
+                              color = "black") +
+                labs(title = m$ScientificName, 
+                     subtitle = glue("{m$IslandName} {m$SiteName}"),
+                     color = "Common Name",
+                     x = "Year",
+                     y = "Mean Density") +
+                scale_color_manual(values = SpeciesColor) +
+                scale_linetype_manual(values = SiteLine, guide = FALSE) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+              
+            })
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v'))
           })
-          
-          ggplot(rpcSM(), aes(x = SurveyYear , y = MeanDensity_sqm, group = ScientificName, color = CommonName)) +
-            geom_line(size = 1) +
-            geom_point() +
-            # geom_errorbar(aes(ymin = MeanDensity_sqm - StandardError,
-            #                   ymax = MeanDensity_sqm + StandardError),
-            #               position = position_dodge(width = 0.9),
-            #               width = 0.25,
-            #               color = "black") +
-            labs(title = glue("{unique(rpcSM()$ScientificName)}"), 
-                 subtitle = glue("{unique(rpcSM()$IslandName)}"),
-                 color = "Common Name",
-                 x = NULL,
-                 y = expression("Mean Density (#/m"^"2"~")")) +
-            scale_color_manual(values=c("blue3")) +
-            theme_classic() +
-            theme(legend.position = "right",
-                  legend.background = element_rect(),
-                  legend.title = element_text(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
+        } 
+        else if (input$rpcs_GraphAll == "Bar") {
+          return({
+            out <- by(data = rpcs_Filter_All(), INDICES = rpcs_Filter_All()$CommonName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() + 
+                geom_col(data = m, 
+                         aes(x = Date, y = MeanDensity_sqm, group = CommonName, fill = CommonName, linetype = SiteName),
+                         width = 250) +
+                geom_text(data = m, 
+                          aes(x = Date, y = MeanDensity_sqm, label = round(MeanDensity_sqm, digits = 2)),
+                          position = position_dodge(1),
+                          vjust = -.2,
+                          hjust = .5,
+                          angle = 0) +
+                scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
+                             expand = c(0.01, 0)) +
+                scale_y_continuous(expand = c(0.1, 0)) +
+                labs(title = m$ScientificName, 
+                     subtitle = glue("{m$IslandName} {m$SiteName}"),
+                     color = "Common Name",
+                     x = "Year",
+                     y = "Mean Density") +
+                scale_fill_manual(values = SpeciesColor) +
+                scale_linetype_manual(values = SiteLine, guide = FALSE) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+              
+            })
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v'))
           })
-        }
-        else if (input$graphrpcByIsl == "Bar") {
-          return({rpcSM <- reactive({
-            rpcBYisland %>%
-              filter(IslandCode == "SM",
-                     CommonName == input$SpeciesNamerpcByIsl)
-          })
-          ggplot(rpcSM(), aes(x = SurveyYear , y = MeanDensity_sqm, fill = CommonName)) +
-            geom_bar(stat = "identity",
-                     position = "dodge") +
-            geom_text(aes(label = round(MeanDensity_sqm, digits = 2)),
-                      position = position_dodge(1),
-                      vjust = -.2,
-                      hjust = .5,
-                      angle = 0) +
-            scale_y_continuous(expand = c(0.1, 0)) +
-            labs(title = glue("{unique(rpcSM()$ScientificName)}"), 
-                 subtitle = glue("{unique(rpcSM()$IslandName)}"),
-                 fill = "Common Name",
-                 x = NULL,
-                 y = expression("Mean Density (#/m"^"2"~")")) +
-            scale_fill_manual(values=c("blue3")) +
-            theme_classic() +
-            theme(legend.position = "right",
-                  legend.background = element_rect(),
-                  legend.title = element_text(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
-          })
-        }
+        } 
       })
-    }
-    
-    { # RPC_Server_byIsl_Locked  -----
       
     }
     
@@ -10751,9 +12688,8 @@ server <- function(input, output, session) {
   
   output$viewReport <- renderUI({ # ........ Report_PDF_Archive ........   -----
     
-    tags$iframe(
-      style="height:600px; width:100%; scrolling=yes",
-      src = glue("Annual_Reports/{input$Reports}.pdf"))
+    tags$iframe(style="height:600px; width:100%; scrolling=yes",
+                src = glue("Annual_Reports/{input$Reports}.pdf"))
   })
   
 } # End of Server function  ----

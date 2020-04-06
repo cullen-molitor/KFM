@@ -334,7 +334,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
       # ~ Core_Conditonals  ----
       # ...... Two Species   ----
       conditionalPanel(condition = "input.tabselected=='core_TP' && input.core_allORone=='Two Species by Site'",
-                       selectInput(inputId = "core_SiteNameOne",
+                       selectInput(inputId = "core_SiteName_One",
                                    label = "Choose a Site:",
                                    choices = SiteNames),
                        selectInput(inputId = "core_SpeciesName_One",
@@ -345,15 +345,12 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                    label = "Species Two:",
                                    choices = levels(factor(core_DF$CommonName)),
                                    selected = "Giant Kelp (> 1 m tall)"),
-                       radioButtons(inputId = "core_GraphOne",
+                       radioButtons(inputId = "core_Graph_Two",
                                     label = "Choose a graph:",
                                     choices = c("Line", "Bar", "Smooth Line")),
-                       radioButtons(inputId = "core_GraphOptionsOne",
+                       radioButtons(inputId = "core_GraphOptions_Two",
                                     label =  "Graph Options:",
-                                    choices = c("With No Index",
-                                                "With ONI",
-                                                "With PDO (NOAA)"
-                                    )
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)")
                        )
       ),
       # ...... Island    ----
@@ -451,45 +448,106 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                    choices = unique(nhsfRaw$CommonName)),
                        tags$hr()
       ),
-      # ~ RPC_Conditional   ----
-      # ...... One Species    ----
-      conditionalPanel(condition = "input.tabselected=='rpcs' && input.allORonerpc=='One Species by Site'",
+      # ~ rpcs_Conditional  ----
+      # ...... One Species ----
+      conditionalPanel(condition = "input.tabselected=='rpcs_TP' && input.rpcs_allORone=='One Species by Site'",
+                       selectInput(inputId = "rpcs_SiteName_One",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "rpcs_SpeciesName_One",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(rpcs_DF$CommonName)),
+                                   selected = "Bat Star"),
                        tags$hr(),
-                       selectInput(inputId = "graphrpc",
-                                   label = "Choose a graph:",
-                                   choices = c("Line", "Bar")),
+                       radioButtons(inputId = "rpcs_Graph_One",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line", 'Boxplot')),
+                       radioButtons(inputId = "rpcs_DataSummary_One",
+                                    label = "Choose a data Summary:",
+                                    choices = c("One species at one site" , "One species with island average")),
+                       radioButtons(inputId = "rpcs_GraphOptions_One",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"))
+      ),
+      # ...... By Island ----
+      conditionalPanel(condition = "input.tabselected=='rpcs_TP' && input.rpcs_allORone=='One Species by Island'",
+                       selectInput(inputId = "rpcs_SpeciesName_Isl",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(rpcs_DF$CommonName)),
+                                   selected = "Purple Urchin"),
+                       radioButtons(inputId = "rpcs_Graph_Isl",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "rpcs_DataSummary_Isl",
+                                    label = "Choose a data Summary:",
+                                    choices = c("Island Mean", "Site Means (by Island)")),
+                       radioButtons(inputId = "rpcs_FreeOrLock_Isl",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales", "Single Plot")),
+                       radioButtons(inputId = "rpcs_GraphOptions_Isl",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"))
+      ),
+      # ...... By MPA ----
+      conditionalPanel(condition = "input.tabselected=='rpcs_TP' && input.rpcs_allORone=='One Species by MPA'",
+                       selectInput(inputId = "rpcs_SpeciesName_MPA",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(rpcs_DF$CommonName)),
+                                   selected = "Warty Sea Cucumber"),
                        tags$hr(),
-                       selectInput(inputId = "SiteNamerpc",
+                       radioButtons(inputId = "rpcs_Graph_MPA",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "rpcs_DataSummary_MPA",
+                                    label = "Choose a data Summary:",
+                                    choices = c("MPA Mean", "Site Means (by MPA)")),
+                       radioButtons(inputId = "rpcs_FreeOrLock_MPA",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales")),
+                       radioButtons(inputId = "rpcs_GraphOptions_MPA",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)")),
+                       tags$hr()
+      ),
+      # ...... Two Species ----
+      conditionalPanel(condition = "input.tabselected=='rpcs_TP' && input.rpcs_allORone=='Two Species by Site'",
+                       selectInput(inputId = "rpcs_SiteName_Two",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "rpcs_SpeciesName_Two_One",
+                                   label = "Species One:",
+                                   choices = levels(factor(rpcs_DF$CommonName)),
+                                   selected = "Purple Urchin"),
+                       selectInput(inputId = "rpcs_SpeciesName_Two_Two",
+                                   label = "Species Two:",
+                                   choices = levels(factor(rpcs_DF$CommonName)),
+                                   selected = "Giant Kelp (Adult)"),
+                       tags$hr(),
+                       radioButtons(inputId = "rpcs_Graph_Two",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "rpcs_GraphOptions_Two",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)"
+                                    )
+                       )
+      ),
+      # ...... All Species ----
+      conditionalPanel(condition ="input.tabselected=='rpcs_TP' && input.rpcs_allORone=='All Species'",
+                       tags$hr(),
+                       selectInput(inputId = "rpcs_SiteNameAll",
                                    label = "Choose a Site:",
                                    choices = SiteNames),
                        tags$hr(),
-                       selectInput(inputId = "SpeciesNamerpc",
-                                   label = "Choose a Species:",
-                                   choices = c(unique(rpc$CommonName), "All Substrate")),
-                       tags$hr()
-      ),
-      # ...... By Island    ----
-      conditionalPanel(condition = "input.tabselected=='rpcs' && input.allORonerpc=='One Species by Island (Free Scales)'",
-                       tags$hr(),
-                       selectInput(inputId = "graphrpcByIsl",
-                                   label = "Choose a graph:",
-                                   choices = c("Line", "Bar")),
-                       tags$hr(),
-                       selectInput(inputId = "SpeciesNamerpcByIsl",
-                                   label = "Choose a Species:",
-                                   choices = unique(rpc$CommonName)),
-                       tags$hr()
-      ),
-      # ...... Locked    ----
-      conditionalPanel(condition = "input.tabselected=='rpcs' && input.allORonerpc=='One Species by Island (Locked Scales)'",
-                       tags$hr(),
-                       selectInput(inputId = "graphrpcLocked",
-                                   label = "Choose a graph:",
-                                   choices = c("Line", "Bar")),
-                       tags$hr(),
-                       selectInput(inputId = "SpeciesNamerpcLocked",
-                                   label = "Choose a Species:",
-                                   choices = unique(rpc$CommonName)),
+                       radioButtons(inputId = "rpcs_GraphAll",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar")),
                        tags$hr()
       ),
       # ~ Temperature_Conditional   ----
@@ -896,17 +954,33 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                 uiOutput(outputId = "outNHSF"),
                 tags$hr()
        ),
-       tabPanel("RPCs", value = "rpcs", # ** RPCs_TP      ----
-                fluidRow(column(6, offset = 3,tags$h1(tags$strong("Random Point Contacts (% Cover)")))),
-                radioButtons(inputId = "allORonerpc",
-                             label = "What would you like to view?",
-                             choices = c("One Species by Site",
-                                         "One Species by Island (Free Scales)", 
-                                         "One Species by Island (Locked Scales)"),
-                             inline = TRUE),
-                tags$hr(),
-                uiOutput(outputId = "outrpc")
-       ),
+       tabPanel("RPCs", value = "rpcs_TP", # ** rpcs_TP         ---- 
+                fluidRow(column(6, offset = 2, tags$h1(tags$strong("1 m Quadrat Species Densities")))),
+                fluidRow(column(3, radioButtons(inputId = "rpcs_allORone",
+                                                label = "What would you like to view?",
+                                                choices = c("One Species by Site",
+                                                            "One Species by Island",
+                                                            "One Species by MPA",
+                                                            "Two Species by Site",
+                                                            "All Species"),
+                                                inline = FALSE)),
+                         column(2, conditionalPanel(
+                           condition = "input.rpcs_allORone == 'One Species by Site' 
+                                                 || input.rpcs_allORone == 'One Species by Island' 
+                                                 || input.rpcs_allORone == 'One Species by MPA'
+                                                 || input.rpcs_allORone == 'Two Species by Site'",
+                           imageOutput(outputId = "rpcs_TopPhoto_One",
+                                       height = 200))),
+                         conditionalPanel(condition = "input.rpcs_allORone == 'Two Species by Site'",
+                                          column(2,imageOutput(outputId = "rpcs_TopPhoto_Two",
+                                                               height = 200)),
+                                          column(2, imageOutput(outputId = "rpcs_TopSitePhoto_Two",
+                                                                height = 200))),
+                         column(2, conditionalPanel(
+                           condition = "input.rpcs_allORone == 'One Species by Site'",
+                           imageOutput(outputId = "rpcs_TopSitePhoto_One",
+                                       height = 200)))),
+                uiOutput(outputId = "rpcs_UIout")),
        tabPanel("Temperature", value = "temps", #** Temp_TP    ----
                 fluidRow(column(6, offset = 3,tags$h1(tags$strong("Water Temperatures")))),
                 radioButtons(inputId = "allORonetemps",
