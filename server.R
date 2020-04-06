@@ -92,18 +92,28 @@ server <- function(input, output, session) {
                                                                           label = "Show error bars?",
                                                                           choices = c("Yes" = 1, "No" = 0),
                                                                           inline = TRUE))),
-                                  conditionalPanel("input.oneM_Graph_Isl == 'Bar' && input.oneM_DataSummary_Isl == 'Island Mean' && 
+                                  conditionalPanel("input.oneM_Graph_Isl == 'Bar' && 
+                                                   input.oneM_DataSummary_Isl == 'Island Mean' && 
                                                    input.oneM_FreeOrLock_Isl != 'Single Plot'",
                                                    column(3, radioButtons(inputId = "oneM_Bar_Text_Isl",
                                                                           label = "Show density value?",
                                                                           choices = c("Yes" = 1, "No" = 0), selected = 0,
                                                                           inline = TRUE))),
-                                  conditionalPanel("input.oneM_Graph_Isl == 'Bar' && input.oneM_DataSummary_Isl == 'Site Means (by Island)'",
-                                                   
+                                  conditionalPanel("(input.oneM_Graph_Isl == 'Bar' && 
+                                                   input.oneM_DataSummary_Isl == 'Island Mean' && 
+                                                   input.oneM_FreeOrLock_Isl != 'Locked Scales' && 
+                                                   input.oneM_FreeOrLock_Isl != 'Free Scales') ||
+                                                   (input.oneM_Graph_Isl == 'Bar' && 
+                                                   input.oneM_DataSummary_Isl == 'Site Means (by Island)')",
                                                    column(3, radioButtons(inputId = "oneM_BarOptions_Isl",
                                                                           label =  "Bar Graph Options:",
                                                                           choices = c("Stack" = "stack", "Fill" = "fill", "Dodge" = "dodge"),
-                                                                          inline = TRUE)))),
+                                                                          inline = TRUE))),
+                                  conditionalPanel("input.oneM_GraphOptions_Isl == 'With ONI' ||
+                                                      input.oneM_GraphOptions_Isl == 'With PDO (NOAA)' ||
+                                                      input.oneM_GraphOptions_Isl == 'With PDO (UW)'",
+                                                             column(6, imageOutput(outputId = "oneM_ONIpdoPIC_Isl",
+                                                                         height = 75)))),
                          fluidRow(conditionalPanel("input.oneM_Graph_Isl == 'Line' || input.oneM_Graph_Isl == 'Bar'",
                                                    tags$hr())),
                          conditionalPanel("input.oneM_Graph_Isl == 'Smooth Line'",
@@ -134,20 +144,20 @@ server <- function(input, output, session) {
                          plotOutput(outputId = "oneM_Filter_MPA",
                                     height = 850),
                          tags$hr(),
-                         fluidRow(conditionalPanel("input.oneM_GraphMPA == 'Line' || (input.oneM_GraphMPA == 'Bar' && 
-                                                   input.oneM_DataSummaryMPA == 'MPA Mean')",
+                         fluidRow(conditionalPanel("input.oneM_Graph_MPA == 'Line' || (input.oneM_Graph_MPA == 'Bar' && 
+                                                   input.oneM_DataSummary_MPA == 'MPA Mean')",
                                                    column(3, radioButtons(inputId = "oneM_EB_MPA",
                                                                           label = "Show error bars?",
                                                                           choices = c("Yes" = 1, "No" = 0),
                                                                           inline = TRUE))),
-                                  conditionalPanel("input.oneM_GraphMPA == 'Bar' && input.oneM_DataSummaryMPA == 'MPA Mean'",
+                                  conditionalPanel("input.oneM_Graph_MPA == 'Bar' && input.oneM_DataSummary_MPA == 'MPA Mean'",
                                                    column(3, radioButtons(inputId = "oneM_Bar_Text_MPA",
                                                                           label = "Show density value?",
                                                                           choices = c("Yes" = 1, "No" = 0), selected = 0,
                                                                           inline = TRUE)))),
-                         fluidRow(conditionalPanel("input.oneM_GraphMPA == 'Line' || input.oneM_GraphMPA == 'Bar'",
+                         fluidRow(conditionalPanel("input.oneM_Graph_MPA == 'Line' || input.oneM_Graph_MPA == 'Bar'",
                                                    tags$hr())),
-                         conditionalPanel("input.oneM_GraphMPA == 'Smooth Line'",
+                         conditionalPanel("input.oneM_Graph_MPA == 'Smooth Line'",
                                           sliderInput(inputId = "oneM_SmoothSlide_MPA",
                                                       label = "Span: Controls the amount of smoothing for the loess smoother. 
                                                       Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
@@ -161,10 +171,10 @@ server <- function(input, output, session) {
                                                                           choices = c("Yes" = 1, "No" = 0),
                                                                           inline = TRUE))),
                                           tags$hr()),
-                         conditionalPanel("input.oneM_GraphOptionsMPA == 'With ONI'",
+                         conditionalPanel("input.oneM_GraphOptions_MPA == 'With ONI'",
                                           ONI_tagList,
                                           tags$hr()),
-                         conditionalPanel("input.oneM_GraphOptionsMPA == 'With PDO (NOAA)'",
+                         conditionalPanel("input.oneM_GraphOptions_MPA == 'With PDO (NOAA)'",
                                           PDO_NOAA_tagList,
                                           tags$hr()),
                          MPA_tagList,
@@ -179,12 +189,12 @@ server <- function(input, output, session) {
                          sliderInput(inputId = "oneM_Y_Slide_Two",
                                      label = "Adjust the second y-axis by a multiple of:",
                                      min = 1, max = 50, step = 1, value = 1, width = "100%", ticks = T),
-                         conditionalPanel("input.oneM_GraphTwo == 'Line' || input.oneM_GraphTwo == 'Bar'",
+                         conditionalPanel("input.oneM_Graph_Two == 'Line' || input.oneM_Graph_Two == 'Bar'",
                                           radioButtons(inputId = "oneM_EB_Two",
                                                        label = "Show error bars?",
                                                        choices = c("Yes" = 1, "No" = 0),
                                                        inline = TRUE)),
-                         conditionalPanel("input.oneM_GraphTwo == 'Smooth Line'",
+                         conditionalPanel("input.oneM_Graph_Two == 'Smooth Line'",
                                           sliderInput(inputId = "oneM_SmoothSlide_Two",
                                                       label = "Span: Controls the amount of smoothing for the loess smoother. 
                                                       Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
@@ -198,25 +208,25 @@ server <- function(input, output, session) {
                                                                           choices = c("Yes" = 1, "No" = 0),
                                                                           inline = TRUE)))),
                          tags$hr(),
-                         conditionalPanel("input.oneM_GraphOptionsTwo == 'With ONI'",
+                         conditionalPanel("input.oneM_GraphOptions_Two == 'With ONI'",
                                           ONI_tagList,
                                           tags$hr()),
-                         conditionalPanel("input.oneM_GraphOptionsTwo == 'With PDO (NOAA)'",
+                         conditionalPanel("input.oneM_GraphOptions_Two == 'With PDO (NOAA)'",
                                           PDO_NOAA_tagList,
                                           tags$hr()),
-                         conditionalPanel("input.oneM_GraphOptionsTwo == 'With PDO (UW)'",
+                         conditionalPanel("input.oneM_GraphOptions_Two == 'With PDO (UW)'",
                                           PDO_UW_tagList,
                                           tags$hr()),
-                         fluidRow(column(6, tags$h1(tags$strong(input$oneM_SpeciesNameTwo_One)),
+                         fluidRow(column(6, tags$h1(tags$strong(input$oneM_SpeciesName_Two_One)),
                                          imageOutput(outputId = "oneM_LargeSpPhoto_Two_1",
                                                      height = 450)),
-                                  column(6, tags$h1(tags$strong(input$oneM_SpeciesNameTwo_Two)),
+                                  column(6, tags$h1(tags$strong(input$oneM_SpeciesName_Two_Two)),
                                          imageOutput(outputId = "oneM_LargeSpPhoto_Two_2",
                                                      height = 450))),
                          tags$hr(),
-                         fluidRow(column(6, tags$h1(tags$strong(input$oneM_SpeciesNameTwo_One)),
+                         fluidRow(column(6, tags$h1(tags$strong(input$oneM_SpeciesName_Two_One)),
                                          DTOutput(outputId = "oneM_DToutData_Two_1")),
-                                  column(6, tags$h1(tags$strong(input$oneM_SpeciesNameTwo_Two)),
+                                  column(6, tags$h1(tags$strong(input$oneM_SpeciesName_Two_Two)),
                                          DTOutput(outputId = "oneM_DToutData_Two_2"))),
                          tags$hr(),
                          imageOutput(outputId = "oneM_LargeSitePhoto_Two",
@@ -291,7 +301,7 @@ server <- function(input, output, session) {
             height = 200
           ))
         }
-        else if (input$oneM_allORone ==  'One Species by MPA' && input$oneM_SpeciesNameMPA == unique(oneM_Filter_MPA()$CommonName)) {
+        else if (input$oneM_allORone ==  'One Species by MPA' && input$oneM_SpeciesName_MPA == unique(oneM_Filter_MPA()$CommonName)) {
           return(list(
             src = glue("www/Indicator_Species/{unique(oneM_Filter_MPA()$Species)}.jpg"),
             contentType = "image/jpg",
@@ -300,7 +310,7 @@ server <- function(input, output, session) {
             height = 200
           ))
         }
-        else if (input$oneM_allORone ==  'Two Species by Site' && input$oneM_SpeciesNameTwo_One == unique(oneM_Filter_Two_One()$CommonName)) {
+        else if (input$oneM_allORone ==  'Two Species by Site' && input$oneM_SpeciesName_Two_One == unique(oneM_Filter_Two_One()$CommonName)) {
           return(list(
             src = glue("www/Indicator_Species/{unique(oneM_Filter_Two_One()$Species)}.jpg"),
             contentType = "image/jpg",
@@ -313,7 +323,7 @@ server <- function(input, output, session) {
       
       output$oneM_TopPhoto_Two <- renderImage({
         
-        if (input$oneM_allORone ==  'Two Species by Site' && input$oneM_SpeciesNameTwo_Two == unique(oneM_Filter_Two_Two()$CommonName)) {
+        if (input$oneM_allORone ==  'Two Species by Site' && input$oneM_SpeciesName_Two_Two == unique(oneM_Filter_Two_Two()$CommonName)) {
           return(list(
             src = glue("www/Indicator_Species/{unique(oneM_Filter_Two_Two()$Species)}.jpg"),
             contentType = "image/jpg",
@@ -817,15 +827,21 @@ server <- function(input, output, session) {
         }
       }, deleteFile = FALSE) # ONI/PDO scale photo
       
-      output$oneM_Plot_Isl1 <- renderPlot({  # Facet plots    ----
+      oneM_AxisScale_Isl <- reactive({
+        if(input$oneM_FreeOrLock_Isl == "Locked Scales"){
+          return("fixed")
+        }
+        if(input$oneM_FreeOrLock_Isl == "Free Scales"){
+          return("free")
+        }
+      }) # Facet Plot Axis Scale free or fixed 
+      
+      output$oneM_Plot_Isl1 <- renderPlot({ # Facet plots    ---- 
         
         if (is.null(input$oneM_Graph_Isl))
           return(NULL) 
         
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With No Index") {  # Line   ----
+        else if(input$oneM_Graph_Isl == "Line" && input$oneM_DataSummary_Isl == "Island Mean") { # Line   ----
           return({   
             ggplot() +
               geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
@@ -839,6 +855,8 @@ server <- function(input, output, session) {
                         aes(x = IslandDate, y = Island_Mean_Density, group = IslandName, color = IslandName),
                         size = 1) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365,
+                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
                            expand = c(0.01, 0)) +
               geom_errorbar(data = oneM_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
@@ -847,7 +865,7 @@ server <- function(input, output, session) {
                    color = "Common Name",
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "fixed") +
+              facet_grid(rows = vars(IslandName), scales = oneM_AxisScale_Isl()) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "none",
@@ -864,20 +882,27 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
           })
         } 
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With No Index") {
+        else if(input$oneM_Graph_Isl == "Line" && input$oneM_DataSummary_Isl == "Site Means (by Island)") {
           return({
             out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                          position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_Isl()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
                 geom_line(data = m, 
                           aes(Date, MeanDensity_sqm, group = SiteName, colour = SiteName, linetype = SiteName),
                           size = 1) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
+                             limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365),
                              expand = c(0.01, 0)) +
-                scale_y_continuous(limits = c(0, max(oneM_Filter_Isl()$MaxSum)), expand = c(0.01, 0)) +
+                scale_y_continuous(limits = c(0, ifelse(input$oneM_FreeOrLock_Isl == "Locked Scales", 
+                                                        max(oneM_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm))),
+                                   expand = c(0.01, 0)) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
@@ -910,470 +935,23 @@ server <- function(input, output, session) {
                                           label_size = 20, label_fontface = "bold.italic"
             ))
           })
-        }
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {  
-          return({   
-            ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = oneM_FilterByIsl_Isl(), 
-                        aes(x = IslandDate, y = Island_Mean_Density, group = IslandName, color = IslandName),
-                        size = 1, show.legend = FALSE) +
-              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              geom_errorbar(data = oneM_FilterByIsl_Isl(), 
-                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-                            width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   color = "Common Name",
-                   fill = "Oceanic Nino\nIndex Gradient",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "fixed") +
-              scale_color_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                          position = "identity", alpha = 1, show.legend = FALSE) +
-                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-                geom_line(data = m, 
-                          aes(Date, MeanDensity_sqm, group = SiteName, colour = SiteName, linetype = SiteName),
-                          size = 1) +
-                scale_y_continuous(limits = c(0, max(oneM_Filter_Isl()$MaxSum)), expand = c(0.01, 0)) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
-                             limits = c(min(as.Date(oneM_Filter_Isl()$IslandDate))-365, 
-                                        max(as.Date(oneM_Filter_Isl()$IslandDate))+365),
-                             expand = c(0.01, 0)) +
-                geom_errorbar(data = m, 
-                              aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
-                              width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-                labs(title = m$IslandName,
-                     color = "Site Name",
-                     linetype ="Site Name",
-                     fill = "Oceanic Nino\nIndex Gradient",
-                     caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
-                     x = "Year",
-                     y = "Mean Density") +
-                scale_color_manual(values = SiteColor, breaks = as.character(m$SiteName)) +
-                scale_linetype_manual(values = SiteLine, breaks = as.character(m$SiteName)) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.key.width = unit(1, "cm"),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 12, colour = "black"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-              
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {  
-          return({  
-            ggplot() +
-              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
-                                             ymin = 0, ymax = Inf, fill = pdoAnom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = oneM_FilterByIsl_Isl(), 
-                        aes(x = IslandDate, y = Island_Mean_Density, group = IslandName, color = IslandName),
-                        size = 1, show.legend = FALSE) +
-              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              geom_errorbar(data = oneM_FilterByIsl_Isl(), 
-                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-                            width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"),
-                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   color = "Common Name",
-                   fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "fixed") +
-              scale_color_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
         } 
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
+        else if(input$oneM_Graph_Isl == "Bar" && input$oneM_DataSummary_Isl == "Island Mean") { # Bar   ----
           return({
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() + 
-                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
-                                               ymin = 0, ymax = Inf, fill = pdoAnom),
-                          position = "identity", alpha = 1, show.legend = FALSE) +
-                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-                geom_line(data = m, 
-                          aes(Date, MeanDensity_sqm, group = SiteName, colour = SiteName, linetype = SiteName),
-                          size = 1) +
-                scale_y_continuous(limits = c(0, max(oneM_Filter_Isl()$MaxSum)), expand = c(0.01, 0)) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
-                             limits = c(min(as.Date(oneM_Filter_Isl()$IslandDate))-365, 
-                                        max(as.Date(oneM_Filter_Isl()$IslandDate))+365),
-                             expand = c(0.01, 0)) +
-                geom_errorbar(data = m, 
-                              aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
-                              width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-                labs(title = m$IslandName,
-                     color = "Site Name",
-                     linetype ="Site Name",
-                     fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)",
-                     caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
-                     x = "Year",
-                     y = "Mean Density") +
-                scale_color_manual(values = SiteColor, breaks = as.character(m$SiteName)) +
-                scale_linetype_manual(values = SiteLine, breaks = as.character(m$SiteName)) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.key.width = unit(1, "cm"),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 12, colour = "black"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-              
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With No Index") { 
-          return({  
             ggplot() +
-              geom_line(data = oneM_FilterByIsl_Isl(), 
-                        aes(x = IslandDate, y = Island_Mean_Density, group = IslandName, color = IslandName),
-                        size = 1) +
-              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
-                           expand = c(0.01, 0)) +
-              geom_errorbar(data = oneM_FilterByIsl_Isl(), 
-                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-                            width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "free") +
-              scale_color_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "none",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
-          })
-        } 
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With No Index") {
-          return({
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() + 
-                geom_line(data = m, 
-                          aes(Date, MeanDensity_sqm, group = SiteName, colour = SiteName, linetype = SiteName),
-                          size = 1) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
-                             expand = c(0.01, 0)) +
-                geom_errorbar(data = m, 
-                              aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
-                              width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-                labs(title = m$IslandName,
-                     color = "Site Name",
-                     linetype ="Site Name",
-                     caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
-                     x = "Year",
-                     y = "Mean Density") +
-                scale_color_manual(values = SiteColor, breaks = as.character(m$SiteName)) +
-                scale_linetype_manual(values = SiteLine, breaks = as.character(m$SiteName)) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.key.width = unit(1, "cm"),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 12, colour = "black"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-              
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With ONI") { 
-          return({ 
-            ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                        position = "identity", alpha = 1) +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_Isl()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = oneM_FilterByIsl_Isl(), 
-                        aes(x = IslandDate, y = Island_Mean_Density, group = IslandName, color = IslandName),
-                        size = 1, show.legend = FALSE) +
-              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              geom_errorbar(data = oneM_FilterByIsl_Isl(), 
-                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-                            width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   color = "Common Name",
-                   fill = "Oceanic Nino\nIndex Gradient",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "free") +
-              scale_color_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
-          })
-        } 
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                          position = "identity", alpha = 1, show.legend = FALSE) +
-                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-                geom_line(data = m, 
-                          aes(Date, MeanDensity_sqm, group = SiteName, colour = SiteName, linetype = SiteName),
-                          size = 1) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
-                             limits = c(min(as.Date(oneM_Filter_Isl()$IslandDate))-365, 
-                                        max(as.Date(oneM_Filter_Isl()$IslandDate))+365),
-                             expand = c(0.01, 0)) +
-                geom_errorbar(data = m, 
-                              aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
-                              width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-                labs(title = m$IslandName,
-                     color = "Site Name",
-                     linetype ="Site Name",
-                     caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
-                     x = "Year",
-                     y = "Mean Density") +
-                scale_color_manual(values = SiteColor, breaks = as.character(m$SiteName)) +
-                scale_linetype_manual(values = SiteLine, breaks = as.character(m$SiteName)) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.key.width = unit(1, "cm"),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 12, colour = "black"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-              
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
-          return({
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() + 
-                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
-                                               ymin = 0, ymax = Inf, fill = pdoAnom),
-                          position = "identity", alpha = 1, show.legend = FALSE) +
-                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-                geom_line(data = m, 
-                          aes(Date, MeanDensity_sqm, group = SiteName, colour = SiteName, linetype = SiteName),
-                          size = 1) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
-                             limits = c(min(as.Date(oneM_Filter_Isl()$IslandDate))-365, 
-                                        max(as.Date(oneM_Filter_Isl()$IslandDate))+365),
-                             expand = c(0.01, 0)) +
-                geom_errorbar(data = m, 
-                              aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
-                              width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-                labs(title = m$IslandName,
-                     color = "Site Name",
-                     linetype ="Site Name",
-                     fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)",
-                     caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
-                     x = "Year",
-                     y = "Mean Density") +
-                scale_color_manual(values = SiteColor, breaks = as.character(m$SiteName)) +
-                scale_linetype_manual(values = SiteLine, breaks = as.character(m$SiteName)) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.key.width = unit(1, "cm"),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 12, colour = "black"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-              
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
-          return({ 
-            ggplot() +
-              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
-                                             ymin = 0, ymax = Inf, fill = pdoAnom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = oneM_FilterByIsl_Isl(), 
-                        aes(x = IslandDate, y = Island_Mean_Density, group = IslandName, color = IslandName),
-                        size = 1, show.legend = FALSE) +
-              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              geom_errorbar(data = oneM_FilterByIsl_Isl(), 
-                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-                            width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"),
-                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   color = "Common Name",
-                   fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "free") +
-              scale_color_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        } 
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With No Index") { # Bar   ----
-          return({
-            ggplot() +
+              new_scale_fill() +
               geom_col(data = oneM_FilterByIsl_Isl(), 
                        aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
                        position = "dodge",
                        width = 280) +
-              facet_grid(rows = vars(IslandName), scales = "fixed") +
+              facet_grid(rows = vars(IslandName), scales = oneM_AxisScale_Isl()) +
               geom_text(data = oneM_FilterByIsl_Isl(),
                         aes(x = IslandDate, y = Island_Mean_Density, label = round(Island_Mean_Density, digits = 2)),
                         position = position_dodge(1), vjust = -.2, hjust = .5, angle = 0, alpha = as.numeric(input$oneM_Bar_Text_Isl)) +
@@ -1407,23 +985,25 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With No Index") {
+        else if(input$oneM_Graph_Isl == "Bar" && input$oneM_DataSummary_Isl == "Site Means (by Island)") {
           return({
             out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_col(data = m, 
-                         aes(x = Date, y = MeanDensity_sqm, fill = SiteName),
-                         position = input$oneM_BarOptions_Isl,
-                         width = 280) +
-                coord_cartesian(ylim = c(0, oneM_yValue_Isl())) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
-                             limits = c(min(as.Date(m$Date))-365, 
-                                        max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                          position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_Isl()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+                new_scale_fill() +
+                geom_col(data = m, aes(x = Date, y = MeanDensity_sqm, fill = SiteName),
+                         position = input$oneM_BarOptions_Isl, width = 280) +
+                coord_cartesian(ylim = c(0, ifelse(input$oneM_FreeOrLock_Isl == "Locked Scales", 
+                                                   oneM_yValue_Isl(), max(m$MaxSumBar)))) +
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = c(0.01, 0),
+                             limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365)) +
                 labs(title = m$IslandName,
                      color = "Site Name",
                      fill = "Site Name",
@@ -1451,536 +1031,31 @@ server <- function(input, output, session) {
                                           label_size = 20, label_fontface = "bold.italic"
             ))
           })
-        }  
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({
-            ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              labs(fill = "Oceanic Nino\nIndex Gradient") +
-              new_scale_fill() +
-              geom_col(data = oneM_FilterByIsl_Isl(), 
-                       aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
-                       position = "dodge",
-                       width = 280, show.legend = FALSE) +
-              geom_text(data = oneM_FilterByIsl_Isl(),
-                        aes(x = IslandDate, y = Island_Mean_Density, label = round(Island_Mean_Density, digits = 2)),
-                        position = position_dodge(1), vjust = -.2, hjust = .5, angle = 0, alpha = as.numeric(input$oneM_Bar_Text_Isl)) +
-              geom_errorbar(data = oneM_FilterByIsl_Isl(), 
-                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-                            width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
-              scale_x_date(date_labels = "%Y", date_breaks = "1 year", 
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"),
-                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   color = "Common Name",
-                   fill = "Oceanic Nino\nIndex Gradient",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "fixed") +
-              scale_fill_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                          position = "identity", alpha = 1, show.legend = FALSE) +
-                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-                labs(fill = "Oceanic Nino\nIndex Gradient") +
-                new_scale_fill() +
-                geom_col(data = m,  aes(x = Date, y = MeanDensity_sqm, fill = SiteName),
-                         position = input$oneM_BarOptions_Isl,
-                         width = 280) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
-                             limits = c(min(as.Date(m$Date))-365, 
-                                        max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
-                labs(title = m$IslandName,
-                     color = "Site Name",
-                     fill = "Site Name",
-                     x = "Year",
-                     y = oneM_yLabel_Isl()) +
-                scale_fill_manual(values = SiteColor) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.key.width = unit(1, "cm"),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 12, colour = "black"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
         } 
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
-          return({
-            ggplot() +
-              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
-                                             ymin = 0, ymax = Inf, fill = pdoAnom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              labs(fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)") +
-              new_scale_fill() +
-              geom_col(data = oneM_FilterByIsl_Isl(), 
-                       aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
-                       position = "dodge",
-                       width = 280, show.legend = FALSE) +
-              geom_text(data = oneM_FilterByIsl_Isl(),
-                        aes(x = IslandDate, y = Island_Mean_Density, label = round(Island_Mean_Density, digits = 2)),
-                        position = position_dodge(1), vjust = -.2, hjust = .5, angle = 0, alpha = as.numeric(input$oneM_Bar_Text_Isl)) +
-              geom_errorbar(data = oneM_FilterByIsl_Isl(), 
-                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-                            width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
-              scale_x_date(date_labels = "%Y", date_breaks = "1 year", 
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"),
-                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   color = "Common Name",
-                   fill = "Pacific Decadal Oscillation\nIndex Gradient",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "fixed") +
-              scale_fill_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
-          return({
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() +
-                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
-                                               ymin = 0, ymax = Inf, fill = pdoAnom),
-                          position = "identity", alpha = 1, show.legend = FALSE) +
-                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0,
-                                     guide = guide_colorbar(order = 1)) +
-                labs(fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)") +
-                new_scale_fill() +
-                geom_col(data = m, 
-                         aes(x = Date, y = MeanDensity_sqm, fill = SiteName),
-                         position = input$oneM_BarOptions_Isl,
-                         width = 280) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
-                             limits = c(min(as.Date(m$Date))-365, 
-                                        max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
-                labs(title = m$IslandName,
-                     color = "Site Name",
-                     fill = "Site Name",
-                     x = "Year",
-                     y = oneM_yLabel_Isl()) +
-                scale_fill_manual(values = SiteColor) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.key.width = unit(1, "cm"),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 12, colour = "black"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With No Index") {
-          return({
-            ggplot() +
-              geom_col(data = oneM_FilterByIsl_Isl(), 
-                       aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
-                       position = "dodge",
-                       width = 280) +
-              geom_text(data = oneM_FilterByIsl_Isl(),
-                        aes(x = IslandDate, y = Island_Mean_Density, label = round(Island_Mean_Density, digits = 2)),
-                        position = position_dodge(1), vjust = -.2, hjust = .5, angle = 0, alpha = as.numeric(input$oneM_Bar_Text_Isl)) +
-              geom_errorbar(data = oneM_FilterByIsl_Isl(), 
-                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-                            width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
-              scale_x_date(date_labels = "%Y", date_breaks = "1 year", 
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"),
-                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "free") +
-              scale_fill_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "none",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With No Index") {
-          return({
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() +
-                geom_col(data = m, 
-                         aes(x = Date, y = MeanDensity_sqm, fill = SiteName),
-                         position = input$oneM_BarOptions_Isl,
-                         width = 280) +
-                scale_y_continuous(expand = c(0.1, 0)) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
-                             limits = c(min(as.Date(m$Date))-365, 
-                                        max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
-                labs(title = m$IslandName,
-                     color = "Site Name",
-                     fill = "Site Name",
-                     x = "Year",
-                     y = oneM_yLabel_Isl()) +
-                scale_fill_manual(values = SiteColor) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.key.width = unit(1, "cm"),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 12, colour = "black"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
-        } 
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({
-            ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              labs(fill = "Oceanic Nino\nIndex Gradient") +
-              new_scale_fill() +
-              geom_col(data = oneM_FilterByIsl_Isl(), 
-                       aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
-                       position = "dodge",
-                       width = 280, show.legend = FALSE) +
-              geom_text(data = oneM_FilterByIsl_Isl(),
-                        aes(x = IslandDate, y = Island_Mean_Density, label = round(Island_Mean_Density, digits = 2)),
-                        position = position_dodge(1), vjust = -.2, hjust = .5, angle = 0, alpha = as.numeric(input$oneM_Bar_Text_Isl)) +
-              geom_errorbar(data = oneM_FilterByIsl_Isl(), 
-                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-                            width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
-              scale_x_date(date_labels = "%Y", date_breaks = "1 year", 
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"),
-                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   color = "Common Name",
-                   fill = "Oceanic Nino\nIndex Gradient",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "free") +
-              scale_fill_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                          position = "identity", alpha = 1, show.legend = FALSE) +
-                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0,
-                                     guide = guide_colorbar(order = 1)) +
-                labs(fill = "Oceanic Nino\nIndex Gradient") +
-                new_scale_fill() +
-                geom_col(data = m, 
-                         aes(x = Date, y = MeanDensity_sqm, fill = SiteName),
-                         position = input$oneM_BarOptions_Isl,
-                         width = 280) +
-                scale_y_continuous(expand = c(0.1, 0)) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
-                             limits = c(min(as.Date(m$Date))-365, 
-                                        max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
-                labs(title = m$IslandName,
-                     color = "Site Name",
-                     fill = "Site Name",
-                     x = "Year",
-                     y = oneM_yLabel_Isl()) +
-                scale_fill_manual(values = SiteColor) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.key.width = unit(1, "cm"),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 12, colour = "black"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
-        } 
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
-          return({
-            ggplot() +
-              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
-                                             ymin = 0, ymax = Inf, fill = pdoAnom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              labs(fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)") +
-              new_scale_fill() +
-              geom_col(data = oneM_FilterByIsl_Isl(), 
-                       aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
-                       position = "dodge",
-                       width = 280, show.legend = FALSE) +
-              geom_text(data = oneM_FilterByIsl_Isl(),
-                        aes(x = IslandDate, y = Island_Mean_Density, label = round(Island_Mean_Density, digits = 2)),
-                        position = position_dodge(1), vjust = -.2, hjust = .5, angle = 0, alpha = as.numeric(input$oneM_Bar_Text_Isl)) +
-              geom_errorbar(data = oneM_FilterByIsl_Isl(), 
-                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-                            width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
-              scale_x_date(date_labels = "%Y", date_breaks = "1 year", 
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"),
-                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   color = "Common Name",
-                   fill = "Pacific Decadal Oscillation\nIndex Gradient",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "free") +
-              scale_fill_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
-          return({
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() +
-                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
-                                               ymin = 0, ymax = Inf, fill = pdoAnom),
-                          position = "identity", alpha = 1, show.legend = FALSE) +
-                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0,
-                                     guide = guide_colorbar(order = 1)) +
-                labs(fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)") +
-                new_scale_fill() +
-                geom_col(data = m, 
-                         aes(x = Date, y = MeanDensity_sqm, fill = SiteName),
-                         position = input$oneM_BarOptions_Isl,
-                         width = 280) +
-                scale_y_continuous(expand = c(0.1, 0)) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
-                             limits = c(min(as.Date(m$Date))-365, 
-                                        max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
-                labs(title = m$IslandName,
-                     color = "Site Name",
-                     fill = "Site Name",
-                     x = "Year",
-                     y = oneM_yLabel_Isl()) +
-                scale_fill_manual(values = SiteColor) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.key.width = unit(1, "cm"),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 12, colour = "black"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
-        } 
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With No Index") { # Smooth   -----
+        else if(input$oneM_Graph_Isl == "Smooth Line" && input$oneM_DataSummary_Isl == "Island Mean") { # Smooth   -----
           return({   
             ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
               geom_smooth(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
                           se = as.logical(input$oneM_SmoothSE_Isl),
                           span = input$oneM_SmoothSlide_Isl) +
               geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
                          size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Isl),inherit.aes = FALSE) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   color = "Common Name",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "fixed") +
-              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
-              theme_classic() +
-              theme(legend.position = "none",
-                    legend.background = element_rect(),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({   
-            ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
-                         size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Isl), inherit.aes = FALSE) +
-              geom_smooth(data = oneM_FilterByIsl_Isl(), aes(x= IslandDate, y = Island_Mean_Density, color = IslandName),
-                          se = as.logical(input$oneM_SmoothSE_Isl),
-                          span = input$oneM_SmoothSlide_Isl) +
-              scale_x_date(date_labels = "%Y", breaks = oneM_FilterByIsl_Isl()$IslandDate,
                            limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
+                                                                                 max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
                            expand = c(0.01, 0)) +
               labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
-                   fill = "Oceanic Nino\nIndex Gradient",
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "fixed") +
+              facet_grid(rows = vars(IslandName), scales = oneM_AxisScale_Isl()) +
               scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
               theme_classic() +
               theme(legend.position = "none",
@@ -1996,397 +1071,32 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_Graph_Isl == "Smooth Line" && 
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
-          return({   
-            ggplot() +
-              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom),
-                        position = "identity", alpha = 1, show.legend = FALSE) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
-                         size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Isl), inherit.aes = FALSE) +
-              geom_smooth(data = oneM_FilterByIsl_Isl(), aes(x= IslandDate, y = Island_Mean_Density, color = IslandName),
-                          se = as.logical(input$oneM_SmoothSE_Isl),
-                          span = input$oneM_SmoothSlide_Isl) +
-              scale_x_date(date_labels = "%Y", breaks = oneM_FilterByIsl_Isl()$IslandDate,
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   color = "Common Name",
-                   fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "fixed") +
-              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
-              theme_classic() +
-              theme(legend.position = "none",
-                    legend.background = element_rect(),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With No Index") { 
-          return({   
-            ggplot() +
-              geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
-                         size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Isl), inherit.aes = FALSE) +
-              geom_smooth(data = oneM_FilterByIsl_Isl(), aes(x= IslandDate, y = Island_Mean_Density, color = IslandName),
-                          se = as.logical(input$oneM_SmoothSE_Isl),
-                          span = input$oneM_SmoothSlide_Isl) +
-              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   color = "Common Name",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "free") +
-              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
-              theme_classic() +
-              theme(legend.position = "none",
-                    legend.background = element_rect(),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({   
-            ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
-                         size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Isl), inherit.aes = FALSE) +
-              geom_smooth(data = oneM_FilterByIsl_Isl(), aes(x= IslandDate, y = Island_Mean_Density, color = IslandName),
-                          se = as.logical(input$oneM_SmoothSE_Isl),
-                          span = input$oneM_SmoothSlide_Isl) +
-              scale_x_date(date_labels = "%Y", breaks = oneM_FilterByIsl_Isl()$IslandDate,
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   color = "Common Name",
-                   fill = "Oceanic Nino\nIndex Gradient",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "free") +
-              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
-              theme_classic() +
-              theme(legend.position = "none",
-                    legend.background = element_rect(),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
-          return({   
-            ggplot() +
-              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom),
-                        position = "identity", alpha = 1, show.legend = FALSE) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
-                         size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Isl), inherit.aes = FALSE) +
-              geom_smooth(data = oneM_FilterByIsl_Isl(), aes(x= IslandDate, y = Island_Mean_Density, color = IslandName),
-                          se = as.logical(input$oneM_SmoothSE_Isl),
-                          span = input$oneM_SmoothSlide_Isl) +
-              scale_x_date(date_labels = "%Y", breaks = oneM_FilterByIsl_Isl()$IslandDate,
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   color = "Common Name",
-                   fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              facet_grid(rows = vars(IslandName), scales = "free") +
-              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
-              theme_classic() +
-              theme(legend.position = "none",
-                    legend.background = element_rect(),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With No Index") { 
+        else if(input$oneM_Graph_Isl == "Smooth Line" && input$oneM_DataSummary_Isl == "Site Means (by Island)") { 
           return({
             out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                          position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_Isl()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+                geom_point(data = m, aes(x = Date, y = MeanDensity_sqm, color = SiteName),
                            size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Isl), inherit.aes = FALSE) +
-                geom_smooth(data = m, aes(x= Date, y = MeanDensity_sqm, color = SiteName),
+                geom_smooth(data = m, aes(x = Date, y = MeanDensity_sqm, color = SiteName),
                             se = as.logical(input$oneM_SmoothSE_Isl),
                             span = input$oneM_SmoothSlide_Isl) +
                 scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                             limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
+                                        max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
                              expand = c(0.01, 0)) +
+                scale_y_continuous(limits = c(0, ifelse(input$oneM_FreeOrLock_Isl == "Locked Scales", 
+                                                        max(oneM_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm))),
+                                   expand = c(0.01, 0)) +
                 labs(title = glue("{unique(m$IslandName)}"), 
                      color = "Site Name",
-                     x = "Year",
-                     y = expression("Mean Density (#/m"^"2"~")")) +
-                scale_color_manual(values = SiteColor) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({   
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                          position = "identity", alpha = 1, show.legend = FALSE) +
-                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-                geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
-                           size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Isl), inherit.aes = FALSE) +
-                geom_smooth(data = m, aes(x= Date, y = MeanDensity_sqm, color = SiteName),
-                            se = as.logical(input$oneM_SmoothSE_Isl),
-                            span = input$oneM_SmoothSlide_Isl) +
-                scale_x_date(date_labels = "%Y", breaks = m$Date,
-                             limits = c(min(as.Date(m$Date))-365, 
-                                        max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
-                labs(title = glue("{unique(m$IslandName)}"), 
-                     color = "Site Name",
-                     fill = "Oceanic Nino\nIndex Gradient",
-                     x = "Year",
-                     y = expression("Mean Density (#/m"^"2"~")")) +
-                scale_color_manual(values = SiteColor) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Locked Scales" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
-          return({   
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() +
-                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom),
-                          position = "identity", alpha = 1, show.legend = FALSE) +
-                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-                geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
-                           size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Isl), inherit.aes = FALSE) +
-                geom_smooth(data = m, aes(x= Date, y = MeanDensity_sqm, color = SiteName),
-                            se = as.logical(input$oneM_SmoothSE_Isl),
-                            span = input$oneM_SmoothSlide_Isl) +
-                scale_x_date(date_labels = "%Y", breaks = m$Date,
-                             limits = c(min(as.Date(m$Date))-365, 
-                                        max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
-                labs(title = glue("{unique(m$IslandName)}"), 
-                     color = "Site Name",
-                     fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)",
-                     x = "Year",
-                     y = expression("Mean Density (#/m"^"2"~")")) +
-                scale_color_manual(values = SiteColor) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With No Index") { 
-          return({   
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() +
-                geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
-                           size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Isl), inherit.aes = FALSE) +
-                geom_smooth(data = m, aes(x= Date, y = MeanDensity_sqm, color = SiteName),
-                            se = as.logical(input$oneM_SmoothSE_Isl),
-                            span = input$oneM_SmoothSlide_Isl) +
-                scale_x_date(date_labels = "%Y", date_breaks = '1 year',
-                             expand = c(0.01, 0)) +
-                labs(title = glue("{unique(m$IslandName)}"), 
-                     color = "Site Name",
-                     x = "Year",
-                     y = expression("Mean Density (#/m"^"2"~")")) +
-                scale_color_manual(values = SiteColor) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({   
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                          position = "identity", alpha = 1, show.legend = FALSE) +
-                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-                geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
-                           size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Isl), inherit.aes = FALSE) +
-                geom_smooth(data = m, aes(x= Date, y = MeanDensity_sqm, color = SiteName),
-                            se = as.logical(input$oneM_SmoothSE_Isl),
-                            span = input$oneM_SmoothSlide_Isl) +
-                scale_x_date(date_labels = "%Y", breaks = m$Date,
-                             limits = c(min(as.Date(m$Date))-365, 
-                                        max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
-                labs(title = glue("{unique(m$IslandName)}"), 
-                     color = "Site Name",
-                     fill = "Oceanic Nino\nIndex Gradient",
-                     x = "Year",
-                     y = expression("Mean Density (#/m"^"2"~")")) +
-                scale_color_manual(values = SiteColor) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
-            ))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_FreeOrLock_Isl == "Free Scales" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
-          return({   
-            out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() +
-                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom),
-                          position = "identity", alpha = 1, show.legend = FALSE) +
-                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-                geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName),
-                           size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Isl), inherit.aes = FALSE) +
-                geom_smooth(data = m, aes(x= Date, y = MeanDensity_sqm, color = SiteName),
-                            se = as.logical(input$oneM_SmoothSE_Isl),
-                            span = input$oneM_SmoothSlide_Isl) +
-                scale_x_date(date_labels = "%Y", breaks = m$Date,
-                             limits = c(min(as.Date(m$Date))-365, 
-                                        max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
-                labs(title = glue("{unique(m$IslandName)}"), 
-                     color = "Site Name",
-                     fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)",
                      x = "Year",
                      y = expression("Mean Density (#/m"^"2"~")")) +
                 scale_color_manual(values = SiteColor) +
@@ -2418,20 +1128,26 @@ server <- function(input, output, session) {
         if (is.null(input$oneM_Graph_Isl))
           return(NULL) 
         
-        else if(input$oneM_Graph_Isl == "Line" && 
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_GraphOptions_Isl == "With No Index") { # Line   ----
+        else if(input$oneM_Graph_Isl == "Line" && input$oneM_DataSummary_Isl == "Island Mean") { # Line   ----
           return({   
             ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
               geom_line(data = oneM_FilterByIsl_Isl(), 
                         aes(x = IslandDate, y = Island_Mean_Density, group = IslandName, color = IslandName),
                         size = 1) +
               scale_x_date(date_labels = "%Y", breaks = oneM_FilterByIsl_Isl()$IslandDate, 
+                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365,
+                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
                            expand = c(0.01, 0)) +
               geom_errorbar(data = oneM_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-                            width = 0.25,
-                            color = "black") +
+                            width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
               labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -2452,22 +1168,27 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
           })
         } 
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_GraphOptions_Isl == "With No Index") {
+        else if(input$oneM_Graph_Isl == "Line" && input$oneM_DataSummary_Isl == "Site Means (by Island)") {
           return({
             ggplot() + 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
               geom_line(data = oneM_Filter_Isl(), 
                         aes(Date, MeanDensity_sqm, group = SiteName, colour = SiteName, linetype = SiteName),
                         size = 1) +
               scale_x_date(date_labels = "%Y", date_breaks = "1 year",
+                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365,
+                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
                            expand = c(0.01, 0)) +
               scale_y_continuous(limits = c(0, max(oneM_Filter_Isl()$MaxSum)), expand = c(0.01, 0)) +
               geom_errorbar(data = oneM_Filter_Isl(), 
-                            aes(x = Date, ymin = MeanDensity_sqm - StandardError,
-                                ymax = MeanDensity_sqm + StandardError),
-                            width = 0.25,
-                            color = "black") +
+                            aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
+                            width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
               labs(title = oneM_Filter_Isl()$IslandName,
                    color = "Site Name",
                    linetype ="Site Name",
@@ -2504,208 +1225,17 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({   
-            ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = oneM_FilterByIsl_Isl(), 
-                        aes(x = IslandDate, y = Island_Mean_Density, group = IslandName, color = IslandName),
-                        size = 1) +
-              scale_x_date(date_labels = "%Y", breaks = oneM_FilterByIsl_Isl()$IslandDate,
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              geom_errorbar(data = oneM_FilterByIsl_Isl(), 
-                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-                            width = 0.25,
-                            color = "black") +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   color = "Common Name",
-                   fill = "Oceanic Nino\nIndex Gradient",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              scale_color_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
-          })
-        } 
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({
-            ggplot() + 
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = oneM_Filter_Isl(), 
-                        aes(Date, MeanDensity_sqm, group = SiteName, colour = SiteName, linetype = SiteName),
-                        size = 1) +
-              scale_y_continuous(limits = c(0, max(oneM_Filter_Isl()$MaxSum)), expand = c(0.01, 0)) +
-              scale_x_date(date_labels = "%Y", date_breaks = "1 year",
-                           limits = c(min(as.Date(oneM_Filter_Isl()$Date))-365, 
-                                      max(as.Date(oneM_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
-              geom_errorbar(data = oneM_Filter_Isl(), 
-                            aes(x = Date, ymin = MeanDensity_sqm - StandardError,
-                                ymax = MeanDensity_sqm + StandardError),
-                            width = 0.25,
-                            color = "black") +
-              labs(title = oneM_Filter_Isl()$IslandName,
-                   color = "Site Name",
-                   linetype ="Site Name",
-                   fill = "Oceanic Nino\nIndex Gradient",
-                   caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
-                   x = "Year",
-                   y = "Mean Density") +
-              geom_vline(size = 1, xintercept = as.Date("2005-07-01", format = "%Y-%m-%d")) +
-              geom_text(x = as.Date("2005-07-01", format = "%Y-%m-%d"), 
-                        y= Inf, aes(label = "16 New Sites Added"),
-                        hjust = 0,
-                        vjust = 1,
-                        inherit.aes = FALSE) +
-              geom_vline(size = 1, xintercept = as.Date("2001-06-01", format = "%Y-%m-%d")) +
-              geom_text(x = as.Date("2001-06-01", format = "%Y-%m-%d"), 
-                        y= Inf, aes(label = "Miracle Mile Added"),
-                        hjust = 1,
-                        vjust = 1,
-                        inherit.aes = FALSE) +
-              scale_color_manual(values = SiteColor2, guide = guide_legend(ncol = 8)) +
-              scale_linetype_manual(values = SiteLine, guide = guide_legend(ncol = 8)) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.justification = c(0,0.5),
-                    legend.background = element_rect(),
-                    legend.key.width = unit(1, "cm"),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 12, colour = "black"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-            
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") { 
-          return({  
-            ggplot() +
-              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = oneM_FilterByIsl_Isl(), 
-                        aes(x = IslandDate, y = Island_Mean_Density, group = IslandName, color = IslandName),
-                        size = 1, show.legend = FALSE) +
-              scale_x_date(date_labels = "%Y", breaks = oneM_FilterByIsl_Isl()$IslandDate,
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              geom_errorbar(data = oneM_FilterByIsl_Isl(), 
-                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-                            width = 0.25,
-                            color = "black") +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"),
-                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   color = "Common Name",
-                   fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              scale_color_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        } 
-        else if(input$oneM_Graph_Isl == "Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
-          return({
-            ggplot() + 
-              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
-                                             ymin = 0, ymax = Inf, fill = pdoAnom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = oneM_Filter_Isl(), 
-                        aes(Date, MeanDensity_sqm, group = SiteName, colour = SiteName, linetype = SiteName),
-                        size = 1) +
-              scale_y_continuous(limits = c(0, max(oneM_Filter_Isl()$MaxSum)), expand = c(0.01, 0)) +
-              scale_x_date(date_labels = "%Y", date_breaks = "1 year",
-                           limits = c(min(as.Date(oneM_Filter_Isl()$Date))-365, 
-                                      max(as.Date(oneM_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
-              geom_errorbar(data = oneM_Filter_Isl(), 
-                            aes(x = Date, ymin = MeanDensity_sqm - StandardError,
-                                ymax = MeanDensity_sqm + StandardError),
-                            width = 0.25,
-                            color = "black") +
-              labs(title = oneM_Filter_Isl()$IslandName,
-                   color = "Site Name",
-                   linetype ="Site Name",
-                   fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)",
-                   caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
-                   x = "Year",
-                   y = "Mean Density") +
-              geom_vline(size = 1, xintercept = as.Date("2005-07-01", format = "%Y-%m-%d")) +
-              geom_text(x = as.Date("2005-07-01", format = "%Y-%m-%d"), 
-                        y= Inf, aes(label = "16 New Sites Added"),
-                        hjust = 0,
-                        vjust = 1,
-                        inherit.aes = FALSE) +
-              geom_vline(size = 1, xintercept = as.Date("2001-06-01", format = "%Y-%m-%d")) +
-              geom_text(x = as.Date("2001-06-01", format = "%Y-%m-%d"), 
-                        y= Inf, aes(label = "Miracle Mile Added"),
-                        hjust = 1,
-                        vjust = 1,
-                        inherit.aes = FALSE) +
-              scale_color_manual(values = SiteColor2, guide = guide_legend(ncol = 8)) +
-              scale_linetype_manual(values = SiteLine, guide = guide_legend(ncol = 8)) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.justification = c(0,0.5),
-                    legend.background = element_rect(),
-                    legend.key.width = unit(1, "cm"),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 12, colour = "black"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-            
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Bar" && 
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_GraphOptions_Isl == "With No Index") { # Bar -----
+        else if(input$oneM_Graph_Isl == "Bar" && input$oneM_DataSummary_Isl == "Island Mean") { # Bar -----
           return({
             ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
               geom_col(data = oneM_FilterByIsl_Isl(), 
                        aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
                        position = input$oneM_BarOptions_Isl,
@@ -2737,9 +1267,7 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_GraphOptions_Isl == "With No Index") {
+        else if(input$oneM_Graph_Isl == "Bar" && input$oneM_DataSummary_Isl == "Site Means (by Island)") {
           return({
             ggplot() +
               geom_col(data = oneM_Filter_Isl() %>% group_by(SurveyYear) %>% mutate(Date = mean(Date)), 
@@ -2784,240 +1312,26 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
           })
         } 
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({
-            ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              labs(fill = "Oceanic Nino\nIndex Gradient") +
-              new_scale_fill() +
-              geom_col(data = oneM_FilterByIsl_Isl(), 
-                       aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
-                       position = input$oneM_BarOptions_Isl,
-                       width = 280) +
-              scale_y_continuous(expand = c(0.1, 0)) +
-              scale_x_date(date_labels = "%Y", date_breaks = "1 year", 
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"),
-                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   fill = "Island Name",
-                   x = "Year",
-                   y = oneM_yLabel_Isl()) +
-              scale_fill_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({
-            ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              labs(fill = "Oceanic Nino\nIndex Gradient") +
-              new_scale_fill() +
-              geom_col(data = oneM_Filter_Isl(), 
-                       aes(x = Date, y = MeanDensity_sqm, fill = SiteName),
-                       position = input$oneM_BarOptions_Isl,
-                       width = 280) +
-              scale_x_date(date_labels = "%Y", breaks = oneM_Filter_Isl()$Date,
-                           limits = c(min(as.Date(oneM_Filter_Isl()$Date))-365, 
-                                      max(as.Date(oneM_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = oneM_Filter_Isl()$IslandName,
-                   color = "Site Name",
-                   fill = "Site Name",
-                   x = "Year",
-                   y = oneM_yLabel_Isl()) +
-              geom_vline(size = 1, xintercept = as.Date("2005-01-01", format = "%Y-%m-%d")) +
-              geom_text(x = as.Date("2005-01-01", format = "%Y-%m-%d"), 
-                        y= Inf, aes(label = "16 New Sites Added"),
-                        hjust = 0,
-                        vjust = 1,
-                        inherit.aes = FALSE) +
-              geom_vline(size = 1, xintercept = as.Date("2001-01-01", format = "%Y-%m-%d")) +
-              geom_text(x = as.Date("2001-01-01", format = "%Y-%m-%d"), 
-                        y= Inf, aes(label = "Miracle Mile Added"),
-                        hjust = 1,
-                        vjust = 1,
-                        inherit.aes = FALSE) +
-              scale_fill_manual(values = SiteColor2, guide = guide_legend(ncol = 8)) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.justification = c(0,0.5),
-                    legend.background = element_rect(),
-                    legend.key.width = unit(1, "cm"),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 12, colour = "black"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        } 
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
-          return({
-            ggplot() +
-              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom),
-                        position = "identity", alpha = 1, show.legend = FALSE) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              labs(fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)") +
-              new_scale_fill() +
-              geom_col(data = oneM_FilterByIsl_Isl(), 
-                       aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
-                       position = input$oneM_BarOptions_Isl,
-                       width = 280, show.legend = FALSE) +
-              scale_y_continuous(expand = c(0.1, 0)) +
-              scale_x_date(date_labels = "%Y", date_breaks = "1 year", 
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"),
-                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   color = "Common Name",
-                   fill = "Pacific Decadal Oscillation\nIndex Gradient",
-                   x = "Year",
-                   y = oneM_yLabel_Isl()) +
-              scale_fill_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                    legend.text = element_text(size = 14, vjust = .5),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Bar" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
-          return({
-            ggplot() +
-              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
-                                             ymin = 0, ymax = Inf, fill = pdoAnom),
-                        position = "identity", alpha = 1) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0,
-                                   guide = guide_colorbar(order = 1)) +
-              labs(fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)") +
-              new_scale_fill() +
-              geom_col(data = oneM_Filter_Isl(), 
-                       aes(x = Date, y = MeanDensity_sqm, fill = SiteName),
-                       position = input$oneM_BarOptions_Isl,
-                       width = 280) +
-              scale_x_date(date_labels = "%Y", breaks = oneM_Filter_Isl()$Date,
-                           limits = c(min(as.Date(oneM_Filter_Isl()$Date))-365, 
-                                      max(as.Date(oneM_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = oneM_Filter_Isl()$IslandName,
-                   color = "Site Name",
-                   fill = "Site Name",
-                   x = "Year",
-                   y = oneM_yLabel_Isl()) +
-              geom_vline(size = 1, xintercept = as.Date("2005-01-01", format = "%Y-%m-%d")) +
-              geom_text(x = as.Date("2005-01-01", format = "%Y-%m-%d"), 
-                        y= Inf, aes(label = "16 New Sites Added"),
-                        hjust = 0,
-                        vjust = 1,
-                        inherit.aes = FALSE) +
-              geom_vline(size = 1, xintercept = as.Date("2001-01-01", format = "%Y-%m-%d")) +
-              geom_text(x = as.Date("2001-01-01", format = "%Y-%m-%d"), 
-                        y= Inf, aes(label = "Miracle Mile Added"),
-                        hjust = 1,
-                        vjust = 1,
-                        inherit.aes = FALSE) +
-              scale_fill_manual(values = SiteColor2, guide = guide_legend(ncol = 8)) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.justification = c(0,0.5),
-                    legend.background = element_rect(),
-                    legend.key.width = unit(1, "cm"),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 12, colour = "black"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Smooth Line" && 
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_GraphOptions_Isl == "With No Index") { # Smooth   ----
+        else if(input$oneM_Graph_Isl == "Smooth Line" && input$oneM_DataSummary_Isl == "Island Mean") { # Smooth   ----
           return({   
             ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
               geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName), 
                          size = 2, alpha = as.numeric(input$oneM_SmoothPoint_Isl)) +
               geom_smooth(data = oneM_FilterByIsl_Isl(), aes(x= IslandDate, y = Island_Mean_Density, color = IslandName),
-                          se = as.logical(input$oneM_SmoothSE_Isl),
-                          span = input$oneM_SmoothSlide_Isl) +
+                          se = as.logical(input$oneM_SmoothSE_Isl), span = input$oneM_SmoothSlide_Isl) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   color = "Common Name",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
-              theme_classic() +
-              theme(legend.position = "right",
-                    legend.background = element_rect(),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({   
-            ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                        position = "identity", alpha = 1, show.legend = FALSE) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName), 
-                         size = 2, alpha = as.numeric(input$oneM_SmoothPoint_Isl)) +
-              geom_smooth(data = oneM_FilterByIsl_Isl(), aes(x= IslandDate, y = Island_Mean_Density, color = IslandName),
-                          se = as.logical(input$oneM_SmoothSE_Isl),
-                          span = input$oneM_SmoothSlide_Isl) +
-              scale_x_date(date_labels = "%Y", breaks = oneM_FilterByIsl_Isl()$IslandDate,
                            limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
                            expand = c(0.01, 0)) +
               labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
-                   fill = "Oceanic Nino\nIndex Gradient",
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
               scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
@@ -3035,54 +1349,23 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Island Mean" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
+        else if(input$oneM_Graph_Isl == "Smooth Line" && input$oneM_DataSummary_Isl == "Site Means (by Island)") {
           return({   
             ggplot() +
-              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom),
-                        position = "identity", alpha = 1, show.legend = FALSE) +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_Isl()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = oneM_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean_Density, color = IslandName), 
-                         size = 2, alpha = as.numeric(input$oneM_SmoothPoint_Isl)) +
-              geom_smooth(data = oneM_FilterByIsl_Isl(), aes(x= IslandDate, y = Island_Mean_Density, color = IslandName),
-                          se = as.logical(input$oneM_SmoothSE_Isl),
-                          span = input$oneM_SmoothSlide_Isl) +
-              scale_x_date(date_labels = "%Y", breaks = oneM_FilterByIsl_Isl()$IslandDate,
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   color = "Common Name",
-                   fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
-              theme_classic() +
-              theme(legend.position = "right",
-                    legend.background = element_rect(),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_GraphOptions_Isl == "With No Index") {
-          return({   
-            ggplot() +
               geom_point(data = oneM_Filter_Isl(), aes(x = Date, y = MeanDensity_sqm, color = CommonName), 
                          size = 2, alpha = as.numeric(input$oneM_SmoothPoint_Isl)) +
               geom_smooth(data = oneM_Filter_Isl(), aes(x= Date, y = MeanDensity_sqm, color = SiteName),
-                          se = as.logical(input$oneM_SmoothSE_Isl),
-                          span = input$oneM_SmoothSlide_Isl) +
+                          se = as.logical(input$oneM_SmoothSE_Isl), span = input$oneM_SmoothSlide_Isl) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(oneM_Filter_Isl()$Date))-365, 
+                                      max(as.Date(oneM_Filter_Isl()$Date))+365),
                            expand = c(0.01, 0)) +
               labs(title = glue("{unique(oneM_Filter_Isl()$ScientificName)}"), 
                    color = "Common Name",
@@ -3103,80 +1386,6 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_GraphOptions_Isl == "With ONI") {
-          return({   
-            ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
-                        position = "identity", alpha = 1, show.legend = FALSE) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = oneM_Filter_Isl(), aes(x = Date, y = MeanDensity_sqm, color = CommonName), 
-                         size = 2, alpha = as.numeric(input$oneM_SmoothPoint_Isl)) +
-              geom_smooth(data = oneM_FilterByIsl_Isl(), aes(x= IslandDate, y = Island_Mean_Density, color = IslandName),
-                          se = as.logical(as.logical(input$oneM_SmoothSE_Isl)),
-                          span = input$oneM_SmoothSlide_Isl) +
-              scale_x_date(date_labels = "%Y", breaks = oneM_FilterByIsl_Isl()$IslandDate,
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   color = "Common Name",
-                   fill = "Oceanic Nino\nIndex Gradient",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
-              theme_classic() +
-              theme(legend.position = "right",
-                    legend.background = element_rect(),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$oneM_Graph_Isl == "Smooth Line" &&
-                input$oneM_DataSummary_Isl == "Site Means (by Island)" &&
-                input$oneM_GraphOptions_Isl == "With PDO (NOAA)") {
-          return({   
-            ggplot() +
-              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom),
-                        position = "identity", alpha = 1, show.legend = FALSE) +
-              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = oneM_Filter_Isl(), aes(x = Date, y = MeanDensity_sqm, color = CommonName), 
-                         size = 2, alpha = as.numeric(input$oneM_SmoothPoint_Isl)) +
-              geom_smooth(data = oneM_FilterByIsl_Isl(), aes(x= IslandDate, y = Island_Mean_Density, color = IslandName),
-                          se = as.logical(input$oneM_SmoothSE_Isl),
-                          span = input$oneM_SmoothSlide_Isl) +
-              scale_x_date(date_labels = "%Y", breaks = oneM_FilterByIsl_Isl()$IslandDate,
-                           limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   color = "Common Name",
-                   fill = "Pacific Decadal Oscillation\nIndex Gradient (NOAA)",
-                   x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
-              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
-              theme_classic() +
-              theme(legend.position = "right",
-                    legend.background = element_rect(),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
       })
       
     }
@@ -3185,7 +1394,7 @@ server <- function(input, output, session) {
       
       oneM_Filter_MPA <- reactive({
         oneM_DFMPA %>%
-          filter(CommonName == input$oneM_SpeciesNameMPA) %>%
+          filter(CommonName == input$oneM_SpeciesName_MPA) %>%
           group_by(IslandCode, SurveyYear) %>%
           mutate(Date = mean(Date),
                  MaxSumBar = max(sum(MeanDensity_sqm))) %>%
@@ -3197,7 +1406,7 @@ server <- function(input, output, session) {
       
       oneM_FilterBarSite_MPA <-reactive({
         oneM_DFMPA %>%
-          filter(CommonName == input$oneM_SpeciesNameMPA,
+          filter(CommonName == input$oneM_SpeciesName_MPA,
                  SiteName != "Keyhole") %>%
           group_by(IslandCode, SurveyYear) %>%
           mutate(Date = mean(Date),
@@ -3209,7 +1418,7 @@ server <- function(input, output, session) {
       
       oneM_Inside_MPA <- reactive({
         oneM_DFMPA %>% 
-          filter(CommonName == input$oneM_SpeciesNameMPA,
+          filter(CommonName == input$oneM_SpeciesName_MPA,
                  ReserveStatus == "Inside",
                  SiteName != "Keyhole") %>%
           group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
@@ -3219,7 +1428,7 @@ server <- function(input, output, session) {
       
       oneM_Outside_MPA <- reactive({
         oneM_DFMPA %>%
-          filter(CommonName == input$oneM_SpeciesNameMPA,
+          filter(CommonName == input$oneM_SpeciesName_MPA,
                  ReserveStatus == "Outside",
                  SiteName != "Keyhole") %>%
           group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
@@ -3227,12 +1436,79 @@ server <- function(input, output, session) {
                    MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
       })
       
+      oneM_alphaONI_MPA <- reactive({
+        if(input$oneM_GraphOptions_MPA == "With No Index"){
+          return(0)
+        }
+        else if(input$oneM_GraphOptions_MPA == "With ONI"){
+          return(1)
+        }
+        else if(input$oneM_GraphOptions_MPA == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$oneM_GraphOptions_MPA == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      oneM_alphaPDO_NOAA_MPA <- reactive({
+        if(input$oneM_GraphOptions_MPA == "With No Index"){
+          return(0)
+        }
+        if(input$oneM_GraphOptions_MPA == "With ONI"){
+          return(0)
+          
+        }
+        if(input$oneM_GraphOptions_MPA == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$oneM_GraphOptions_MPA == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      oneM_alphaPDO_UW_MPA <- reactive({
+        if(input$oneM_GraphOptions_MPA == "With No Index"){
+          return(0)
+        }
+        if(input$oneM_GraphOptions_MPA == "With ONI"){
+          return(0)
+          
+        }
+        if(input$oneM_GraphOptions_MPA == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$oneM_GraphOptions_MPA == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$oneM_ONIpdoPIC_MPA <- renderImage({
+        if(input$oneM_GraphOptions_MPA == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$oneM_GraphOptions_MPA == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$oneM_GraphOptions_MPA == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
+      oneM_AxisScale_MPA <- reactive({
+        if(input$oneM_FreeOrLock_MPA == "Locked Scales"){
+          return("fixed")
+        }
+        if(input$oneM_FreeOrLock_MPA == "Free Scales"){
+          return("free")
+        }
+      }) # Facet Plot Axis Scale free or fixed 
+      
       output$oneM_Filter_MPA <- renderPlot({
-        if (is.null(input$oneM_GraphMPA))
+        if (is.null(input$oneM_Graph_MPA))
           return(NULL)
         
-        else if(input$oneM_GraphMPA == "Line" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With No Index") {  # Line    ----
+        else if(input$oneM_Graph_MPA == "Line" && input$oneM_DataSummary_MPA == "MPA Mean") {  # Line    ----
           return({
             ggplot() +
               geom_line(data = oneM_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
@@ -3266,8 +1542,7 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Line" && input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With No Index") {
+        else if(input$oneM_Graph_MPA == "Line" && input$oneM_DataSummary_MPA == "Site Means (by MPA)") {
           return({
             out <- by(data = oneM_Filter_MPA(), INDICES = oneM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -3312,8 +1587,8 @@ server <- function(input, output, session) {
             ))
           })
         }
-        else if(input$oneM_GraphMPA == "Line" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With ONI") {  
+        else if(input$oneM_Graph_MPA == "Line" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With ONI") {  
           return({
             ggplot() +
               geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
@@ -3353,8 +1628,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Line" && input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With ONI") {
+        else if(input$oneM_Graph_MPA == "Line" && input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With ONI") {
           return({
             out <- by(data = oneM_Filter_MPA(), INDICES = oneM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -3403,8 +1678,8 @@ server <- function(input, output, session) {
             ))
           })
         }
-        else if(input$oneM_GraphMPA == "Line" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With PDO (NOAA)") {  
+        else if(input$oneM_Graph_MPA == "Line" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With PDO (NOAA)") {  
           return({
             ggplot() +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
@@ -3445,8 +1720,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Line" && input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With PDO (NOAA)") {
+        else if(input$oneM_Graph_MPA == "Line" && input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With PDO (NOAA)") {
           return({
             out <- by(data = oneM_Filter_MPA(), INDICES = oneM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -3496,8 +1771,8 @@ server <- function(input, output, session) {
             ))
           })
         }  
-        else if(input$oneM_GraphMPA == "Line" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With No Index") { 
+        else if(input$oneM_Graph_MPA == "Line" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With No Index") { 
           return({ 
             ggplot() +
               geom_line(data = oneM_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
@@ -3531,8 +1806,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Line" &&  input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With No Index") {
+        else if(input$oneM_Graph_MPA == "Line" &&  input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With No Index") {
           return({
             out <- by(data = oneM_Filter_MPA(), INDICES = oneM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -3577,8 +1852,8 @@ server <- function(input, output, session) {
             ))
           })
         }
-        else if(input$oneM_GraphMPA == "Line" &&  input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With ONI") {
+        else if(input$oneM_Graph_MPA == "Line" &&  input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With ONI") {
           return({
             out <- by(data = oneM_Filter_MPA(), INDICES = oneM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -3627,8 +1902,8 @@ server <- function(input, output, session) {
             ))
           })
         }
-        else if(input$oneM_GraphMPA == "Line" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With PDO (NOAA)") { 
+        else if(input$oneM_Graph_MPA == "Line" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With PDO (NOAA)") { 
           return({ 
             ggplot() +
               geom_rect(data = pdo_noaa, 
@@ -3669,8 +1944,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Line" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With ONI") { 
+        else if(input$oneM_Graph_MPA == "Line" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With ONI") { 
           return({ 
             ggplot() +
               geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
@@ -3710,8 +1985,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Line" &&  input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With PDO (NOAA)") {
+        else if(input$oneM_Graph_MPA == "Line" &&  input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With PDO (NOAA)") {
           return({
             out <- by(data = oneM_Filter_MPA(), INDICES = oneM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -3761,8 +2036,8 @@ server <- function(input, output, session) {
             ))
           })
         }
-        else if(input$oneM_GraphMPA == "Bar" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With No Index") { # Bar    -----
+        else if(input$oneM_Graph_MPA == "Bar" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With No Index") { # Bar    -----
           return({ 
             ggplot() +
               geom_col(data = oneM_Inside_MPA(), 
@@ -3808,8 +2083,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Bar" &&  input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With No Index") {
+        else if(input$oneM_Graph_MPA == "Bar" &&  input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With No Index") {
           return({
             out <- by(data = oneM_FilterBarSite_MPA(), INDICES = oneM_FilterBarSite_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -3868,8 +2143,8 @@ server <- function(input, output, session) {
             ))
           })
         } 
-        else if(input$oneM_GraphMPA == "Bar" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With ONI") { 
+        else if(input$oneM_Graph_MPA == "Bar" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With ONI") { 
           return({ 
             ggplot() +
               geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
@@ -3922,8 +2197,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Bar" &&  input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With ONI") {
+        else if(input$oneM_Graph_MPA == "Bar" &&  input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With ONI") {
           return({
             out <- by(data = oneM_FilterBarSite_MPA(), INDICES = oneM_FilterBarSite_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -3984,8 +2259,8 @@ server <- function(input, output, session) {
             ))
           })
         }  
-        else if(input$oneM_GraphMPA == "Bar" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With PDO (NOAA)") { 
+        else if(input$oneM_Graph_MPA == "Bar" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With PDO (NOAA)") { 
           return({ 
             ggplot() +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
@@ -4040,8 +2315,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Bar" &&  input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With PDO (NOAA)") {
+        else if(input$oneM_Graph_MPA == "Bar" &&  input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With PDO (NOAA)") {
           return({
             out <- by(data = oneM_FilterBarSite_MPA(), INDICES = oneM_FilterBarSite_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -4104,8 +2379,8 @@ server <- function(input, output, session) {
             ))
           })
         }
-        else if(input$oneM_GraphMPA == "Bar" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With No Index") { 
+        else if(input$oneM_Graph_MPA == "Bar" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With No Index") { 
           return({ 
             ggplot() +
               geom_col(data = oneM_Inside_MPA(), 
@@ -4151,8 +2426,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Bar" && input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With No Index") {
+        else if(input$oneM_Graph_MPA == "Bar" && input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With No Index") {
           return({
             out <- by(data = oneM_FilterBarSite_MPA(), INDICES = oneM_FilterBarSite_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -4210,8 +2485,8 @@ server <- function(input, output, session) {
             ))
           })
         } 
-        else if(input$oneM_GraphMPA == "Bar" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With ONI") { 
+        else if(input$oneM_Graph_MPA == "Bar" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With ONI") { 
           return({ 
             ggplot() +
               geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
@@ -4265,8 +2540,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Bar" && input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With ONI") {
+        else if(input$oneM_Graph_MPA == "Bar" && input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With ONI") {
           return({
             out <- by(data = oneM_FilterBarSite_MPA(), INDICES = oneM_FilterBarSite_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -4328,8 +2603,8 @@ server <- function(input, output, session) {
             ))
           })
         } 
-        else if(input$oneM_GraphMPA == "Bar" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With PDO (NOAA)") { 
+        else if(input$oneM_Graph_MPA == "Bar" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With PDO (NOAA)") { 
           return({ 
             ggplot() +
               geom_rect(data = pdo_noaa, 
@@ -4383,8 +2658,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Bar" && input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With PDO (NOAA)") {
+        else if(input$oneM_Graph_MPA == "Bar" && input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With PDO (NOAA)") {
           return({
             out <- by(data = oneM_FilterBarSite_MPA(), INDICES = oneM_FilterBarSite_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -4447,11 +2722,8 @@ server <- function(input, output, session) {
             ))
           })
         } 
-        
-        
-        
-        else if(input$oneM_GraphMPA == "Smooth Line" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With No Index") {  # Smooth       ----
+        else if(input$oneM_Graph_MPA == "Smooth Line" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With No Index") {  # Smooth       ----
           return({
             ggplot() +
               geom_point(data = oneM_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
@@ -4486,8 +2758,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Smooth Line" && input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With No Index") {
+        else if(input$oneM_Graph_MPA == "Smooth Line" && input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With No Index") {
           return({
             out <- by(data = oneM_Filter_MPA(), INDICES = oneM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -4531,8 +2803,8 @@ server <- function(input, output, session) {
             ))
           })
         }
-        else if(input$oneM_GraphMPA == "Smooth Line" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With ONI") {  
+        else if(input$oneM_Graph_MPA == "Smooth Line" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With ONI") {  
           return({
             ggplot() +
               geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
@@ -4572,8 +2844,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Smooth Line" && input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With ONI") {
+        else if(input$oneM_Graph_MPA == "Smooth Line" && input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With ONI") {
           return({
             out <- by(data = oneM_Filter_MPA(), INDICES = oneM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -4621,8 +2893,8 @@ server <- function(input, output, session) {
             ))
           })
         }
-        else if(input$oneM_GraphMPA == "Smooth Line" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With PDO (NOAA)") {  
+        else if(input$oneM_Graph_MPA == "Smooth Line" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With PDO (NOAA)") {  
           return({
             ggplot() +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
@@ -4661,8 +2933,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Smooth Line" && input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Locked Scales" && input$oneM_GraphOptionsMPA == "With PDO (NOAA)") {
+        else if(input$oneM_Graph_MPA == "Smooth Line" && input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Locked Scales" && input$oneM_GraphOptions_MPA == "With PDO (NOAA)") {
           return({
             out <- by(data = oneM_Filter_MPA(), INDICES = oneM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -4711,8 +2983,8 @@ server <- function(input, output, session) {
             ))
           })
         }  
-        else if(input$oneM_GraphMPA == "Smooth Line" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With No Index") { 
+        else if(input$oneM_Graph_MPA == "Smooth Line" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With No Index") { 
           return({ 
             ggplot() +
               geom_point(data = oneM_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
@@ -4747,8 +3019,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Smooth Line" &&  input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With No Index") {
+        else if(input$oneM_Graph_MPA == "Smooth Line" &&  input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With No Index") {
           return({
             out <- by(data = oneM_Filter_MPA(), INDICES = oneM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -4792,8 +3064,8 @@ server <- function(input, output, session) {
             ))
           })
         }
-        else if(input$oneM_GraphMPA == "Smooth Line" &&  input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With ONI") {
+        else if(input$oneM_Graph_MPA == "Smooth Line" &&  input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With ONI") {
           return({
             out <- by(data = oneM_Filter_MPA(), INDICES = oneM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -4841,8 +3113,8 @@ server <- function(input, output, session) {
             ))
           })
         }
-        else if(input$oneM_GraphMPA == "Smooth Line" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With PDO (NOAA)") { 
+        else if(input$oneM_Graph_MPA == "Smooth Line" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With PDO (NOAA)") { 
           return({ 
             ggplot() +
               geom_rect(data = pdo_noaa, 
@@ -4883,8 +3155,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Smooth Line" && input$oneM_DataSummaryMPA == "MPA Mean" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With ONI") { 
+        else if(input$oneM_Graph_MPA == "Smooth Line" && input$oneM_DataSummary_MPA == "MPA Mean" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With ONI") { 
           return({ 
             ggplot() +
               geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = Anom),
@@ -4924,8 +3196,8 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
           })
         }
-        else if(input$oneM_GraphMPA == "Smooth Line" &&  input$oneM_DataSummaryMPA == "Site Means (by MPA)" &&
-                input$oneM_FreeOrLockMPA == "Free Scales" && input$oneM_GraphOptionsMPA == "With PDO (NOAA)") {
+        else if(input$oneM_Graph_MPA == "Smooth Line" &&  input$oneM_DataSummary_MPA == "Site Means (by MPA)" &&
+                input$oneM_FreeOrLock_MPA == "Free Scales" && input$oneM_GraphOptions_MPA == "With PDO (NOAA)") {
           return({
             out <- by(data = oneM_Filter_MPA(), INDICES = oneM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
@@ -4975,14 +3247,15 @@ server <- function(input, output, session) {
           })
         }  
       })
+      
     }
     
     { # oneM_Server_Two_Species    ----
       
       oneM_Filter_Two_One <- reactive({
         oneM_DF %>%
-          filter(SiteName == input$oneM_SiteNameTwo,
-                 CommonName == input$oneM_SpeciesNameTwo_One) %>%
+          filter(SiteName == input$oneM_SiteName_Two,
+                 CommonName == input$oneM_SpeciesName_Two_One) %>%
           select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
                  StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
                  Species, SiteNumber, IslandCode, SiteCode) 
@@ -4990,8 +3263,8 @@ server <- function(input, output, session) {
       
       oneM_Filter_Two_Two <- reactive({
         oneM_DF %>%
-          filter(SiteName == input$oneM_SiteNameTwo,
-                 CommonName == input$oneM_SpeciesNameTwo_Two) %>%
+          filter(SiteName == input$oneM_SiteName_Two,
+                 CommonName == input$oneM_SpeciesName_Two_Two) %>%
           select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
                  StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
                  Species, SiteNumber, IslandCode, SiteCode) 
@@ -4999,10 +3272,10 @@ server <- function(input, output, session) {
       
       output$oneM_LargeSpPhoto_Two_1 <- renderImage({
         
-        if (is.null(input$oneM_SpeciesNameTwo_One))
+        if (is.null(input$oneM_SpeciesName_Two_One))
           return(NULL) 
         
-        if (input$oneM_SpeciesNameTwo_One == unique(oneM_Filter_Two_One()$CommonName)) {
+        if (input$oneM_SpeciesName_Two_One == unique(oneM_Filter_Two_One()$CommonName)) {
           return(list(
             src = glue("www/Indicator_Species/{unique(oneM_Filter_Two_One()$Species)}.jpg"),
             contentType = "image/jpg",
@@ -5015,7 +3288,7 @@ server <- function(input, output, session) {
       
       output$oneM_LargeSpPhoto_Two_2 <- renderImage({
         
-        if (input$oneM_SpeciesNameTwo_Two == unique(oneM_Filter_Two_Two()$CommonName)) {
+        if (input$oneM_SpeciesName_Two_Two == unique(oneM_Filter_Two_Two()$CommonName)) {
           return(list(
             src = glue("www/Indicator_Species/{unique(oneM_Filter_Two_Two()$Species)}.jpg"),
             contentType = "image/jpg",
@@ -5027,10 +3300,10 @@ server <- function(input, output, session) {
       }, deleteFile = FALSE)
       
       output$oneM_TopSitePhoto_Two <- renderImage({
-        if (is.null(input$oneM_SpeciesNameTwo_One))
+        if (is.null(input$oneM_SpeciesName_Two_One))
           return(NULL)
         
-        if (input$oneM_SiteNameTwo == unique(oneM_Filter_Two_One()$SiteName)) {
+        if (input$oneM_SiteName_Two == unique(oneM_Filter_Two_One()$SiteName)) {
           return(list(
             src = glue("www/Sat_Imagery/{unique(oneM_Filter_Two_One()$SiteCode)}.png"),
             contentType = "image/png",
@@ -5042,10 +3315,10 @@ server <- function(input, output, session) {
       }, deleteFile = FALSE)
       
       output$oneM_LargeSitePhoto_Two <- renderImage({
-        if (is.null(input$oneM_SpeciesNameTwo_One))
+        if (is.null(input$oneM_SpeciesName_Two_One))
           return(NULL)
         
-        if (input$oneM_SiteNameTwo == unique(oneM_Filter_Two_One()$SiteName)) {
+        if (input$oneM_SiteName_Two == unique(oneM_Filter_Two_One()$SiteName)) {
           return(list(
             src = glue("www/Sat_Imagery/{unique(oneM_Filter_Two_One()$SiteCode)}.png"),
             contentType = "image/png",
@@ -5058,10 +3331,10 @@ server <- function(input, output, session) {
       
       output$oneM_Plot_Two <- renderPlot({
         
-        if (is.null(input$oneM_GraphTwo))
+        if (is.null(input$oneM_Graph_Two))
           return(NULL) 
         
-        else if(input$oneM_GraphTwo == "Line" && input$oneM_GraphOptionsTwo== "With No Index"){
+        else if(input$oneM_Graph_Two == "Line" && input$oneM_GraphOptions_Two== "With No Index"){
           return({
             ggplot() +
               geom_line(data = oneM_Filter_Two_One(), 
@@ -5106,7 +3379,7 @@ server <- function(input, output, session) {
                     axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
           })}
-        else if(input$oneM_GraphTwo == "Line" && input$oneM_GraphOptionsTwo == "With ONI") {
+        else if(input$oneM_Graph_Two == "Line" && input$oneM_GraphOptions_Two == "With ONI") {
           return({
             ggplot() +
               geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,
@@ -5157,7 +3430,7 @@ server <- function(input, output, session) {
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
             
           })}
-        else if(input$oneM_GraphTwo == "Line" && input$oneM_GraphOptionsTwo == "With PDO (NOAA)") {
+        else if(input$oneM_Graph_Two == "Line" && input$oneM_GraphOptions_Two == "With PDO (NOAA)") {
           return({
             ggplot() +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
@@ -5209,7 +3482,7 @@ server <- function(input, output, session) {
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
             
           })}
-        else if(input$oneM_GraphTwo == "Line" && input$oneM_GraphOptionsTwo == "With PDO (UW)") {
+        else if(input$oneM_Graph_Two == "Line" && input$oneM_GraphOptions_Two == "With PDO (UW)") {
           return({
             ggplot() +
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd,
@@ -5261,7 +3534,7 @@ server <- function(input, output, session) {
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
             
           })}
-        else if(input$oneM_GraphTwo == "Bar" && input$oneM_GraphOptionsTwo== "With No Index") {
+        else if(input$oneM_Graph_Two == "Bar" && input$oneM_GraphOptions_Two== "With No Index") {
           return({
             ggplot() +
               geom_col(data = oneM_Filter_Two_One(), 
@@ -5308,7 +3581,7 @@ server <- function(input, output, session) {
                     axis.text.y = element_text(size = 12, face = "bold", color = "black"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
           })}
-        else if(input$oneM_GraphTwo == "Bar" && input$oneM_GraphOptionsTwo== "With ONI") {
+        else if(input$oneM_Graph_Two == "Bar" && input$oneM_GraphOptions_Two== "With ONI") {
           return({
             ggplot() +
               geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,
@@ -5324,12 +3597,12 @@ server <- function(input, output, session) {
               geom_col(data = oneM_Filter_Two_One(), 
                        aes(x = Date - 50, y = MeanDensity_sqm, fill = CommonName),
                        position = "dodge",
-                       # fill = SpeciesColor[SpeciesColor = input$oneM_SpeciesNameTwo_One],
+                       # fill = SpeciesColor[SpeciesColor = input$oneM_SpeciesName_Two_One],
                        width = 100) +
               geom_col(data = oneM_Filter_Two_Two(), 
                        aes(x = Date + 50, y = MeanDensity_sqm*input$oneM_Y_Slide_Two, fill = CommonName),
                        position = "dodge",
-                       # fill = SpeciesColor[SpeciesColor = input$oneM_SpeciesNameTwo_Two],
+                       # fill = SpeciesColor[SpeciesColor = input$oneM_SpeciesName_Two_Two],
                        width = 100) +
               geom_errorbar(data = oneM_Filter_Two_One(),
                             aes(x = Date - 50, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
@@ -5368,7 +3641,7 @@ server <- function(input, output, session) {
                     axis.text.y = element_text(size = 12, face = "bold", color = "black"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
           })}
-        else if(input$oneM_GraphTwo == "Bar" && input$oneM_GraphOptionsTwo== "With PDO (NOAA)") {
+        else if(input$oneM_Graph_Two == "Bar" && input$oneM_GraphOptions_Two== "With PDO (NOAA)") {
           return({
             ggplot() +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
@@ -5382,12 +3655,12 @@ server <- function(input, output, session) {
               geom_col(data = oneM_Filter_Two_One(), 
                        aes(x = Date - 50, y = MeanDensity_sqm, color = CommonName),
                        position = "dodge",
-                       fill = SpeciesColor[SpeciesColor = input$oneM_SpeciesNameTwo_One],
+                       fill = SpeciesColor[SpeciesColor = input$oneM_SpeciesName_Two_One],
                        width = 100) +
               geom_col(data = oneM_Filter_Two_Two(), 
                        aes(x = Date + 50, y = MeanDensity_sqm*input$oneM_Y_Slide_Two, color = CommonName),
                        position = "dodge",
-                       fill = SpeciesColor[SpeciesColor = input$oneM_SpeciesNameTwo_Two],
+                       fill = SpeciesColor[SpeciesColor = input$oneM_SpeciesName_Two_Two],
                        width = 100) +
               geom_errorbar(data = oneM_Filter_Two_One(),
                             aes(x = Date - 50, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
@@ -5425,7 +3698,7 @@ server <- function(input, output, session) {
                     axis.text.y = element_text(size = 12, face = "bold", color = "black"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
           })}
-        else if(input$oneM_GraphTwo == "Bar" && input$oneM_GraphOptionsTwo== "With PDO (UW)") {
+        else if(input$oneM_Graph_Two == "Bar" && input$oneM_GraphOptions_Two== "With PDO (UW)") {
           return({
             ggplot() +
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd,
@@ -5439,12 +3712,12 @@ server <- function(input, output, session) {
               geom_col(data = oneM_Filter_Two_One(), 
                        aes(x = Date - 50, y = MeanDensity_sqm, color = CommonName),
                        position = "dodge",
-                       fill = SpeciesColor[SpeciesColor = input$oneM_SpeciesNameTwo_One],
+                       fill = SpeciesColor[SpeciesColor = input$oneM_SpeciesName_Two_One],
                        width = 100) +
               geom_col(data = oneM_Filter_Two_Two(), 
                        aes(x = Date + 50, y = MeanDensity_sqm*input$oneM_Y_Slide_Two, color = CommonName),
                        position = "dodge",
-                       fill = SpeciesColor[SpeciesColor = input$oneM_SpeciesNameTwo_Two],
+                       fill = SpeciesColor[SpeciesColor = input$oneM_SpeciesName_Two_Two],
                        width = 100) +
               geom_errorbar(data = oneM_Filter_Two_One(),
                             aes(x = Date - 50, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
@@ -5482,7 +3755,7 @@ server <- function(input, output, session) {
                     axis.text.y = element_text(size = 12, face = "bold", color = "black"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
           })}
-        else if(input$oneM_GraphTwo == "Smooth Line" && input$oneM_GraphOptionsTwo== "With No Index"){
+        else if(input$oneM_Graph_Two == "Smooth Line" && input$oneM_GraphOptions_Two== "With No Index"){
           return({
             ggplot() +
               geom_smooth(data = oneM_Filter_Two_One(), 
@@ -5526,7 +3799,7 @@ server <- function(input, output, session) {
                     axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
           })}
-        else if(input$oneM_GraphTwo == "Smooth Line" && input$oneM_GraphOptionsTwo == "With ONI") {
+        else if(input$oneM_Graph_Two == "Smooth Line" && input$oneM_GraphOptions_Two == "With ONI") {
           return({
             ggplot() +
               geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,
@@ -5576,7 +3849,7 @@ server <- function(input, output, session) {
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
             
           })}
-        else if(input$oneM_GraphTwo == "Smooth Line" && input$oneM_GraphOptionsTwo == "With PDO (NOAA)") {
+        else if(input$oneM_Graph_Two == "Smooth Line" && input$oneM_GraphOptions_Two == "With PDO (NOAA)") {
           return({
             ggplot() +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
@@ -5627,7 +3900,7 @@ server <- function(input, output, session) {
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
             
           })}
-        else if(input$oneM_GraphTwo == "Smooth Line" && input$oneM_GraphOptionsTwo == "With PDO (UW)") {
+        else if(input$oneM_Graph_Two == "Smooth Line" && input$oneM_GraphOptions_Two == "With PDO (UW)") {
           return({
             ggplot() +
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd,
