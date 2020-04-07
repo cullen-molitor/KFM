@@ -1705,7 +1705,9 @@ server <- function(input, output, session) {
                             mutate(SumBar = sum(MeanDensity_sqm)),
                           aes(x = Date + 70, y = SumBar, label = "Out"),
                           vjust = -.2, hjust = .5, angle = 0) +
-                scale_y_continuous(limits = c(0, max(oneM_Filter_MPA()$MaxSumBar)), expand = c(0.01, 0)) +
+                scale_y_continuous(limits = c(0, ifelse(input$oneM_FreeOrLock_MPA == "Locked Scales", 
+                                                        max(oneM_Filter_MPA()$MaxSumBar), max(m$MeanDensity_sqm))),
+                                   expand = c(0.01, 0)) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
                              expand = c(0.01, 0)) +
@@ -3995,7 +3997,9 @@ server <- function(input, output, session) {
                             mutate(SumBar = sum(MeanDensity_sqm)),
                           aes(x = Date + 70, y = SumBar, label = "Out"),
                           vjust = -.2, hjust = .5, angle = 0) +
-                scale_y_continuous(limits = c(0, max(fiveM_Filter_MPA()$MaxSumBar)), expand = c(0.01, 0)) +
+                scale_y_continuous(limits = c(0, ifelse(input$fiveM_FreeOrLock_MPA == "Locked Scales", 
+                                                        max(fiveM_Filter_MPA()$MaxSumBar), max(m$MeanDensity_sqm))),
+                                   expand = c(0.01, 0)) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
                              expand = c(0.01, 0)) +
@@ -6285,7 +6289,9 @@ server <- function(input, output, session) {
                             mutate(SumBar = sum(MeanDensity_sqm)),
                           aes(x = Date + 70, y = SumBar, label = "Out"),
                           vjust = -.2, hjust = .5, angle = 0) +
-                scale_y_continuous(limits = c(0, max(bands_Filter_MPA()$MaxSumBar)), expand = c(0.01, 0)) +
+                scale_y_continuous(limits = c(0, ifelse(input$bands_FreeOrLock_MPA == "Locked Scales", 
+                                                        max(bands_Filter_MPA()$MaxSumBar), max(m$MeanDensity_sqm))),
+                                   expand = c(0.1, 0)) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
                              expand = c(0.01, 0)) +
@@ -9926,7 +9932,7 @@ server <- function(input, output, session) {
                      linetype = "Site Name",
                      caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
                      x = "Year",
-                     y = "Mean Density") +
+                     y = "Percent Cover") +
                 scale_color_manual(values = SiteColor, breaks = as.character(m$SiteName)) +
                 scale_linetype_manual(values = SiteLine, breaks = as.character(m$SiteName)) +
                 theme_classic() +
@@ -10039,14 +10045,16 @@ server <- function(input, output, session) {
                             mutate(SumBar = sum(MeanDensity_sqm)),
                           aes(x = Date + 70, y = SumBar, label = "Out"),
                           vjust = -.2, hjust = .5, angle = 0) +
-                scale_y_continuous(limits = c(0, max(rpcs_Filter_MPA()$MaxSumBar)), expand = c(0.01, 0)) +
+                scale_y_continuous(limits = c(0, ifelse(input$rpcs_FreeOrLock_MPA == "Locked Scales", 
+                                                        max(rpcs_Filter_MPA()$MaxSumBar), max(m$MeanDensity_sqm))),
+                                   expand = c(0.01, 0)) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
                              expand = c(0.01, 0)) +
                 labs(title = m$IslandName,
                      fill = "Outside",
                      x = "Year",
-                     y = "Mean Density") +
+                     y = "Percent Cover") +
                 scale_fill_manual(values = SiteColor) +
                 scale_color_manual(values = SiteColor) +
                 theme_classic() +
@@ -10142,7 +10150,7 @@ server <- function(input, output, session) {
                      linetype = "Site Name",
                      caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
                      x = "Year",
-                     y = "Mean Density") +
+                     y = "Percent Cover") +
                 scale_color_manual(values = SiteColor) +
                 scale_linetype_manual(values = SiteLine) +
                 theme_classic() +

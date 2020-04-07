@@ -76,6 +76,7 @@
   all_species <- read_csv("core_Species.csv")
   core_species <- as.character(all_species$CommonName)
   names(core_species) <- glue("{all_species$Protocol} - {all_species$CommonName}")
+  rpcs_species <- read_csv("rpcs_Species.csv")
   
   
   SpeciesColor <- c(as.character(SpeciesName$Color), "blue3", "forestgreen", "gold", "orangered", "red3")
@@ -177,7 +178,20 @@
 { # .. RPC_DF   ----
   
   rpcs_DF <- read_csv("rpcs_Summary.csv")
+  rpcs_Levels <- unique(rpcs_species$CommonName)
   rpcs_DF$IslandName <- factor(rpcs_DF$IslandName, levels = IslandLevels)
+  rpcs_DF$SiteName <- factor(rpcs_DF$SiteName, levels = unique(siteInfo2$SiteName))
+  rpcs_DF$CommonName <- factor(rpcs_DF$CommonName, levels = rpcs_Levels)
+  
+  rpcs_DFMPA <- read_csv("rpcs_MPA.csv")
+  rpcs_DFMPA$IslandName <- factor(rpcs_DFMPA$IslandName, levels = MPA_Levels)
+  rpcs_DFMPA$SiteName <- factor(rpcs_DFMPA$SiteName, levels = as.character(MPA_Site_levels$SiteName))
+  rpcs_DFMPA$CommonName <- factor(rpcs_DFMPA$CommonName, levels = rpcs_Levels)
+
+  # rpcs_DFRaw <- read_csv("rpcs_RAW.csv")
+  # rpcs_DFRaw$IslandName <- factor(rpcs_DFRaw$IslandName, levels = IslandLevels)
+  # rpcs_DFRaw$SiteName <- factor(rpcs_DFRaw$SiteName, levels = unique(siteInfo2$SiteName))
+  # rpcs_DFRaw$CommonName <- factor(rpcs_DFRaw$CommonName, levels = rpcs_Levels)
   
 }
 
