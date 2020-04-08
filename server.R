@@ -6891,11 +6891,7 @@ server <- function(input, output, session) {
                          tags$hr(),
                          sliderInput(inputId = "core_Y_Slide_Two",
                                      label = "Adjust the second y-axis by a multiple of:",
-                                     min = 1,
-                                     max = 40,
-                                     step = 1,
-                                     value = 1,
-                                     width = "100%"),
+                                     min = 1, max = 40, step = 1, value = 1, width = "100%"),
                          conditionalPanel("input.core_Graph_Two == 'Line' || input.core_Graph_Two == 'Bar'",
                                           radioButtons(inputId = "core_EB_Two",
                                                        label = "Show error bars?",
@@ -6920,18 +6916,61 @@ server <- function(input, output, session) {
                                                                           choices = c("Yes" = 1, "No" = 0),
                                                                           inline = TRUE))),
                                           tags$hr()),
-                         fluidRow(column(4, tags$h1(tags$strong(input$core_SpeciesName_One)),
+                         fluidRow(column(4, tags$h1(tags$strong(input$core_SpeciesName_Two_One)),
                                          imageOutput(outputId = "core_SpeciesPhoto_Two_One",
                                                      height = 450)),
-                                  column(4, offset = 2, tags$h1(tags$strong(input$core_SpeciesName_Two)),
+                                  column(4, offset = 2, tags$h1(tags$strong(input$core_SpeciesName_Two_Two)),
                                          imageOutput(outputId = "core_SpeciesPhoto_Two_Two",
                                                      height = 450))),
                          tags$hr(),
-                         fluidRow(column(6, tags$h1(tags$strong(input$core_SpeciesName_One)),
+                         fluidRow(column(6, tags$h1(tags$strong(input$core_SpeciesName_Two_One)),
                                          DTOutput(outputId = "core_DTout_Two_One")),
-                                  column(6, tags$h1(tags$strong(input$core_SpeciesName_Two)),
+                                  column(6, tags$h1(tags$strong(input$core_SpeciesName_Two_Two)),
                                          DTOutput(outputId = "core_DTout_Two_Two"))),
                          tags$hr()
+      )
+    }
+    else if(input$core_allORone == "Two Species by Island") { #  core_TP_by_Isl      ---- 
+      dyn_ui <- tabPanel("Core Densities", value = 'core_TP',
+                         tags$hr(),
+                         plotOutput(outputId = "core_Plot_Isl",
+                                    height = 500),
+                         tags$hr(),
+                         sliderInput(inputId = "core_Y_Slide_Isl",
+                                     label = "Adjust the second y-axis by a multiple of:",
+                                     min = 1, max = 40, step = 1, value = 1, width = "100%"),
+                         fluidRow(conditionalPanel("input.core_Graph_Isl == 'Line' || input.core_Graph_Isl == 'Bar'",
+                                                   column(3, radioButtons(inputId = "core_EB_Isl",
+                                                                          label = "Show error bars?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE))),
+                                  conditionalPanel("input.core_GraphOptions_Isl == 'With ONI' ||
+                                                      input.core_GraphOptions_Isl == 'With PDO (NOAA)' ||
+                                                      input.core_GraphOptions_Isl == 'With PDO (UW)'",
+                                                   column(6, imageOutput(outputId = "core_ONIpdoPIC_Isl",
+                                                                         height = 75)))),
+                         fluidRow(conditionalPanel("input.core_Graph_Isl == 'Line' || input.core_Graph_Isl == 'Bar'",
+                                                   tags$hr())),
+                         conditionalPanel("input.core_Graph_Isl == 'Smooth Line'",
+                                          sliderInput(inputId = "core_SmoothSlide_Isl",
+                                                      label = "Span: Controls the amount of smoothing for the loess smoother. 
+                                                      Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
+                                                      min = 0, max = 1, step = .05, value = .5, width = "100%"),
+                                          fluidRow(column(3, radioButtons(inputId = "core_SmoothSE_Isl",
+                                                                          label = "Show the standard error?",
+                                                                          choices = c("Yes" = TRUE, "No" = FALSE),
+                                                                          inline = TRUE)),
+                                                   column(3, radioButtons(inputId = "core_SmoothPoint_Isl",
+                                                                          label = "Show the mean values?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE))),
+                                          tags$hr()),
+                         conditionalPanel("input.core_GraphOptions_Isl == 'With ONI'",
+                                          ONI_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.core_GraphOptions_Isl == 'With PDO (NOAA)'",
+                                          PDO_NOAA_tagList,
+                                          tags$hr())
       )
     }
     return(dyn_ui)
@@ -6941,19 +6980,19 @@ server <- function(input, output, session) {
     
     { # Core_Two_Species    ----
       
-      core_Filter_One <- reactive({
+      core_Filter_Two_One <- reactive({
         core_DF %>%
-          filter(SiteName == input$core_SiteName_One,
-                 CommonName == input$core_SpeciesName_One) %>%
+          filter(SiteName == input$core_SiteName_Two,
+                 CommonName == input$core_SpeciesName_Two_One) %>%
           select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
                  StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
                  Species, SiteNumber, IslandCode, SiteCode, SurveyType) 
       })
       
-      core_Filter_Two <- reactive({
+      core_Filter_Two_Two <- reactive({
         core_DF %>%
-          filter(SiteName == input$core_SiteName_One,
-                 CommonName == input$core_SpeciesName_Two) %>%
+          filter(SiteName == input$core_SiteName_Two,
+                 CommonName == input$core_SpeciesName_Two_Two) %>%
           select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
                  StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
                  Species, SiteNumber, IslandCode, SiteCode, SurveyType) 
@@ -6963,15 +7002,15 @@ server <- function(input, output, session) {
         if (is.null(input$core_allORone))
           return(NULL)
         
-        if (input$core_allORone ==  'Two Species by Site' && input$core_SpeciesName_One == unique(core_Filter_One()$CommonName)) {
+        if (input$core_allORone ==  'Two Species by Site' && input$core_SpeciesName_Two_One == unique(core_Filter_Two_One()$CommonName)) {
           return(list(
-            src = glue("www/Indicator_Species/{unique(core_Filter_One()$Species)}.jpg"),
+            src = glue("www/Indicator_Species/{unique(core_Filter_Two_One()$Species)}.jpg"),
             contentType = "image/jpg",
             width = 200,
             height = 200
           ))
         }
-        else if (input$core_allORone ==  'Two Species by Island' && input$core_SpeciesName_Isl_One == unique(core_Filter_Isl()$CommonName)) {
+        else if (input$core_allORone ==  'Two Species by Island' && input$core_SpeciesName_Isl_One == unique(core_Filter_Isl_One()$CommonName)) {
           return(list(
             src = glue("www/Indicator_Species/{unique(core_Filter_Isl_One()$Species)}.jpg"),
             contentType = "image/jpg",
@@ -6981,7 +7020,7 @@ server <- function(input, output, session) {
         }
         else if (input$core_allORone ==  'Two Species by MPA' && input$core_SpeciesNameMPA == unique(core_Filter_MPA()$CommonName)) {
           return(list(
-            src = glue("www/Indicator_Species/{unique(core_Filter_MPA_MPA()$Species)}.jpg"),
+            src = glue("www/Indicator_Species/{unique(core_Filter_MPA()$Species)}.jpg"),
             contentType = "image/jpg",
             width = 200,
             height = 200
@@ -6993,9 +7032,9 @@ server <- function(input, output, session) {
         if (is.null(input$core_allORone))
           return(NULL)
         
-        if (input$core_allORone ==  'Two Species by Site' && input$core_SpeciesName_Two == unique(core_Filter_Two()$CommonName)) {
+        if (input$core_allORone ==  'Two Species by Site' && input$core_SpeciesName_Two_Two == unique(core_Filter_Two_Two()$CommonName)) {
           return(list(
-            src = glue("www/Indicator_Species/{unique(core_Filter_Two()$Species)}.jpg"),
+            src = glue("www/Indicator_Species/{unique(core_Filter_Two_Two()$Species)}.jpg"),
             contentType = "image/jpg",
             width = 200,
             height = 200
@@ -7025,24 +7064,24 @@ server <- function(input, output, session) {
         
         if (input$core_allORone ==  'Two Species by Site') {
           return(list(
-            src = glue("www/Sat_Imagery/{unique(core_Filter_One()$SiteCode)}.png"),
+            src = glue("www/Sat_Imagery/{unique(core_Filter_Two_One()$SiteCode)}.png"),
             contentType = "image/png",
             width = 430,
             height = 210))
         }
         else if (input$core_allORone ==  'Two Species by Island') {
           return(list(
-            src = glue("www/Sat_Imagery/{unique(core_Filter_Isl_One()$SiteCode)}.png"),
+            src = glue("www/Sat_Imagery/{unique(core_Filter_Isl_One()$IslandCode)}.png"),
             contentType = "image/png",
             width = 430,
             height = 210))
         }
         else if (input$core_allORone ==  'Two Species by MPA') {
           return(list(
-            src = glue("www/Sat_Imagery/{unique(core_Filter_MPA_MPA()$SiteCode)}.png"),
+            src = glue("www/Sat_Imagery/{unique(core_Filter_MPA()$IslandCode)}.png"),
             contentType = "image/png",
-            width = 430,
-            height = 210))
+            width = 185,
+            height = 200))
         }
       }, deleteFile = FALSE)
       
@@ -7052,21 +7091,21 @@ server <- function(input, output, session) {
         
         if (input$core_allORone ==  'Two Species by Site') {
           return(list(
-            src = glue("www/Sat_Imagery/{unique(core_Filter_One()$SiteCode)}.png"),
+            src = glue("www/Sat_Imagery/{unique(core_Filter_Two_One()$SiteCode)}.png"),
             contentType = "image/png",
             width = 1287,
             height = 625))
         }
         else if (input$core_allORone ==  'Two Species by Island') {
           return(list(
-            src = glue("www/Sat_Imagery/{unique(core_Filter_Isl_One()$SiteCode)}.png"),
+            src = glue("www/Sat_Imagery/{unique(core_Filter_Isl_One()$IslandCode)}.png"),
             contentType = "image/png",
             width = 1287,
             height = 625))
         }
         else if (input$core_allORone ==  'Two Species by MPA') {
           return(list(
-            src = glue("www/Sat_Imagery/{unique(core_Filter_MPA_MPA()$SiteCode)}.png"),
+            src = glue("www/Sat_Imagery/{unique(core_Filter_MPA()$IslandCode)}.png"),
             contentType = "image/png",
             width = 1287,
             height = 625))
@@ -7075,14 +7114,14 @@ server <- function(input, output, session) {
       
       output$core_SpeciesPhoto_Two_One <- renderImage({
         
-        if (is.null(input$core_SpeciesName_One))
+        if (is.null(input$core_SpeciesName_Two_One))
           return(NULL) 
         
-        if (input$core_SpeciesName_One == unique(core_Filter_One()$CommonName)) {
+        if (input$core_SpeciesName_Two_One == unique(core_Filter_Two_One()$CommonName)) {
           return(list(
-            src = glue("www/Indicator_Species/{unique(core_Filter_One()$Species)}.jpg"),
+            src = glue("www/Indicator_Species/{unique(core_Filter_Two_One()$Species)}.jpg"),
             contentType = "image/jpg",
-            alt = glue("{unique(core_Filter_One()$CommonName)}"),
+            alt = glue("{unique(core_Filter_Two_One()$CommonName)}"),
             width = 450,
             height = 450
           ))
@@ -7091,11 +7130,11 @@ server <- function(input, output, session) {
       
       output$core_SpeciesPhoto_Two_Two <- renderImage({
         
-        if (input$core_SpeciesName_Two == unique(core_Filter_Two()$CommonName)) {
+        if (input$core_SpeciesName_Two_Two == unique(core_Filter_Two_Two()$CommonName)) {
           return(list(
-            src = glue("www/Indicator_Species/{unique(core_Filter_Two()$Species)}.jpg"),
+            src = glue("www/Indicator_Species/{unique(core_Filter_Two_Two()$Species)}.jpg"),
             contentType = "image/jpg",
-            alt = glue("{unique(core_Filter_Two()$CommonName)}"),
+            alt = glue("{unique(core_Filter_Two_Two()$CommonName)}"),
             width = 450,
             height = 450
           ))
@@ -7176,36 +7215,36 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(core_alphaPDO_UW_Two()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = core_Filter_One(), 
+              geom_line(data = core_Filter_Two_One(), 
                         aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName),
                         size = 1) +
-              geom_line(data = core_Filter_Two(), 
+              geom_line(data = core_Filter_Two_Two(), 
                         aes(x = Date, y = MeanDensity_sqm*input$core_Y_Slide_Two, group = ScientificName, color = CommonName),
                         size = 1) +
-              geom_errorbar(data = core_Filter_One(),
+              geom_errorbar(data = core_Filter_Two_One(),
                             aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                             width = 2, color = "black", alpha = as.numeric(input$core_EB_Two)) +
-              geom_errorbar(data = core_Filter_Two(),
+              geom_errorbar(data = core_Filter_Two_Two(),
                             aes(x = Date, ymin = MeanDensity_sqm*input$core_Y_Slide_Two - StandardError*input$core_Y_Slide_Two, 
                                 ymax = MeanDensity_sqm*input$core_Y_Slide_Two + StandardError*input$core_Y_Slide_Two),
                             width = 2, color = "black", alpha = as.numeric(input$core_EB_Two)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Two, 
-                                                     name = glue("{unique(core_Filter_Two()$CommonName)} per square meter"))) +
-              scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_One()$Date), 
-                           limits = c(min(as.Date(core_Filter_One()$Date))-365, 
-                                      max(as.Date(core_Filter_One()$Date))+365),
+                                                     name = glue("{unique(core_Filter_Two_Two()$CommonName)} per square meter"))) +
+              scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_Two_One()$Date), 
+                           limits = c(min(as.Date(core_Filter_Two_One()$Date))-365, 
+                                      max(as.Date(core_Filter_Two_One()$Date))+365),
                            expand = c(0.01, 0)) +
-              labs(title = glue("{unique(core_Filter_One()$ScientificName)
-                              } and {unique(core_Filter_Two()$ScientificName)}"), 
-                   subtitle = glue("{unique(core_Filter_One()$IslandName)} {unique(core_Filter_One()$SiteName)}"),
+              labs(title = glue("{unique(core_Filter_Two_One()$ScientificName)
+                              } and {unique(core_Filter_Two_Two()$ScientificName)}"), 
+                   subtitle = glue("{unique(core_Filter_Two_One()$IslandName)} {unique(core_Filter_Two_One()$SiteName)}"),
                    color = "Common Name",
                    caption = 
                      glue(
-                       "{core_Filter_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(core_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
-                     } and has a mean depth of {round(mean(core_Filter_One()$MeanDepth), 2)} ft"),
+                       "{core_Filter_Two_One()$SiteName} is typically surveyed in {
+                     month(round(mean(month(core_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     } and has a mean depth of {round(mean(core_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(core_Filter_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(core_Filter_Two_One()$CommonName)} per square meter')) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -7229,36 +7268,36 @@ server <- function(input, output, session) {
                         position = "identity", alpha = as.numeric(core_alphaPDO_UW_Two()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
               new_scale_fill() +
-              geom_col(data = core_Filter_One(), 
+              geom_col(data = core_Filter_Two_One(), 
                        aes(x = Date - 50, y = MeanDensity_sqm, fill = CommonName),
                        position = "dodge",
                        width = 100) +
-              geom_col(data = core_Filter_Two(), 
+              geom_col(data = core_Filter_Two_Two(), 
                        aes(x = Date + 50, y = MeanDensity_sqm*input$core_Y_Slide_Two, fill = CommonName),
                        position = "dodge",
                        width = 100) +
-              geom_errorbar(data = core_Filter_One(),
+              geom_errorbar(data = core_Filter_Two_One(),
                             aes(x = Date - 50, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                             width = 2, color = "black", alpha = as.numeric(input$core_EB_Two)) +
-              geom_errorbar(data = core_Filter_Two(),
+              geom_errorbar(data = core_Filter_Two_Two(),
                             aes(x = Date + 50, ymin = MeanDensity_sqm*input$core_Y_Slide_Two - StandardError*input$core_Y_Slide_Two, 
                                 ymax = MeanDensity_sqm*input$core_Y_Slide_Two + StandardError*input$core_Y_Slide_Two),
                             width = 2, color = "black", alpha = as.numeric(input$core_EB_Two)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Two, 
-                                                     name = glue("{unique(core_Filter_Two()$CommonName)} per square meter"))) +
-              scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_One()$Date),
-                           limits = c(min(as.Date(core_Filter_One()$Date))-365,
-                                      max(as.Date(core_Filter_One()$Date))+365),
+                                                     name = glue("{unique(core_Filter_Two_Two()$CommonName)} per square meter"))) +
+              scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_Two_One()$Date),
+                           limits = c(min(as.Date(core_Filter_Two_One()$Date))-365,
+                                      max(as.Date(core_Filter_Two_One()$Date))+365),
                            expand = c(0.01, 0)) +
-              labs(title = glue("{unique(core_Filter_One()$ScientificName)
-                              } and {unique(core_Filter_Two()$ScientificName)}"),
-                   subtitle = glue("{unique(core_Filter_One()$IslandName)} {unique(core_Filter_One()$SiteName)}"),
+              labs(title = glue("{unique(core_Filter_Two_One()$ScientificName)
+                              } and {unique(core_Filter_Two_Two()$ScientificName)}"),
+                   subtitle = glue("{unique(core_Filter_Two_One()$IslandName)} {unique(core_Filter_Two_One()$SiteName)}"),
                    color = "Common Name",
                    caption =
                      glue(
-                       "{core_Filter_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(core_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
-                     } and has a mean depth of {round(mean(core_Filter_One()$MeanDepth), 2)} ft"),
+                       "{core_Filter_Two_One()$SiteName} is typically surveyed in {
+                     month(round(mean(month(core_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     } and has a mean depth of {round(mean(core_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
               scale_fill_manual(values = SpeciesColor) +
@@ -7283,35 +7322,35 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(core_alphaPDO_UW_Two()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              stat_smooth(data = core_Filter_One(), 
+              stat_smooth(data = core_Filter_Two_One(), 
                           aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName),
                           size = 1, span = input$core_SmoothSlide_Two, se = as.logical(input$core_SmoothSE_Two)) +
-              geom_point(data = core_Filter_One(),
+              geom_point(data = core_Filter_Two_One(),
                          aes(x = Date, y = MeanDensity_sqm, color = CommonName),
                          size = 1, alpha = as.numeric(input$core_SmoothPoint_Two)) +
-              stat_smooth(data = core_Filter_Two(), 
+              stat_smooth(data = core_Filter_Two_Two(), 
                           aes(x = Date, y = MeanDensity_sqm * input$core_Y_Slide_Two, group = ScientificName, color = CommonName),
                           size = 1,
                           span = input$core_SmoothSlide_Two,
                           se = as.logical(input$core_SmoothSE_Two)) +
-              geom_point(data = core_Filter_Two(),
+              geom_point(data = core_Filter_Two_Two(),
                          aes(x = Date, y = MeanDensity_sqm * input$core_Y_Slide_Two, color = CommonName),
                          size = 1, alpha = as.numeric(input$core_SmoothPoint_Two)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Two, 
-                                                     name = glue("{unique(core_Filter_Two()$CommonName)} per square meter"))) +
-              scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_One()$Date), 
-                           limits = c(min(as.Date(core_Filter_One()$Date))-365, 
-                                      max(as.Date(core_Filter_One()$Date))+365),
+                                                     name = glue("{unique(core_Filter_Two_Two()$CommonName)} per square meter"))) +
+              scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_Two_One()$Date), 
+                           limits = c(min(as.Date(core_Filter_Two_One()$Date))-365, 
+                                      max(as.Date(core_Filter_Two_One()$Date))+365),
                            expand = c(0.01, 0)) +
-              labs(title = glue("{unique(core_Filter_One()$ScientificName)
-                              } and {unique(core_Filter_Two()$ScientificName)}"), 
-                   subtitle = glue("{unique(core_Filter_One()$IslandName)} {unique(core_Filter_One()$SiteName)}"),
+              labs(title = glue("{unique(core_Filter_Two_One()$ScientificName)
+                              } and {unique(core_Filter_Two_Two()$ScientificName)}"), 
+                   subtitle = glue("{unique(core_Filter_Two_One()$IslandName)} {unique(core_Filter_Two_One()$SiteName)}"),
                    color = "Common Name",
-                   caption = glue("{core_Filter_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(core_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
-                     } and has a mean depth of {round(mean(core_Filter_One()$MeanDepth), 2)} ft"),
+                   caption = glue("{core_Filter_Two_One()$SiteName} is typically surveyed in {
+                     month(round(mean(month(core_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     } and has a mean depth of {round(mean(core_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(core_Filter_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(core_Filter_Two_One()$CommonName)} per square meter')) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -7328,7 +7367,7 @@ server <- function(input, output, session) {
       })
       
       output$core_DTout_Two_One <- renderDT({
-        datatable(core_Filter_One(),
+        datatable(core_Filter_Two_One(),
                   extensions = c('Buttons', 'ColReorder'),
                   options = list(
                     initComplete = JS(
@@ -7345,7 +7384,7 @@ server <- function(input, output, session) {
                                    list(list(className = 'dt-center', targets = 0:6))),
                     colReorder = TRUE),
                   rownames = FALSE) %>% 
-          formatStyle(names(core_Filter_One()),
+          formatStyle(names(core_Filter_Two_One()),
                       color = "black",
                       backgroundColor = 'white',
                       backgroundPosition = 'center'
@@ -7353,7 +7392,7 @@ server <- function(input, output, session) {
       })
       
       output$core_DTout_Two_Two <- renderDT({
-        datatable(core_Filter_Two(),
+        datatable(core_Filter_Two_Two(),
                   extensions = c('Buttons', 'ColReorder'),
                   options = list(
                     initComplete = JS(
@@ -7370,7 +7409,7 @@ server <- function(input, output, session) {
                                    list(list(className = 'dt-center', targets = 0:6))),
                     colReorder = TRUE),
                   rownames = FALSE) %>% 
-          formatStyle(names(core_Filter_Two()),
+          formatStyle(names(core_Filter_Two_Two()),
                       color = "black",
                       backgroundColor = 'white',
                       backgroundPosition = 'center'
@@ -7379,6 +7418,246 @@ server <- function(input, output, session) {
       
     }
     
+    { # core_Server_by_Island   ----
+      
+      core_Filter_Isl_One <- reactive({
+        core_DF <- core_DF %>%
+          filter(CommonName == input$core_SpeciesName_Isl_One,
+                 IslandName == input$core_IslandName_Isl) %>%
+          group_by(SurveyYear) %>%
+          mutate(Date = mean(Date))
+      })
+      
+      core_Filter_Isl_Two <- reactive({
+        core_DF <- core_DF %>%
+          filter(CommonName == input$core_SpeciesName_Isl_Two,
+                 IslandName == input$core_IslandName_Isl) %>%
+          group_by(SurveyYear) %>%
+          mutate(Date = mean(Date)) 
+      })
+      
+      core_alphaONI_Isl <- reactive({
+        if(input$core_GraphOptions_Isl == "With No Index"){
+          return(0)
+        }
+        else if(input$core_GraphOptions_Isl == "With ONI"){
+          return(1)
+        }
+        else if(input$core_GraphOptions_Isl == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$core_GraphOptions_Isl == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      core_alphaPDO_NOAA_Isl <- reactive({
+        if(input$core_GraphOptions_Isl == "With No Index"){
+          return(0)
+        }
+        if(input$core_GraphOptions_Isl == "With ONI"){
+          return(0)
+          
+        }
+        if(input$core_GraphOptions_Isl == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$core_GraphOptions_Isl == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      core_alphaPDO_UW_Isl <- reactive({
+        if(input$core_GraphOptions_Isl == "With No Index"){
+          return(0)
+        }
+        if(input$core_GraphOptions_Isl == "With ONI"){
+          return(0)
+          
+        }
+        if(input$core_GraphOptions_Isl == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$core_GraphOptions_Isl == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$core_ONIpdoPIC_Isl <- renderImage({
+        if(input$core_GraphOptions_Isl == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$core_GraphOptions_Isl == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$core_GraphOptions_Isl == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
+      core_AxisScale_Isl <- reactive({
+        if(input$core_FreeOrLock_Isl == "Locked Scales"){
+          return("fixed")
+        }
+        if(input$core_FreeOrLock_Isl == "Free Scales"){
+          return("free")
+        }
+      }) # Facet Plot Axis Scale free or fixed 
+      
+      output$core_Plot_Isl <- renderPlot({  # Single plot    ----
+        
+        if (is.null(input$core_Graph_Isl))
+          return(NULL) 
+        
+        else if(input$core_Graph_Isl == "Line") { # Line   ----
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(core_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(core_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_line(data = core_Filter_Isl_One(), 
+                        aes(x = IslandDate, y = Island_Mean_Density, group = IslandName, color = CommonName),
+                        size = 1) +
+              geom_line(data = core_Filter_Isl_Two(), 
+                        aes(x = IslandDate, y = Island_Mean_Density * input$core_Y_Slide_Isl, group = IslandName, color = CommonName),
+                        size = 1) +
+              geom_errorbar(data = core_Filter_Isl_One(), 
+                            aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
+                            width = 0, color = "black", alpha = as.numeric(input$core_EB_Isl)) +
+              geom_errorbar(data = core_Filter_Isl_Two(), 
+                            aes(x = IslandDate, ymin = Island_Mean_Density * input$core_Y_Slide_Isl - IslandSE * input$core_Y_Slide_Isl,
+                                ymax = Island_Mean_Density * input$core_Y_Slide_Isl + IslandSE * input$core_Y_Slide_Isl),
+                            width = 0, color = "black", alpha = as.numeric(input$core_EB_Isl)) +
+              scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Isl, 
+                                                     name = glue("{unique(core_Filter_Isl_Two()$CommonName)} per square meter"))) +
+              scale_x_date(date_labels = "%Y", breaks = core_Filter_Isl_One()$IslandDate, 
+                           limits = c(min(as.Date(core_Filter_Isl_One()$IslandDate))-365,
+                                      max(as.Date(core_Filter_Isl_One()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(core_Filter_Isl_One()$ScientificName)} and {unique(core_Filter_Isl_Two()$ScientificName)}"),
+                     subtitle = glue("{unique(core_Filter_Isl_One()$IslandName)}"), 
+                   color = "Common Name",
+                   x = "Year",
+                   y = expression("Mean Density (#/m"^"2"~")")) +
+              scale_color_manual(values = SpeciesColor) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        } 
+        else if(input$core_Graph_Isl == "Bar") { # Bar -----
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(core_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(core_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_col(data = core_Filter_Isl_One(), 
+                       aes(x = IslandDate - 50, y = Island_Mean_Density, fill = CommonName),
+                       position = "dodge", width = 100) +
+              geom_col(data = core_Filter_Isl_Two(), 
+                       aes(x = IslandDate + 50, y = Island_Mean_Density * input$core_Y_Slide_Isl, fill = CommonName),
+                       position = "dodge", width = 100) +
+              geom_errorbar(data = core_Filter_Isl_One(), 
+                            aes(x = IslandDate - 50, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
+                            width = 0, color = "black", alpha = as.numeric(input$core_EB_Isl)) +
+              geom_errorbar(data = core_Filter_Isl_Two(), 
+                            aes(x = IslandDate + 50, ymin = Island_Mean_Density * input$core_Y_Slide_Isl - IslandSE * input$core_Y_Slide_Isl,
+                                ymax = Island_Mean_Density * input$core_Y_Slide_Isl + IslandSE * input$core_Y_Slide_Isl),
+                            width = 0, color = "black", alpha = as.numeric(input$core_EB_Isl)) +
+              scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Isl, 
+                                                     name = glue("{unique(core_Filter_Isl_Two()$CommonName)} per square meter"))) +
+              scale_x_date(date_labels = "%Y", breaks = core_Filter_Isl_One()$IslandDate, 
+                           limits = c(min(as.Date(core_Filter_Isl_One()$IslandDate))-365, 
+                                      max(as.Date(core_Filter_Isl_One()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(core_Filter_Isl_One()$ScientificName)} and {unique(core_Filter_Isl_Two()$ScientificName)}"),
+                   subtitle = glue("{unique(core_Filter_Isl_One()$IslandName)}"),
+                   color = "Common Name",
+                   fill = "Common Name",
+                   x = "Year",
+                   y = "Mean Density") +
+              scale_fill_manual(values = SpeciesColor) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$core_Graph_Isl == "Smooth Line") { # Smooth   ----
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(core_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(core_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_smooth(data = core_Filter_Isl_One(), aes(x= IslandDate, y = Island_Mean_Density, color = CommonName),
+                          se = as.logical(input$core_SmoothSE_Isl), span = input$core_SmoothSlide_Isl) +
+              geom_smooth(data = core_Filter_Isl_Two(), 
+                          aes(x= IslandDate, y = Island_Mean_Density * input$core_Y_Slide_Isl, color = CommonName),
+                          se = as.logical(input$core_SmoothSE_Isl), span = input$core_SmoothSlide_Isl) +
+              geom_point(data = core_Filter_Isl_One(), aes(x = IslandDate, y = Island_Mean_Density, color = CommonName), 
+                         size = 2, alpha = as.numeric(input$core_SmoothPoint_Isl)) +
+              geom_point(data = core_Filter_Isl_Two(), 
+                         aes(x = IslandDate, y = Island_Mean_Density* input$core_Y_Slide_Isl, color = CommonName), 
+                         size = 2, alpha = as.numeric(input$core_SmoothPoint_Isl)) +
+              scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Isl, 
+                                                     name = glue("{unique(core_Filter_Isl_Two()$CommonName)} per square meter"))) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(core_Filter_Isl_One()$IslandDate))-365, 
+                                      max(as.Date(core_Filter_Isl_One()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(core_Filter_Isl_One()$ScientificName)} and {unique(core_Filter_Isl_Two()$ScientificName)}"),
+                   subtitle = glue("{unique(core_Filter_Isl_One()$IslandName)}"), 
+                   color = "Common Name",
+                   x = "Year",
+                   y = expression("Mean Density (#/m"^"2"~")")) +
+              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+      })
+      
+    }
   }
   
   output$outNHSF <- renderUI({ # NHSF_UI   ----

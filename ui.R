@@ -332,16 +332,16 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                        tags$hr()
       ),
       # ~ Core_Conditonals  ----
-      # ...... Two Species   ----
+      # ...... By Site   ----
       conditionalPanel(condition = "input.tabselected=='core_TP' && input.core_allORone=='Two Species by Site'",
-                       selectInput(inputId = "core_SiteName_One",
+                       selectInput(inputId = "core_SiteName_Two",
                                    label = "Choose a Site:",
                                    choices = SiteNames),
-                       selectInput(inputId = "core_SpeciesName_One",
+                       selectInput(inputId = "core_SpeciesName_Two_One",
                                    label = "Species One:",
                                    choices = levels(factor(core_DF$CommonName)),
                                    selected = "Purple Urchin"),
-                       selectInput(inputId = "core_SpeciesName_Two",
+                       selectInput(inputId = "core_SpeciesName_Two_Two",
                                    label = "Species Two:",
                                    choices = levels(factor(core_DF$CommonName)),
                                    selected = "Giant Kelp (> 1 m tall)"),
@@ -353,15 +353,15 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                     choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)")
                        )
       ),
-      # ...... Island    ----
+      # ...... By Island    ----
       conditionalPanel(condition = "input.tabselected=='core_TP' && input.core_allORone=='Two Species by Island'",
-                       selectInput(inputId = "core_SiteName_Isl",
+                       selectInput(inputId = "core_IslandName_Isl",
                                    label = "Choose a Site:",
-                                   choices = SiteNames),
+                                   choices = IslandLevels),
                        selectInput(inputId = "core_SpeciesName_Isl_One",
                                    label = "Species One:",
                                    choices = levels(factor(core_DF$CommonName)),
-                                   selected = "Purple Urchin"),
+                                   selected = "Stalked Tunicate"),
                        selectInput(inputId = "core_SpeciesName_Isl_Two",
                                    label = "Species Two:",
                                    choices = levels(factor(core_DF$CommonName)),
@@ -369,18 +369,14 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                        radioButtons(inputId = "core_Graph_Isl",
                                     label = "Choose a graph:",
                                     choices = c("Line", "Bar", "Smooth Line")),
-                       radioButtons(inputId = "core_FreeOrLock_Isl",
-                                    label =  "Axis Options:",
-                                    choices = c("Locked Scales", "Free Scales", "Single Plot")),
                        radioButtons(inputId = "core_GraphOptions_Isl",
                                     label =  "Graph Options:",
                                     choices = c("With No Index",
                                                 "With ONI",
-                                                "With PDO (NOAA)"
-                                    )
-                       )
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"))
       ),
-      # ...... MPA   ----
+      # ...... By MPA   ----
       conditionalPanel(condition = "input.tabselected=='core_TP' && input.core_allORone=='Two Species by MPA'",
                        selectInput(inputId = "core_SiteName_MPA",
                                    label = "Choose a Site:",
