@@ -356,7 +356,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
       # ...... By Island    ----
       conditionalPanel(condition = "input.tabselected=='core_TP' && input.core_allORone=='Two Species by Island'",
                        selectInput(inputId = "core_IslandName_Isl",
-                                   label = "Choose a Site:",
+                                   label = "Choose an Island:",
                                    choices = IslandLevels),
                        selectInput(inputId = "core_SpeciesName_Isl_One",
                                    label = "Species One:",
@@ -378,30 +378,26 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
       ),
       # ...... By MPA   ----
       conditionalPanel(condition = "input.tabselected=='core_TP' && input.core_allORone=='Two Species by MPA'",
-                       selectInput(inputId = "core_SiteName_MPA",
-                                   label = "Choose a Site:",
-                                   choices = SiteNames),
+                       selectInput(inputId = "core_IslandName_MPA",
+                                   label = "Choose an MPA:",
+                                   choices = MPA_Levels),
                        selectInput(inputId = "core_SpeciesName_MPA_One",
                                    label = "Species One:",
-                                   choices = levels(factor(core_DF$CommonName)),
+                                   choices = levels(factor(core_DFMPA$CommonName)),
                                    selected = "Purple Urchin"),
                        selectInput(inputId = "core_SpeciesName_MPA_Two",
                                    label = "Species Two:",
-                                   choices = levels(factor(core_DF$CommonName)),
+                                   choices = levels(factor(core_DFMPA$CommonName)),
                                    selected = "Giant Kelp (> 1 m tall)"),
                        radioButtons(inputId = "core_Graph_MPA",
                                     label = "Choose a graph:",
                                     choices = c("Line", "Bar", "Smooth Line")),
-                       radioButtons(inputId = "core_FreeOrLock_MPA",
-                                    label =  "Axis Options:",
-                                    choices = c("Locked Scales", "Free Scales", "Single Plot")),
                        radioButtons(inputId = "core_GraphOptions_MPA",
                                     label =  "Graph Options:",
                                     choices = c("With No Index",
                                                 "With ONI",
-                                                "With PDO (NOAA)"
-                                    )
-                       )
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"))
       ),
       # ~ NHSF_Conditonals  ----
       # ...... One Species  ----
@@ -846,6 +842,8 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                                             "One Species by Island",
                                                             "One Species by MPA",
                                                             "Two Species by Site",
+                                                            # "Two Species by Island",
+                                                            # "Two Species by MPA",
                                                             "All Species"),
                                                 inline = FALSE)),
                          column(2, conditionalPanel(
