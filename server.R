@@ -7826,15 +7826,18 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(core_Filter_MPA_One()$ScientificName)} and {unique(core_Filter_MPA_Two()$ScientificName)}"),
                    subtitle = glue("{unique(core_Filter_MPA_One()$MPA_Name)}"), 
                    color = "Common Name",
+                   linetype = "Reserve Status",
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
-              scale_color_manual(values = SpeciesColor) +
-              scale_linetype_manual(values = c("Inside" = "dashed", "Outside" = "solid")) +
+              scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 1)) +
+              scale_linetype_manual(values = c("Inside" = "dashed", "Outside" = "solid"), 
+                                    guide = guide_legend(order = 2)) +
               theme_classic() +
               theme(legend.position = "bottom",
                     legend.background = element_rect(),
                     legend.title = element_text(size = 14, colour = "black", face = "bold"),
                     legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    legend.key.width = unit(2, "cm"),
                     plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
                     plot.subtitle = element_text(hjust = 0.5, size = 16),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
@@ -7906,10 +7909,13 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(core_alphaPDO_UW_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_smooth(data = core_Filter_MPA_One(), aes(x= MPA_Date, y = MPA_Mean, color = CommonName),
+              geom_smooth(data = core_Filter_MPA_One(), 
+                          aes(x= MPA_Date, y = MPA_Mean, group = ReserveStatus, 
+                              color = CommonName, linetype = ReserveStatus),
                           se = as.logical(input$core_SmoothSE_MPA), span = input$core_SmoothSlide_MPA) +
               geom_smooth(data = core_Filter_MPA_Two(), 
-                          aes(x= MPA_Date, y = MPA_Mean * input$core_Y_Slide_MPA, color = CommonName),
+                          aes(x= MPA_Date, y = MPA_Mean * input$core_Y_Slide_MPA, group = ReserveStatus, 
+                              color = CommonName, linetype = ReserveStatus),
                           se = as.logical(input$core_SmoothSE_MPA), span = input$core_SmoothSlide_MPA) +
               geom_point(data = core_Filter_MPA_One(), aes(x = MPA_Date, y = MPA_Mean, color = CommonName), 
                          size = 2, alpha = as.numeric(input$core_SmoothPoint_MPA)) +
@@ -7925,14 +7931,18 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(core_Filter_MPA_One()$ScientificName)} and {unique(core_Filter_MPA_Two()$ScientificName)}"),
                    subtitle = glue("{unique(core_Filter_MPA_One()$IslandName)}"), 
                    color = "Common Name",
+                   linetype = "Reserve Status",
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
-              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
+              scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 1)) +
+              scale_linetype_manual(values = c("Inside" = "dashed", "Outside" = "solid"), 
+                                    guide = guide_legend(order = 2)) +
               theme_classic() +
               theme(legend.position = "bottom",
                     legend.background = element_rect(),
                     legend.title = element_text(size = 14, colour = "black", face = "bold"),
                     legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    legend.key.width = unit(2, "cm"),
                     plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
                     plot.subtitle = element_text(hjust = 0.5, size = 16),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
@@ -7944,968 +7954,6 @@ server <- function(input, output, session) {
         }
       })
       
-    }
-    
-  }
-  
-  output$outNHSF <- renderUI({ # NHSF_UI   ----
-    if (is.null(input$allORoneNHSF))
-      return(NULL)
-    
-    if(input$allORoneNHSF == "One Species by Site") {
-      dyn_ui <- tabPanel("NHSF", value = 'nhsf', # NHSF_TP_one      ----
-                         plotOutput(outputId = "nhsf1",
-                                    height = 800),
-                         tags$hr())
-    }
-    else if (input$allORoneNHSF == "One Species by Island (Free Scales)") {
-      dyn_ui <- tabPanel("NHSF", value = 'nhsf', # NHSF_TP_byISL  ----
-                         plotOutput(outputId = "nhsfBYisl1"),
-                         plotOutput(outputId = "nhsfBYisl2"),
-                         plotOutput(outputId = "nhsfBYisl3"),
-                         plotOutput(outputId = "nhsfBYisl4"),
-                         plotOutput(outputId = "nhsfBYisl5"),
-                         tags$hr()
-      )
-    }
-    else if (input$allORoneNHSF == "One Species by Island (Locked Scales)") {
-      dyn_ui <- tabPanel("NHSF", value = 'nhsf', # NHSF_TP_byISL_Locked  ----
-                         plotOutput(outputId = "nhsfLocked",
-                                    height = 1200),
-                         tags$hr()
-      )
-    }
-    return(dyn_ui)
-  })
-  
-  { # ........ NHSF_Servers ........   ----
-    
-    { # NHSF_Server_One   ----
-      
-      output$nhsf1 <- renderPlot({
-        
-        nhsfone <- reactive({
-          nhsfRaw %>%
-            filter(SiteName == input$SiteNamenhsf,
-                   CommonName == input$nhsfSpeciesName)
-        })
-        nhsfMeanSize <- reactive({
-          nhsfMean %>%
-            filter(SiteName == input$SiteNamenhsf,
-                   CommonName == input$nhsfSpeciesName)
-          
-        })
-        
-        if (is.null(input$nhsfgraph))
-          return(NULL) 
-        
-        if (input$nhsfgraph == "Violin") {
-          return({
-            ggplot() +
-              geom_violin(data = nhsfone(), 
-                          aes(x = Date, y = Size_mm, group = Date, fill = CommonName, color = CommonName),
-                          scale = "area", trim = TRUE) +
-              scale_x_date(date_labels = "%Y", breaks = unique(nhsfone()$Date), expand = c(0.01, 0)) +
-              labs(title = glue("{unique(nhsfone()$ScientificName)}"),
-                   subtitle= glue("{unique(nhsfone()$IslandName)} {unique(nhsfone()$SiteName)}"), 
-                   fill = "Common Name",
-                   color = "Common Name",
-                   x = "Year",
-                   y = "Size Distribution (mm)") +
-              stat_summary(data = nhsfone(), 
-                           aes(x = Date, y = Size_mm, group = Date),
-                           fun.data = function(y, upper_limit = min(nhsfone()$Size_mm)*-1) {
-                             return(data.frame(y = upper_limit,
-                                               label = paste(' n= \n', length(y))))},
-                           position = "identity",
-                           geom = "text",
-                           hjust = 0.5,
-                           vjust = 0.5,
-                           angle = 0,
-                           size = 4,
-                           color = "black") +
-              stat_summary(data = nhsfone(), 
-                           aes(x = Date, y = Size_mm, group = Date),
-                           fun = median, geom = "point", size = 2, color = "black") +
-              scale_fill_manual(values = SpeciesColor) +
-              scale_color_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.background = element_rect(),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if (input$nhsfgraph == "Boxplot") {
-          return({
-            ggplot() +
-              geom_boxplot(data = nhsfone(), 
-                           aes(x = Date, y = Size_mm, group = Date, fill = CommonName),
-                           width = 200) +
-              scale_x_date(date_labels = "%Y", breaks = unique(nhsfone()$Date), expand = c(0.01, 0)) +
-              labs(title = glue("{unique(nhsfone()$ScientificName)}"),
-                   subtitle= glue("{unique(nhsfone()$IslandName)} {unique(nhsfone()$SiteName)}"), 
-                   fill = "Common Name",
-                   x = "Year",
-                   y = "Size Distribution (mm)") +
-              stat_summary(data = nhsfone(), 
-                           aes(x = Date, y = Size_mm, group = Date),
-                           fun.data = function(y, upper_limit = min(nhsfone()$Size_mm)*-1) {
-                             return(data.frame(y = upper_limit,
-                                               label = paste(' n= \n', length(y))))},
-                           position = "identity",
-                           geom = "text",
-                           hjust = 0.5,
-                           vjust = 0.5,
-                           angle = 0,
-                           size = 4) +
-              scale_fill_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.background = element_rect(),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$nhsfgraph == "Joyplot"){
-          return({
-            ggplot() +
-              geom_density_ridges(data = nhsfone(), 
-                                  aes(x = Size_mm, y = Date, group = Date, fill = CommonName, height = ..density..),
-                                  rel_min_height = .01, alpha = .9, stat = "density", scale = 3) +
-              # stat_density_ridges(data = nhsfone(), aes(x = Size_mm, y = Date, group = Date, fill = CommonName, height = ..density..),
-              # quantile_lines = TRUE, quantiles = 2) +
-              scale_y_date(date_labels = "%Y", date_breaks = "1 year", expand = c(0.01, 0)) +
-              scale_x_continuous(limits = c(0, max(nhsfone()$Size_mm))) +
-              labs(title = glue("{unique(nhsfone()$ScientificName)}"),
-                   subtitle= glue("{unique(nhsfone()$IslandName)} {unique(nhsfone()$SiteCode)}"),
-                   fill = "Common Name",
-                   x = "Size Distribution (mm)",
-                   y = "Year") +
-              scale_fill_manual(values = SpeciesColor) +
-              theme_ridges() +
-              theme(legend.position = "bottom",
-                    legend.background = element_rect(),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        }
-        else if(input$nhsfgraph == "Mean Sizes"){
-          return({
-            ggplot() +
-              geom_line(data = nhsfMeanSize(), 
-                        aes(x = Date, y = MeanSize, group = CommonName, color = CommonName),
-                        size = 1) +
-              scale_x_date(date_labels = "%Y", breaks = unique(nhsfone()$Date), expand = c(0.01, 0)) +
-              labs(title = glue("{unique(nhsfMeanSize()$ScientificName)}"),
-                   subtitle= glue("{unique(nhsfMeanSize()$IslandName)} {unique(nhsfMeanSize()$SiteName)}"), 
-                   color = "Common Name",
-                   x = "Year",
-                   y = "Mean Size (mm)") +
-              geom_text(data = nhsfMeanSize(),
-                        aes(x = Date, y = max(nhsfMeanSize()$MeanSize*1.1), 
-                            label = paste(' n= \n', nhsfMeanSize()$TotalCount)),
-                        vjust = .5,
-                        hjust = .5,
-                        angle = 0, 
-                        color = "black",
-                        size = 5) +
-              geom_errorbar(data = nhsfMeanSize(),
-                            aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
-                            position = position_dodge(width = 0.9),
-                            width = 0.25,
-                            color = "black") +
-              scale_color_manual(values = SpeciesColor) +
-              theme_classic() +
-              theme(legend.position = "bottom",
-                    legend.background = element_rect(),
-                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
-                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                    axis.title = element_text(size = 16, face = "bold"),
-                    axis.text.y = element_text(size = 12, face = "bold"),
-                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-          })
-        } 
-      })
-      
-    }
-    
-    { # NHSF_Server_byIsl   ----
-      
-      output$nhsfBYisl1 <- renderPlot({
-        
-        if (is.null(input$nhsfgraphbyIsl))
-          return(NULL) 
-        
-        if (input$nhsfgraphbyIsl == "Violin") {
-          return({nhsfSM <- reactive({
-            nhsfRaw %>%
-              filter(IslandCode == "SM",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-          })
-          ggplot(nhsfSM(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
-            geom_violin(scale = "area", trim = TRUE) +
-            labs(title = glue("{unique(nhsfSM()$ScientificName)}"),
-                 subtitle= glue("{unique(nhsfSM()$IslandName)}"), 
-                 fill = "Common Name",
-                 color = NULL,
-                 x = NULL,
-                 y = "Mean Size (mm)") +
-            stat_summary(
-              fun.data = function(y, upper_limit = max(nhsfSM()$Size_mm)*1.1) {
-                return(data.frame(y = upper_limit,
-                                  label = paste(' n= \n', length(y))))},
-              position = "identity",
-              geom = "text",
-              hjust = 0.5,
-              vjust = 0.5,
-              angle = 0,
-              size = 4,
-              color = "black") +
-            stat_summary(fun=median, geom="point", size=2, color="black") +
-            scale_fill_manual(values=c("blue3")) +
-            scale_color_manual(values=c("blue3")) +
-            theme_classic() +
-            theme(legend.position = "none",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
-          })
-        }
-        else if (input$nhsfgraphbyIsl == "Boxplot") {
-          return({nhsfSM <- reactive({
-            nhsfRaw %>%
-              filter(IslandCode == "SM",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-          })
-          ggplot(nhsfSM(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
-            geom_boxplot(width=.5, size = 1) +
-            labs(title = glue("{unique(nhsfSM()$ScientificName)}"),
-                 subtitle= glue("{unique(nhsfSM()$IslandName)}"), 
-                 fill = "Common Name",
-                 x = NULL,
-                 y = "Mean Size (mm)") +
-            stat_summary(
-              fun.data = function(y, upper_limit = max(nhsfSM()$Size_mm)*1.1) {
-                return(data.frame(y = upper_limit,
-                                  label = paste(' n= \n', length(y))))},
-              position = "identity",
-              geom = "text",
-              hjust = 0.5,
-              vjust = 0.5,
-              angle = 0,
-              size = 4) +
-            #stat_summary(fun=median, geom="point", size=2, color="blue") +
-            scale_fill_manual(values=c("blue3")) +
-            theme_classic() +
-            theme(legend.position = "none",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold")
-            )
-          })
-        }
-        else if(input$nhsfgraphbyIsl == "Mean Sizes"){
-          return({nhsfSM <- reactive({
-            nhsfRaw %>%
-              group_by(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-              mutate(TotalCount = length(Size_mm),
-                     MeanSize = sum(Size_mm)/length(Size_mm),
-                     StandardDeviation = sd(Size_mm, na.rm = TRUE),
-                     StandardError = std.error(Size_mm, na.rm = TRUE)) %>%
-              select(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear, MeanSize, TotalCount, StandardError, StandardDeviation) %>%
-              distinct()%>%
-              filter(IslandCode == "SM",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-            
-          })
-          ggplot(nhsfSM(), aes(x = SurveyYear , y = MeanSize, group = CommonName, color = CommonName)) +
-            geom_line(size = 1) +
-            geom_point(size = 2) +
-            labs(title = glue("{unique(nhsfSM()$ScientificName)}"),
-                 subtitle= glue("{unique(nhsfSM()$IslandName)}"), 
-                 color = "Common Name",
-                 x = NULL,
-                 y = "Mean Size (mm)") +
-            geom_text(aes(y = max(nhsfSM()$MeanSize*1.1), label = paste(' n= \n', nhsfSM()$TotalCount)),
-                      position = ,
-                      vjust = .5,
-                      hjust = .5,
-                      angle = 0, 
-                      color = "black") +
-            geom_errorbar(aes(ymin = MeanSize - StandardError,
-                              ymax = MeanSize + StandardError),
-                          position = position_dodge(width = 0.9),
-                          width = 0.25,
-                          color = "black") +
-            scale_color_manual(values=c("blue3")) +
-            theme_classic() +
-            theme(legend.position = "none",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
-          })
-        } 
-      })
-      
-      output$nhsfBYisl2 <- renderPlot({
-        
-        if (is.null(input$nhsfgraphbyIsl))
-          return(NULL) 
-        
-        if (input$nhsfgraphbyIsl == "Violin") {
-          return({nhsfSR <- reactive({
-            nhsfRaw %>%
-              filter(IslandCode == "SR",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-          })
-          ggplot(nhsfSR(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
-            geom_violin(scale = "area", trim = TRUE) +
-            labs(title = NULL,
-                 subtitle= glue("{unique(nhsfSR()$IslandName)}"), 
-                 fill = "Common Name",
-                 color = NULL,
-                 x = NULL,
-                 y = "Mean Size (mm)") +
-            stat_summary(
-              fun.data = function(y, upper_limit = max(nhsfSR()$Size_mm)*1.1) {
-                return(data.frame(y = upper_limit,
-                                  label = paste(' n= \n', length(y))))},
-              position = "identity",
-              geom = "text",
-              hjust = 0.5,
-              vjust = 0.5,
-              angle = 0,
-              size = 4,
-              color = "black") +
-            stat_summary(fun=median, geom="point", size=2, color="black") +
-            scale_fill_manual(values=c("forestgreen")) +
-            scale_color_manual(values=c("forestgreen")) +
-            theme_classic() +
-            theme(legend.position = "none",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
-          })
-        }
-        else if (input$nhsfgraphbyIsl == "Boxplot") {
-          return({nhsfSR <- reactive({
-            nhsfRaw %>%
-              filter(IslandCode == "SR",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-          })
-          ggplot(nhsfSR(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
-            geom_boxplot(width=.5, size = 1) +
-            labs(title = NULL,
-                 subtitle= glue("{unique(nhsfSR()$IslandName)}"), 
-                 fill = "Common Name",
-                 x = NULL,
-                 y = "Mean Size (mm)") +
-            stat_summary(
-              fun.data = function(y, upper_limit = max(nhsfSR()$Size_mm)*1.1) {
-                return(data.frame(y = upper_limit,
-                                  label = paste(' n= \n', length(y))))},
-              position = "identity",
-              geom = "text",
-              hjust = 0.5,
-              vjust = 0.5,
-              angle = 0,
-              size = 4) +
-            #stat_summary(fun=median, geom="point", size=2, color="blue") +
-            scale_fill_manual(values=c("forestgreen")) +
-            theme_classic() +
-            theme(legend.position = "none",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold")
-            )
-          })
-        }
-        else if(input$nhsfgraphbyIsl == "Mean Sizes"){
-          return({nhsfSR <- reactive({
-            nhsfRaw %>%
-              group_by(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-              mutate(TotalCount = length(Size_mm),
-                     MeanSize = sum(Size_mm)/length(Size_mm),
-                     StandardDeviation = sd(Size_mm, na.rm = TRUE),
-                     StandardError = std.error(Size_mm, na.rm = TRUE)) %>%
-              select(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear, MeanSize, TotalCount, StandardError, StandardDeviation) %>%
-              distinct()%>%
-              filter(IslandCode == "SR",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-            
-          })
-          ggplot(nhsfSR(), aes(x = SurveyYear , y = MeanSize, group = CommonName, color = CommonName)) +
-            geom_line(size = 1) +
-            geom_point(size = 2) +
-            labs(title = NULL,
-                 subtitle= glue("{unique(nhsfSR()$IslandName)}"), 
-                 color = "Common Name",
-                 x = NULL,
-                 y = "Mean Size (mm)") +
-            geom_text(aes(y = max(nhsfSR()$MeanSize*1.1), label = paste(' n= \n', nhsfSR()$TotalCount)),
-                      position = ,
-                      vjust = .5,
-                      hjust = .5,
-                      angle = 0, 
-                      color = "black") +
-            geom_errorbar(aes(ymin = MeanSize - StandardError,
-                              ymax = MeanSize + StandardError),
-                          position = position_dodge(width = 0.9),
-                          width = 0.25,
-                          color = "black") +
-            scale_color_manual(values=c("forestgreen")) +
-            theme_classic() +
-            theme(legend.position = "none",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
-          })
-        } 
-      })
-      
-      output$nhsfBYisl3 <- renderPlot({
-        
-        if (is.null(input$nhsfgraphbyIsl))
-          return(NULL) 
-        
-        if (input$nhsfgraphbyIsl == "Violin") {
-          return({nhsfSC <- reactive({
-            nhsfRaw %>%
-              filter(IslandCode == "SC",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-          })
-          ggplot(nhsfSC(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
-            geom_violin(scale = "area", trim = TRUE) +
-            labs(title = NULL,
-                 subtitle= glue("{unique(nhsfSC()$IslandName)}"), 
-                 fill = "Common Name",
-                 color = NULL,
-                 x = NULL,
-                 y = "Mean Size (mm)") +
-            stat_summary(
-              fun.data = function(y, upper_limit = max(nhsfSC()$Size_mm)*1.1) {
-                return(data.frame(y = upper_limit,
-                                  label = paste(' n= \n', length(y))))},
-              position = "identity",
-              geom = "text",
-              hjust = 0.5,
-              vjust = 0.5,
-              angle = 0,
-              size = 4,
-              color = "black") +
-            stat_summary(fun=median, geom="point", size=2, color="black") +
-            scale_fill_manual(values=c("gold")) +
-            scale_color_manual(values=c("gold")) +
-            theme_classic() +
-            theme(legend.position = "none",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
-          })
-        }
-        else if (input$nhsfgraphbyIsl == "Boxplot") {
-          return({nhsfSC <- reactive({
-            nhsfRaw %>%
-              filter(IslandCode == "SC",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-          })
-          ggplot(nhsfSC(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
-            geom_boxplot(width=.5, size = 1) +
-            labs(title = NULL,
-                 subtitle= glue("{unique(nhsfSC()$IslandName)}"), 
-                 fill = "Common Name",
-                 x = NULL,
-                 y = "Mean Size (mm)") +
-            stat_summary(
-              fun.data = function(y, upper_limit = max(nhsfSC()$Size_mm)*1.1) {
-                return(data.frame(y = upper_limit,
-                                  label = paste(' n= \n', length(y))))},
-              position = "identity",
-              geom = "text",
-              hjust = 0.5,
-              vjust = 0.5,
-              angle = 0,
-              size = 4) +
-            #stat_summary(fun=median, geom="point", size=2, color="blue") +
-            scale_fill_manual(values=c("gold")) +
-            theme_classic() +
-            theme(legend.position = "none",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold")
-            )
-          })
-        }
-        else if(input$nhsfgraphbyIsl == "Mean Sizes"){
-          return({nhsfSC <- reactive({
-            nhsfRaw %>%
-              group_by(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-              mutate(TotalCount = length(Size_mm),
-                     MeanSize = sum(Size_mm)/length(Size_mm),
-                     StandardDeviation = sd(Size_mm, na.rm = TRUE),
-                     StandardError = std.error(Size_mm, na.rm = TRUE)) %>%
-              select(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear, MeanSize, TotalCount, StandardError, StandardDeviation) %>%
-              distinct()%>%
-              filter(IslandCode == "SC",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-            
-          })
-          ggplot(nhsfSC(), aes(x = SurveyYear , y = MeanSize, group = CommonName, color = CommonName)) +
-            geom_line(size = 1) +
-            geom_point(size = 2) +
-            labs(title = NULL,
-                 subtitle= glue("{unique(nhsfSC()$IslandName)}"), 
-                 color = "Common Name",
-                 x = NULL,
-                 y = "Mean Size (mm)") +
-            geom_text(aes(y = max(nhsfSC()$MeanSize*1.1), label = paste(' n= \n', nhsfSC()$TotalCount)),
-                      position = ,
-                      vjust = .5,
-                      hjust = .5,
-                      angle = 0, 
-                      color = "black") +
-            geom_errorbar(aes(ymin = MeanSize - StandardError,
-                              ymax = MeanSize + StandardError),
-                          position = position_dodge(width = 0.9),
-                          width = 0.25,
-                          color = "black") +
-            scale_color_manual(values=c("gold")) +
-            theme_classic() +
-            theme(legend.position = "none",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
-          })
-        } 
-      })
-      
-      output$nhsfBYisl4 <- renderPlot({
-        
-        if (is.null(input$nhsfgraphbyIsl))
-          return(NULL) 
-        
-        if (input$nhsfgraphbyIsl == "Violin") {
-          return({nhsfAN <- reactive({
-            nhsfRaw %>%
-              filter(IslandCode == "AN",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-          })
-          ggplot(nhsfAN(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
-            geom_violin(scale = "area", trim = TRUE) +
-            labs(title = NULL,
-                 subtitle= glue("{unique(nhsfAN()$IslandName)}"), 
-                 fill = "Common Name",
-                 color = NULL,
-                 x = NULL,
-                 y = "Mean Size (mm)") +
-            stat_summary(
-              fun.data = function(y, upper_limit = max(nhsfAN()$Size_mm)*1.1) {
-                return(data.frame(y = upper_limit,
-                                  label = paste(' n= \n', length(y))))},
-              position = "identity",
-              geom = "text",
-              hjust = 0.5,
-              vjust = 0.5,
-              angle = 0,
-              size = 4,
-              color = "black") +
-            stat_summary(fun=median, geom="point", size=2, color="black") +
-            scale_fill_manual(values=c("orangered")) +
-            scale_color_manual(values=c("orangered")) +
-            theme_classic() +
-            theme(legend.position = "none",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
-          })
-        }
-        else if (input$nhsfgraphbyIsl == "Boxplot") {
-          return({nhsfAN <- reactive({
-            nhsfRaw %>%
-              filter(IslandCode == "AN",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-          })
-          ggplot(nhsfAN(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
-            geom_boxplot(width=.5, size = 1) +
-            labs(title = NULL,
-                 subtitle= glue("{unique(nhsfAN()$IslandName)}"), 
-                 fill = "Common Name",
-                 x = NULL,
-                 y = "Mean Size (mm)") +
-            stat_summary(
-              fun.data = function(y, upper_limit = max(nhsfAN()$Size_mm)*1.1) {
-                return(data.frame(y = upper_limit,
-                                  label = paste(' n= \n', length(y))))},
-              position = "identity",
-              geom = "text",
-              hjust = 0.5,
-              vjust = 0.5,
-              angle = 0,
-              size = 4) +
-            #stat_summary(fun=median, geom="point", size=2, color="blue") +
-            scale_fill_manual(values=c("orangered")) +
-            theme_classic() +
-            theme(legend.position = "none",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold")
-            )
-          })
-        }
-        else if(input$nhsfgraphbyIsl == "Mean Sizes"){
-          return({nhsfAN <- reactive({
-            nhsfRaw %>%
-              group_by(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-              mutate(TotalCount = length(Size_mm),
-                     MeanSize = sum(Size_mm)/length(Size_mm),
-                     StandardDeviation = sd(Size_mm, na.rm = TRUE),
-                     StandardError = std.error(Size_mm, na.rm = TRUE)) %>%
-              select(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear, MeanSize, TotalCount, StandardError, StandardDeviation) %>%
-              distinct()%>%
-              filter(IslandCode == "AN",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-            
-          })
-          ggplot(nhsfAN(), aes(x = SurveyYear , y = MeanSize, group = CommonName, color = CommonName)) +
-            geom_line(size = 1) +
-            geom_point(size = 2) +
-            labs(title = NULL,
-                 subtitle= glue("{unique(nhsfAN()$IslandName)}"), 
-                 color = "Common Name",
-                 x = NULL,
-                 y = "Mean Size (mm)") +
-            geom_text(aes(y = max(nhsfAN()$MeanSize*1.1), label = paste(' n= \n', nhsfAN()$TotalCount)),
-                      position = ,
-                      vjust = .5,
-                      hjust = .5,
-                      angle = 0, 
-                      color = "black") +
-            geom_errorbar(aes(ymin = MeanSize - StandardError,
-                              ymax = MeanSize + StandardError),
-                          position = position_dodge(width = 0.9),
-                          width = 0.25,
-                          color = "black") +
-            scale_color_manual(values=c("orangered")) +
-            theme_classic() +
-            theme(legend.position = "none",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
-          })
-        } 
-      })
-      
-      output$nhsfBYisl5 <- renderPlot({
-        
-        if (is.null(input$nhsfgraphbyIsl))
-          return(NULL) 
-        
-        if (input$nhsfgraphbyIsl == "Violin") {
-          return({nhsfSB <- reactive({
-            nhsfRaw %>%
-              filter(IslandCode == "SB",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-          })
-          ggplot(nhsfSB(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
-            geom_violin(scale = "area", trim = TRUE) +
-            labs(title = NULL,
-                 subtitle= glue("{unique(nhsfSB()$IslandName)}"), 
-                 fill = "Common Name",
-                 color = NULL,
-                 x = "Year",
-                 y = "Mean Size (mm)") +
-            stat_summary(
-              fun.data = function(y, upper_limit = max(nhsfSB()$Size_mm)*1.1) {
-                return(data.frame(y = upper_limit,
-                                  label = paste(' n= \n', length(y))))},
-              position = "identity",
-              geom = "text",
-              hjust = 0.5,
-              vjust = 0.5,
-              angle = 0,
-              size = 4,
-              color = "black") +
-            stat_summary(fun=median, geom="point", size=2, color="black") +
-            scale_fill_manual(values=c("red3")) +
-            scale_color_manual(values=c("red3")) +
-            theme_classic() +
-            theme(legend.position = "bottom",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
-          })
-        }
-        else if (input$nhsfgraphbyIsl == "Boxplot") {
-          return({nhsfSB <- reactive({
-            nhsfRaw %>%
-              filter(IslandCode == "SB",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-          })
-          ggplot(nhsfSB(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
-            geom_boxplot(width=.5, size = 1) +
-            labs(title = NULL,
-                 subtitle= glue("{unique(nhsfSB()$IslandName)}"), 
-                 fill = "Common Name",
-                 x = "Year",
-                 y = "Mean Size (mm)") +
-            stat_summary(
-              fun.data = function(y, upper_limit = max(nhsfSB()$Size_mm)*1.1) {
-                return(data.frame(y = upper_limit,
-                                  label = paste(' n= \n', length(y))))},
-              position = "identity",
-              geom = "text",
-              hjust = 0.5,
-              vjust = 0.5,
-              angle = 0,
-              size = 4) +
-            #stat_summary(fun=median, geom="point", size=2, color="blue") +
-            scale_fill_manual(values=c("red3")) +
-            theme_classic() +
-            theme(legend.position = "bottom",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold")
-            )
-          })
-        }
-        else if(input$nhsfgraphbyIsl == "Mean Sizes"){
-          return({nhsfSB <- reactive({
-            nhsfRaw %>%
-              group_by(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-              mutate(TotalCount = length(Size_mm),
-                     MeanSize = sum(Size_mm)/length(Size_mm),
-                     StandardDeviation = sd(Size_mm, na.rm = TRUE),
-                     StandardError = std.error(Size_mm, na.rm = TRUE)) %>%
-              select(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear, MeanSize, TotalCount, StandardError, StandardDeviation) %>%
-              distinct()%>%
-              filter(IslandName == "Santa Barbara Island",
-                     CommonName == input$nhsfSpeciesNamebyIsl)
-            
-          })
-          ggplot(nhsfSB(), aes(x = SurveyYear , y = MeanSize, group = CommonName, color = CommonName)) +
-            geom_line(size = 1) +
-            geom_point(size = 2) +
-            labs(title = NULL,
-                 subtitle= glue("{unique(nhsfSB()$IslandName)}"), 
-                 color = "Common Name",
-                 x = NULL,
-                 y = "Mean Size (mm)") +
-            geom_text(aes(y = max(nhsfSB()$MeanSize*1.1), label = paste(' n= \n', nhsfSB()$TotalCount)),
-                      position = ,
-                      vjust = .5,
-                      hjust = .5,
-                      angle = 0, 
-                      color = "black") +
-            geom_errorbar(aes(ymin = MeanSize - StandardError,
-                              ymax = MeanSize + StandardError),
-                          position = position_dodge(width = 0.9),
-                          width = 0.25,
-                          color = "black") +
-            scale_color_manual(values=c("red3")) +
-            theme_classic() +
-            theme(legend.position = "none",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
-          })
-        } 
-      })
-      
-    }
-    
-    { # NHSF_Server_byIslLocked ----
-      output$nhsfLocked <- renderPlot({
-        
-        if (is.null(input$nhsfgraphLocked))
-          return(NULL) 
-        
-        if (input$nhsfgraphLocked == "Violin") {
-          return({nhsfLock <- reactive({
-            nhsfRaw %>%
-              filter(CommonName == input$nhsfSpeciesNameLocked)
-          })
-          ggplot(nhsfLock(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
-            geom_violin(scale = "area", trim = TRUE) +
-            facet_grid(rows = vars(IslandName), scales = "fixed") +
-            labs(title = glue("{unique(nhsfLock()$ScientificName)}"),
-                 fill = "Common Name",
-                 color = NULL,
-                 x = "Year",
-                 y = "Mean Size (mm)") +
-            stat_summary(
-              fun.data = function(y, upper_limit = max(nhsfLock()$Size_mm)*1.1) {
-                return(data.frame(y = upper_limit,
-                                  label = paste(' n= \n', length(y))))},
-              position = "identity",
-              geom = "text",
-              hjust = 0.5,
-              vjust = 0.5,
-              angle = 0,
-              size = 4,
-              color = "black") +
-            stat_summary(fun=median, geom="point", size=2, color="black") +
-            scale_fill_manual(values=c("deepskyblue2")) +
-            scale_color_manual(values=c("deepskyblue2")) +
-            theme_dark() +
-            theme(legend.position = "bottom",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
-          })
-        }
-        else if (input$nhsfgraphLocked == "Boxplot") {
-          return({nhsfLock <- reactive({
-            nhsfRaw %>%
-              filter(CommonName == input$nhsfSpeciesNameLocked)
-          })
-          ggplot(nhsfLock(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
-            geom_boxplot(width=.5, size = 1) +
-            facet_grid(rows = vars(IslandName), scales = "fixed") +
-            labs(title = glue("{unique(nhsfLock()$ScientificName)}"),
-                 fill = "Common Name",
-                 x = "Year",
-                 y = "Mean Size (mm)") +
-            stat_summary(
-              fun.data = function(y, upper_limit = max(nhsfLock()$Size_mm)*1.1) {
-                return(data.frame(y = upper_limit,
-                                  label = paste(' n= \n', length(y))))},
-              position = "identity",
-              geom = "text",
-              hjust = 0.5,
-              vjust = 0.5,
-              angle = 0,
-              size = 4) +
-            #stat_summary(fun=median, geom="point", size=2, color="blue") +
-            scale_fill_manual(values=c("orchid3")) +
-            theme_dark() +
-            theme(legend.position = "bottom",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold")
-            )
-          })
-        }
-        else if(input$nhsfgraphLocked == "Mean Sizes"){
-          return({nhsfLock <- reactive({
-            nhsfRaw %>%
-              group_by(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-              mutate(TotalCount = length(Size_mm),
-                     MeanSize = sum(Size_mm)/length(Size_mm),
-                     StandardDeviation = sd(Size_mm, na.rm = TRUE),
-                     StandardError = std.error(Size_mm, na.rm = TRUE)) %>%
-              select(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear, MeanSize, TotalCount, StandardError, StandardDeviation) %>%
-              distinct()%>%
-              filter(CommonName == input$nhsfSpeciesNameLocked)
-            
-          })
-          ggplot(nhsfLock(), aes(x = SurveyYear , y = MeanSize, group = CommonName, color = CommonName)) +
-            geom_line(size = 1) +
-            geom_point(size = 2) +
-            facet_grid(rows = vars(IslandName), scales = "fixed") +
-            labs(title = glue("{unique(nhsfLock()$ScientificName)}"),
-                 color = "Common Name",
-                 x = "Year",
-                 y = "Mean Size (mm)") +
-            geom_text(aes(y= max(nhsfLock()$MeanSize*1.1), label = paste(' n= \n', nhsfLock()$TotalCount)),
-                      position = ,
-                      vjust = .5,
-                      hjust = .5,
-                      angle = 0, 
-                      color = "black") +
-            geom_errorbar(aes(ymin = MeanSize - StandardError,
-                              ymax = MeanSize + StandardError),
-                          position = position_dodge(width = 0.9),
-                          width = 0.25,
-                          color = "black") +
-            scale_color_manual(values=c("purple4")) +
-            theme_dark() +
-            theme(legend.position = "bottom",
-                  legend.background = element_rect(),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  axis.title = element_text(size = 14, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
-          })
-        } 
-      })
     }
     
   }
@@ -11198,6 +10246,968 @@ server <- function(input, output, session) {
         } 
       })
       
+    }
+    
+  }
+  
+  output$outNHSF <- renderUI({ # NHSF_UI   ----
+    if (is.null(input$allORoneNHSF))
+      return(NULL)
+    
+    if(input$allORoneNHSF == "One Species by Site") {
+      dyn_ui <- tabPanel("NHSF", value = 'nhsf', # NHSF_TP_one      ----
+                         plotOutput(outputId = "nhsf1",
+                                    height = 800),
+                         tags$hr())
+    }
+    else if (input$allORoneNHSF == "One Species by Island (Free Scales)") {
+      dyn_ui <- tabPanel("NHSF", value = 'nhsf', # NHSF_TP_byISL  ----
+                         plotOutput(outputId = "nhsfBYisl1"),
+                         plotOutput(outputId = "nhsfBYisl2"),
+                         plotOutput(outputId = "nhsfBYisl3"),
+                         plotOutput(outputId = "nhsfBYisl4"),
+                         plotOutput(outputId = "nhsfBYisl5"),
+                         tags$hr()
+      )
+    }
+    else if (input$allORoneNHSF == "One Species by Island (Locked Scales)") {
+      dyn_ui <- tabPanel("NHSF", value = 'nhsf', # NHSF_TP_byISL_Locked  ----
+                         plotOutput(outputId = "nhsfLocked",
+                                    height = 1200),
+                         tags$hr()
+      )
+    }
+    return(dyn_ui)
+  })
+  
+  { # ........ NHSF_Servers ........   ----
+    
+    { # NHSF_Server_One   ----
+      
+      output$nhsf1 <- renderPlot({
+        
+        nhsfone <- reactive({
+          nhsfRaw %>%
+            filter(SiteName == input$SiteNamenhsf,
+                   CommonName == input$nhsfSpeciesName)
+        })
+        nhsfMeanSize <- reactive({
+          nhsfMean %>%
+            filter(SiteName == input$SiteNamenhsf,
+                   CommonName == input$nhsfSpeciesName)
+          
+        })
+        
+        if (is.null(input$nhsfgraph))
+          return(NULL) 
+        
+        if (input$nhsfgraph == "Violin") {
+          return({
+            ggplot() +
+              geom_violin(data = nhsfone(), 
+                          aes(x = Date, y = Size_mm, group = Date, fill = CommonName, color = CommonName),
+                          scale = "area", trim = TRUE) +
+              scale_x_date(date_labels = "%Y", breaks = unique(nhsfone()$Date), expand = c(0.01, 0)) +
+              labs(title = glue("{unique(nhsfone()$ScientificName)}"),
+                   subtitle= glue("{unique(nhsfone()$IslandName)} {unique(nhsfone()$SiteName)}"), 
+                   fill = "Common Name",
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Size Distribution (mm)") +
+              stat_summary(data = nhsfone(), 
+                           aes(x = Date, y = Size_mm, group = Date),
+                           fun.data = function(y, upper_limit = min(nhsfone()$Size_mm)*-1) {
+                             return(data.frame(y = upper_limit,
+                                               label = paste(' n= \n', length(y))))},
+                           position = "identity",
+                           geom = "text",
+                           hjust = 0.5,
+                           vjust = 0.5,
+                           angle = 0,
+                           size = 4,
+                           color = "black") +
+              stat_summary(data = nhsfone(), 
+                           aes(x = Date, y = Size_mm, group = Date),
+                           fun = median, geom = "point", size = 2, color = "black") +
+              scale_fill_manual(values = SpeciesColor) +
+              scale_color_manual(values = SpeciesColor) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if (input$nhsfgraph == "Boxplot") {
+          return({
+            ggplot() +
+              geom_boxplot(data = nhsfone(), 
+                           aes(x = Date, y = Size_mm, group = Date, fill = CommonName),
+                           width = 200) +
+              scale_x_date(date_labels = "%Y", breaks = unique(nhsfone()$Date), expand = c(0.01, 0)) +
+              labs(title = glue("{unique(nhsfone()$ScientificName)}"),
+                   subtitle= glue("{unique(nhsfone()$IslandName)} {unique(nhsfone()$SiteName)}"), 
+                   fill = "Common Name",
+                   x = "Year",
+                   y = "Size Distribution (mm)") +
+              stat_summary(data = nhsfone(), 
+                           aes(x = Date, y = Size_mm, group = Date),
+                           fun.data = function(y, upper_limit = min(nhsfone()$Size_mm)*-1) {
+                             return(data.frame(y = upper_limit,
+                                               label = paste(' n= \n', length(y))))},
+                           position = "identity",
+                           geom = "text",
+                           hjust = 0.5,
+                           vjust = 0.5,
+                           angle = 0,
+                           size = 4) +
+              scale_fill_manual(values = SpeciesColor) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$nhsfgraph == "Joyplot"){
+          return({
+            ggplot() +
+              geom_density_ridges(data = nhsfone(), 
+                                  aes(x = Size_mm, y = Date, group = Date, fill = CommonName, height = ..density..),
+                                  rel_min_height = .01, alpha = .9, stat = "density", scale = 3) +
+              # stat_density_ridges(data = nhsfone(), aes(x = Size_mm, y = Date, group = Date, fill = CommonName, height = ..density..),
+              # quantile_lines = TRUE, quantiles = 2) +
+              scale_y_date(date_labels = "%Y", date_breaks = "1 year", expand = c(0.01, 0)) +
+              scale_x_continuous(limits = c(0, max(nhsfone()$Size_mm))) +
+              labs(title = glue("{unique(nhsfone()$ScientificName)}"),
+                   subtitle= glue("{unique(nhsfone()$IslandName)} {unique(nhsfone()$SiteCode)}"),
+                   fill = "Common Name",
+                   x = "Size Distribution (mm)",
+                   y = "Year") +
+              scale_fill_manual(values = SpeciesColor) +
+              theme_ridges() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$nhsfgraph == "Mean Sizes"){
+          return({
+            ggplot() +
+              geom_line(data = nhsfMeanSize(), 
+                        aes(x = Date, y = MeanSize, group = CommonName, color = CommonName),
+                        size = 1) +
+              scale_x_date(date_labels = "%Y", breaks = unique(nhsfone()$Date), expand = c(0.01, 0)) +
+              labs(title = glue("{unique(nhsfMeanSize()$ScientificName)}"),
+                   subtitle= glue("{unique(nhsfMeanSize()$IslandName)} {unique(nhsfMeanSize()$SiteName)}"), 
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Mean Size (mm)") +
+              geom_text(data = nhsfMeanSize(),
+                        aes(x = Date, y = max(nhsfMeanSize()$MeanSize*1.1), 
+                            label = paste(' n= \n', nhsfMeanSize()$TotalCount)),
+                        vjust = .5,
+                        hjust = .5,
+                        angle = 0, 
+                        color = "black",
+                        size = 5) +
+              geom_errorbar(data = nhsfMeanSize(),
+                            aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
+                            position = position_dodge(width = 0.9),
+                            width = 0.25,
+                            color = "black") +
+              scale_color_manual(values = SpeciesColor) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        } 
+      })
+      
+    }
+    
+    { # NHSF_Server_byIsl   ----
+      
+      output$nhsfBYisl1 <- renderPlot({
+        
+        if (is.null(input$nhsfgraphbyIsl))
+          return(NULL) 
+        
+        if (input$nhsfgraphbyIsl == "Violin") {
+          return({nhsfSM <- reactive({
+            nhsfRaw %>%
+              filter(IslandCode == "SM",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+          })
+          ggplot(nhsfSM(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
+            geom_violin(scale = "area", trim = TRUE) +
+            labs(title = glue("{unique(nhsfSM()$ScientificName)}"),
+                 subtitle= glue("{unique(nhsfSM()$IslandName)}"), 
+                 fill = "Common Name",
+                 color = NULL,
+                 x = NULL,
+                 y = "Mean Size (mm)") +
+            stat_summary(
+              fun.data = function(y, upper_limit = max(nhsfSM()$Size_mm)*1.1) {
+                return(data.frame(y = upper_limit,
+                                  label = paste(' n= \n', length(y))))},
+              position = "identity",
+              geom = "text",
+              hjust = 0.5,
+              vjust = 0.5,
+              angle = 0,
+              size = 4,
+              color = "black") +
+            stat_summary(fun=median, geom="point", size=2, color="black") +
+            scale_fill_manual(values=c("blue3")) +
+            scale_color_manual(values=c("blue3")) +
+            theme_classic() +
+            theme(legend.position = "none",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
+          })
+        }
+        else if (input$nhsfgraphbyIsl == "Boxplot") {
+          return({nhsfSM <- reactive({
+            nhsfRaw %>%
+              filter(IslandCode == "SM",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+          })
+          ggplot(nhsfSM(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
+            geom_boxplot(width=.5, size = 1) +
+            labs(title = glue("{unique(nhsfSM()$ScientificName)}"),
+                 subtitle= glue("{unique(nhsfSM()$IslandName)}"), 
+                 fill = "Common Name",
+                 x = NULL,
+                 y = "Mean Size (mm)") +
+            stat_summary(
+              fun.data = function(y, upper_limit = max(nhsfSM()$Size_mm)*1.1) {
+                return(data.frame(y = upper_limit,
+                                  label = paste(' n= \n', length(y))))},
+              position = "identity",
+              geom = "text",
+              hjust = 0.5,
+              vjust = 0.5,
+              angle = 0,
+              size = 4) +
+            #stat_summary(fun=median, geom="point", size=2, color="blue") +
+            scale_fill_manual(values=c("blue3")) +
+            theme_classic() +
+            theme(legend.position = "none",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold")
+            )
+          })
+        }
+        else if(input$nhsfgraphbyIsl == "Mean Sizes"){
+          return({nhsfSM <- reactive({
+            nhsfRaw %>%
+              group_by(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+              mutate(TotalCount = length(Size_mm),
+                     MeanSize = sum(Size_mm)/length(Size_mm),
+                     StandardDeviation = sd(Size_mm, na.rm = TRUE),
+                     StandardError = std.error(Size_mm, na.rm = TRUE)) %>%
+              select(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear, MeanSize, TotalCount, StandardError, StandardDeviation) %>%
+              distinct()%>%
+              filter(IslandCode == "SM",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+            
+          })
+          ggplot(nhsfSM(), aes(x = SurveyYear , y = MeanSize, group = CommonName, color = CommonName)) +
+            geom_line(size = 1) +
+            geom_point(size = 2) +
+            labs(title = glue("{unique(nhsfSM()$ScientificName)}"),
+                 subtitle= glue("{unique(nhsfSM()$IslandName)}"), 
+                 color = "Common Name",
+                 x = NULL,
+                 y = "Mean Size (mm)") +
+            geom_text(aes(y = max(nhsfSM()$MeanSize*1.1), label = paste(' n= \n', nhsfSM()$TotalCount)),
+                      position = ,
+                      vjust = .5,
+                      hjust = .5,
+                      angle = 0, 
+                      color = "black") +
+            geom_errorbar(aes(ymin = MeanSize - StandardError,
+                              ymax = MeanSize + StandardError),
+                          position = position_dodge(width = 0.9),
+                          width = 0.25,
+                          color = "black") +
+            scale_color_manual(values=c("blue3")) +
+            theme_classic() +
+            theme(legend.position = "none",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
+          })
+        } 
+      })
+      
+      output$nhsfBYisl2 <- renderPlot({
+        
+        if (is.null(input$nhsfgraphbyIsl))
+          return(NULL) 
+        
+        if (input$nhsfgraphbyIsl == "Violin") {
+          return({nhsfSR <- reactive({
+            nhsfRaw %>%
+              filter(IslandCode == "SR",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+          })
+          ggplot(nhsfSR(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
+            geom_violin(scale = "area", trim = TRUE) +
+            labs(title = NULL,
+                 subtitle= glue("{unique(nhsfSR()$IslandName)}"), 
+                 fill = "Common Name",
+                 color = NULL,
+                 x = NULL,
+                 y = "Mean Size (mm)") +
+            stat_summary(
+              fun.data = function(y, upper_limit = max(nhsfSR()$Size_mm)*1.1) {
+                return(data.frame(y = upper_limit,
+                                  label = paste(' n= \n', length(y))))},
+              position = "identity",
+              geom = "text",
+              hjust = 0.5,
+              vjust = 0.5,
+              angle = 0,
+              size = 4,
+              color = "black") +
+            stat_summary(fun=median, geom="point", size=2, color="black") +
+            scale_fill_manual(values=c("forestgreen")) +
+            scale_color_manual(values=c("forestgreen")) +
+            theme_classic() +
+            theme(legend.position = "none",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
+          })
+        }
+        else if (input$nhsfgraphbyIsl == "Boxplot") {
+          return({nhsfSR <- reactive({
+            nhsfRaw %>%
+              filter(IslandCode == "SR",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+          })
+          ggplot(nhsfSR(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
+            geom_boxplot(width=.5, size = 1) +
+            labs(title = NULL,
+                 subtitle= glue("{unique(nhsfSR()$IslandName)}"), 
+                 fill = "Common Name",
+                 x = NULL,
+                 y = "Mean Size (mm)") +
+            stat_summary(
+              fun.data = function(y, upper_limit = max(nhsfSR()$Size_mm)*1.1) {
+                return(data.frame(y = upper_limit,
+                                  label = paste(' n= \n', length(y))))},
+              position = "identity",
+              geom = "text",
+              hjust = 0.5,
+              vjust = 0.5,
+              angle = 0,
+              size = 4) +
+            #stat_summary(fun=median, geom="point", size=2, color="blue") +
+            scale_fill_manual(values=c("forestgreen")) +
+            theme_classic() +
+            theme(legend.position = "none",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold")
+            )
+          })
+        }
+        else if(input$nhsfgraphbyIsl == "Mean Sizes"){
+          return({nhsfSR <- reactive({
+            nhsfRaw %>%
+              group_by(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+              mutate(TotalCount = length(Size_mm),
+                     MeanSize = sum(Size_mm)/length(Size_mm),
+                     StandardDeviation = sd(Size_mm, na.rm = TRUE),
+                     StandardError = std.error(Size_mm, na.rm = TRUE)) %>%
+              select(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear, MeanSize, TotalCount, StandardError, StandardDeviation) %>%
+              distinct()%>%
+              filter(IslandCode == "SR",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+            
+          })
+          ggplot(nhsfSR(), aes(x = SurveyYear , y = MeanSize, group = CommonName, color = CommonName)) +
+            geom_line(size = 1) +
+            geom_point(size = 2) +
+            labs(title = NULL,
+                 subtitle= glue("{unique(nhsfSR()$IslandName)}"), 
+                 color = "Common Name",
+                 x = NULL,
+                 y = "Mean Size (mm)") +
+            geom_text(aes(y = max(nhsfSR()$MeanSize*1.1), label = paste(' n= \n', nhsfSR()$TotalCount)),
+                      position = ,
+                      vjust = .5,
+                      hjust = .5,
+                      angle = 0, 
+                      color = "black") +
+            geom_errorbar(aes(ymin = MeanSize - StandardError,
+                              ymax = MeanSize + StandardError),
+                          position = position_dodge(width = 0.9),
+                          width = 0.25,
+                          color = "black") +
+            scale_color_manual(values=c("forestgreen")) +
+            theme_classic() +
+            theme(legend.position = "none",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
+          })
+        } 
+      })
+      
+      output$nhsfBYisl3 <- renderPlot({
+        
+        if (is.null(input$nhsfgraphbyIsl))
+          return(NULL) 
+        
+        if (input$nhsfgraphbyIsl == "Violin") {
+          return({nhsfSC <- reactive({
+            nhsfRaw %>%
+              filter(IslandCode == "SC",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+          })
+          ggplot(nhsfSC(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
+            geom_violin(scale = "area", trim = TRUE) +
+            labs(title = NULL,
+                 subtitle= glue("{unique(nhsfSC()$IslandName)}"), 
+                 fill = "Common Name",
+                 color = NULL,
+                 x = NULL,
+                 y = "Mean Size (mm)") +
+            stat_summary(
+              fun.data = function(y, upper_limit = max(nhsfSC()$Size_mm)*1.1) {
+                return(data.frame(y = upper_limit,
+                                  label = paste(' n= \n', length(y))))},
+              position = "identity",
+              geom = "text",
+              hjust = 0.5,
+              vjust = 0.5,
+              angle = 0,
+              size = 4,
+              color = "black") +
+            stat_summary(fun=median, geom="point", size=2, color="black") +
+            scale_fill_manual(values=c("gold")) +
+            scale_color_manual(values=c("gold")) +
+            theme_classic() +
+            theme(legend.position = "none",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
+          })
+        }
+        else if (input$nhsfgraphbyIsl == "Boxplot") {
+          return({nhsfSC <- reactive({
+            nhsfRaw %>%
+              filter(IslandCode == "SC",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+          })
+          ggplot(nhsfSC(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
+            geom_boxplot(width=.5, size = 1) +
+            labs(title = NULL,
+                 subtitle= glue("{unique(nhsfSC()$IslandName)}"), 
+                 fill = "Common Name",
+                 x = NULL,
+                 y = "Mean Size (mm)") +
+            stat_summary(
+              fun.data = function(y, upper_limit = max(nhsfSC()$Size_mm)*1.1) {
+                return(data.frame(y = upper_limit,
+                                  label = paste(' n= \n', length(y))))},
+              position = "identity",
+              geom = "text",
+              hjust = 0.5,
+              vjust = 0.5,
+              angle = 0,
+              size = 4) +
+            #stat_summary(fun=median, geom="point", size=2, color="blue") +
+            scale_fill_manual(values=c("gold")) +
+            theme_classic() +
+            theme(legend.position = "none",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold")
+            )
+          })
+        }
+        else if(input$nhsfgraphbyIsl == "Mean Sizes"){
+          return({nhsfSC <- reactive({
+            nhsfRaw %>%
+              group_by(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+              mutate(TotalCount = length(Size_mm),
+                     MeanSize = sum(Size_mm)/length(Size_mm),
+                     StandardDeviation = sd(Size_mm, na.rm = TRUE),
+                     StandardError = std.error(Size_mm, na.rm = TRUE)) %>%
+              select(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear, MeanSize, TotalCount, StandardError, StandardDeviation) %>%
+              distinct()%>%
+              filter(IslandCode == "SC",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+            
+          })
+          ggplot(nhsfSC(), aes(x = SurveyYear , y = MeanSize, group = CommonName, color = CommonName)) +
+            geom_line(size = 1) +
+            geom_point(size = 2) +
+            labs(title = NULL,
+                 subtitle= glue("{unique(nhsfSC()$IslandName)}"), 
+                 color = "Common Name",
+                 x = NULL,
+                 y = "Mean Size (mm)") +
+            geom_text(aes(y = max(nhsfSC()$MeanSize*1.1), label = paste(' n= \n', nhsfSC()$TotalCount)),
+                      position = ,
+                      vjust = .5,
+                      hjust = .5,
+                      angle = 0, 
+                      color = "black") +
+            geom_errorbar(aes(ymin = MeanSize - StandardError,
+                              ymax = MeanSize + StandardError),
+                          position = position_dodge(width = 0.9),
+                          width = 0.25,
+                          color = "black") +
+            scale_color_manual(values=c("gold")) +
+            theme_classic() +
+            theme(legend.position = "none",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
+          })
+        } 
+      })
+      
+      output$nhsfBYisl4 <- renderPlot({
+        
+        if (is.null(input$nhsfgraphbyIsl))
+          return(NULL) 
+        
+        if (input$nhsfgraphbyIsl == "Violin") {
+          return({nhsfAN <- reactive({
+            nhsfRaw %>%
+              filter(IslandCode == "AN",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+          })
+          ggplot(nhsfAN(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
+            geom_violin(scale = "area", trim = TRUE) +
+            labs(title = NULL,
+                 subtitle= glue("{unique(nhsfAN()$IslandName)}"), 
+                 fill = "Common Name",
+                 color = NULL,
+                 x = NULL,
+                 y = "Mean Size (mm)") +
+            stat_summary(
+              fun.data = function(y, upper_limit = max(nhsfAN()$Size_mm)*1.1) {
+                return(data.frame(y = upper_limit,
+                                  label = paste(' n= \n', length(y))))},
+              position = "identity",
+              geom = "text",
+              hjust = 0.5,
+              vjust = 0.5,
+              angle = 0,
+              size = 4,
+              color = "black") +
+            stat_summary(fun=median, geom="point", size=2, color="black") +
+            scale_fill_manual(values=c("orangered")) +
+            scale_color_manual(values=c("orangered")) +
+            theme_classic() +
+            theme(legend.position = "none",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
+          })
+        }
+        else if (input$nhsfgraphbyIsl == "Boxplot") {
+          return({nhsfAN <- reactive({
+            nhsfRaw %>%
+              filter(IslandCode == "AN",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+          })
+          ggplot(nhsfAN(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
+            geom_boxplot(width=.5, size = 1) +
+            labs(title = NULL,
+                 subtitle= glue("{unique(nhsfAN()$IslandName)}"), 
+                 fill = "Common Name",
+                 x = NULL,
+                 y = "Mean Size (mm)") +
+            stat_summary(
+              fun.data = function(y, upper_limit = max(nhsfAN()$Size_mm)*1.1) {
+                return(data.frame(y = upper_limit,
+                                  label = paste(' n= \n', length(y))))},
+              position = "identity",
+              geom = "text",
+              hjust = 0.5,
+              vjust = 0.5,
+              angle = 0,
+              size = 4) +
+            #stat_summary(fun=median, geom="point", size=2, color="blue") +
+            scale_fill_manual(values=c("orangered")) +
+            theme_classic() +
+            theme(legend.position = "none",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold")
+            )
+          })
+        }
+        else if(input$nhsfgraphbyIsl == "Mean Sizes"){
+          return({nhsfAN <- reactive({
+            nhsfRaw %>%
+              group_by(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+              mutate(TotalCount = length(Size_mm),
+                     MeanSize = sum(Size_mm)/length(Size_mm),
+                     StandardDeviation = sd(Size_mm, na.rm = TRUE),
+                     StandardError = std.error(Size_mm, na.rm = TRUE)) %>%
+              select(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear, MeanSize, TotalCount, StandardError, StandardDeviation) %>%
+              distinct()%>%
+              filter(IslandCode == "AN",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+            
+          })
+          ggplot(nhsfAN(), aes(x = SurveyYear , y = MeanSize, group = CommonName, color = CommonName)) +
+            geom_line(size = 1) +
+            geom_point(size = 2) +
+            labs(title = NULL,
+                 subtitle= glue("{unique(nhsfAN()$IslandName)}"), 
+                 color = "Common Name",
+                 x = NULL,
+                 y = "Mean Size (mm)") +
+            geom_text(aes(y = max(nhsfAN()$MeanSize*1.1), label = paste(' n= \n', nhsfAN()$TotalCount)),
+                      position = ,
+                      vjust = .5,
+                      hjust = .5,
+                      angle = 0, 
+                      color = "black") +
+            geom_errorbar(aes(ymin = MeanSize - StandardError,
+                              ymax = MeanSize + StandardError),
+                          position = position_dodge(width = 0.9),
+                          width = 0.25,
+                          color = "black") +
+            scale_color_manual(values=c("orangered")) +
+            theme_classic() +
+            theme(legend.position = "none",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
+          })
+        } 
+      })
+      
+      output$nhsfBYisl5 <- renderPlot({
+        
+        if (is.null(input$nhsfgraphbyIsl))
+          return(NULL) 
+        
+        if (input$nhsfgraphbyIsl == "Violin") {
+          return({nhsfSB <- reactive({
+            nhsfRaw %>%
+              filter(IslandCode == "SB",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+          })
+          ggplot(nhsfSB(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
+            geom_violin(scale = "area", trim = TRUE) +
+            labs(title = NULL,
+                 subtitle= glue("{unique(nhsfSB()$IslandName)}"), 
+                 fill = "Common Name",
+                 color = NULL,
+                 x = "Year",
+                 y = "Mean Size (mm)") +
+            stat_summary(
+              fun.data = function(y, upper_limit = max(nhsfSB()$Size_mm)*1.1) {
+                return(data.frame(y = upper_limit,
+                                  label = paste(' n= \n', length(y))))},
+              position = "identity",
+              geom = "text",
+              hjust = 0.5,
+              vjust = 0.5,
+              angle = 0,
+              size = 4,
+              color = "black") +
+            stat_summary(fun=median, geom="point", size=2, color="black") +
+            scale_fill_manual(values=c("red3")) +
+            scale_color_manual(values=c("red3")) +
+            theme_classic() +
+            theme(legend.position = "bottom",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
+          })
+        }
+        else if (input$nhsfgraphbyIsl == "Boxplot") {
+          return({nhsfSB <- reactive({
+            nhsfRaw %>%
+              filter(IslandCode == "SB",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+          })
+          ggplot(nhsfSB(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
+            geom_boxplot(width=.5, size = 1) +
+            labs(title = NULL,
+                 subtitle= glue("{unique(nhsfSB()$IslandName)}"), 
+                 fill = "Common Name",
+                 x = "Year",
+                 y = "Mean Size (mm)") +
+            stat_summary(
+              fun.data = function(y, upper_limit = max(nhsfSB()$Size_mm)*1.1) {
+                return(data.frame(y = upper_limit,
+                                  label = paste(' n= \n', length(y))))},
+              position = "identity",
+              geom = "text",
+              hjust = 0.5,
+              vjust = 0.5,
+              angle = 0,
+              size = 4) +
+            #stat_summary(fun=median, geom="point", size=2, color="blue") +
+            scale_fill_manual(values=c("red3")) +
+            theme_classic() +
+            theme(legend.position = "bottom",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold")
+            )
+          })
+        }
+        else if(input$nhsfgraphbyIsl == "Mean Sizes"){
+          return({nhsfSB <- reactive({
+            nhsfRaw %>%
+              group_by(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+              mutate(TotalCount = length(Size_mm),
+                     MeanSize = sum(Size_mm)/length(Size_mm),
+                     StandardDeviation = sd(Size_mm, na.rm = TRUE),
+                     StandardError = std.error(Size_mm, na.rm = TRUE)) %>%
+              select(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear, MeanSize, TotalCount, StandardError, StandardDeviation) %>%
+              distinct()%>%
+              filter(IslandName == "Santa Barbara Island",
+                     CommonName == input$nhsfSpeciesNamebyIsl)
+            
+          })
+          ggplot(nhsfSB(), aes(x = SurveyYear , y = MeanSize, group = CommonName, color = CommonName)) +
+            geom_line(size = 1) +
+            geom_point(size = 2) +
+            labs(title = NULL,
+                 subtitle= glue("{unique(nhsfSB()$IslandName)}"), 
+                 color = "Common Name",
+                 x = NULL,
+                 y = "Mean Size (mm)") +
+            geom_text(aes(y = max(nhsfSB()$MeanSize*1.1), label = paste(' n= \n', nhsfSB()$TotalCount)),
+                      position = ,
+                      vjust = .5,
+                      hjust = .5,
+                      angle = 0, 
+                      color = "black") +
+            geom_errorbar(aes(ymin = MeanSize - StandardError,
+                              ymax = MeanSize + StandardError),
+                          position = position_dodge(width = 0.9),
+                          width = 0.25,
+                          color = "black") +
+            scale_color_manual(values=c("red3")) +
+            theme_classic() +
+            theme(legend.position = "none",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
+          })
+        } 
+      })
+      
+    }
+    
+    { # NHSF_Server_byIslLocked ----
+      output$nhsfLocked <- renderPlot({
+        
+        if (is.null(input$nhsfgraphLocked))
+          return(NULL) 
+        
+        if (input$nhsfgraphLocked == "Violin") {
+          return({nhsfLock <- reactive({
+            nhsfRaw %>%
+              filter(CommonName == input$nhsfSpeciesNameLocked)
+          })
+          ggplot(nhsfLock(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
+            geom_violin(scale = "area", trim = TRUE) +
+            facet_grid(rows = vars(IslandName), scales = "fixed") +
+            labs(title = glue("{unique(nhsfLock()$ScientificName)}"),
+                 fill = "Common Name",
+                 color = NULL,
+                 x = "Year",
+                 y = "Mean Size (mm)") +
+            stat_summary(
+              fun.data = function(y, upper_limit = max(nhsfLock()$Size_mm)*1.1) {
+                return(data.frame(y = upper_limit,
+                                  label = paste(' n= \n', length(y))))},
+              position = "identity",
+              geom = "text",
+              hjust = 0.5,
+              vjust = 0.5,
+              angle = 0,
+              size = 4,
+              color = "black") +
+            stat_summary(fun=median, geom="point", size=2, color="black") +
+            scale_fill_manual(values=c("deepskyblue2")) +
+            scale_color_manual(values=c("deepskyblue2")) +
+            theme_dark() +
+            theme(legend.position = "bottom",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
+          })
+        }
+        else if (input$nhsfgraphLocked == "Boxplot") {
+          return({nhsfLock <- reactive({
+            nhsfRaw %>%
+              filter(CommonName == input$nhsfSpeciesNameLocked)
+          })
+          ggplot(nhsfLock(), aes(x = SurveyYear, y = Size_mm, group = SurveyYear, fill = CommonName)) +
+            geom_boxplot(width=.5, size = 1) +
+            facet_grid(rows = vars(IslandName), scales = "fixed") +
+            labs(title = glue("{unique(nhsfLock()$ScientificName)}"),
+                 fill = "Common Name",
+                 x = "Year",
+                 y = "Mean Size (mm)") +
+            stat_summary(
+              fun.data = function(y, upper_limit = max(nhsfLock()$Size_mm)*1.1) {
+                return(data.frame(y = upper_limit,
+                                  label = paste(' n= \n', length(y))))},
+              position = "identity",
+              geom = "text",
+              hjust = 0.5,
+              vjust = 0.5,
+              angle = 0,
+              size = 4) +
+            #stat_summary(fun=median, geom="point", size=2, color="blue") +
+            scale_fill_manual(values=c("orchid3")) +
+            theme_dark() +
+            theme(legend.position = "bottom",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold")
+            )
+          })
+        }
+        else if(input$nhsfgraphLocked == "Mean Sizes"){
+          return({nhsfLock <- reactive({
+            nhsfRaw %>%
+              group_by(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+              mutate(TotalCount = length(Size_mm),
+                     MeanSize = sum(Size_mm)/length(Size_mm),
+                     StandardDeviation = sd(Size_mm, na.rm = TRUE),
+                     StandardError = std.error(Size_mm, na.rm = TRUE)) %>%
+              select(IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear, MeanSize, TotalCount, StandardError, StandardDeviation) %>%
+              distinct()%>%
+              filter(CommonName == input$nhsfSpeciesNameLocked)
+            
+          })
+          ggplot(nhsfLock(), aes(x = SurveyYear , y = MeanSize, group = CommonName, color = CommonName)) +
+            geom_line(size = 1) +
+            geom_point(size = 2) +
+            facet_grid(rows = vars(IslandName), scales = "fixed") +
+            labs(title = glue("{unique(nhsfLock()$ScientificName)}"),
+                 color = "Common Name",
+                 x = "Year",
+                 y = "Mean Size (mm)") +
+            geom_text(aes(y= max(nhsfLock()$MeanSize*1.1), label = paste(' n= \n', nhsfLock()$TotalCount)),
+                      position = ,
+                      vjust = .5,
+                      hjust = .5,
+                      angle = 0, 
+                      color = "black") +
+            geom_errorbar(aes(ymin = MeanSize - StandardError,
+                              ymax = MeanSize + StandardError),
+                          position = position_dodge(width = 0.9),
+                          width = 0.25,
+                          color = "black") +
+            scale_color_manual(values=c("purple4")) +
+            theme_dark() +
+            theme(legend.position = "bottom",
+                  legend.background = element_rect(),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  axis.title = element_text(size = 14, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
+          })
+        } 
+      })
     }
     
   }

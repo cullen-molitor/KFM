@@ -149,34 +149,14 @@
   
   # core_DF <- rbind(oneM_DF, fiveM_DF, bands_DF)
   
-  core_DF <- rbind(oneM_DF %>% filter(CommonName != "Wakame (Adult)" &
-                                        CommonName != "Wakame (Juvenile)" &
-                                        CommonName != "Devil Weed (Juvenile)" &
-                                        CommonName != "Devil Weed (Adult)" &
-                                        CommonName != "Giant Kelp (Adult)" &
-                                        CommonName != "Giant-spined Sea Star"),
-                   fiveM_DF %>% filter(CommonName != "Wakame (Adult)" &
-                                         CommonName != "Wakame (Juvenile)"),
-                   bands_DF %>% filter(CommonName != "Devil Weed (Juvenile)" &
-                                         CommonName != "Devil Weed (Adult)" &
-                                         CommonName != "Giant-spined Sea Star"))
-  core_DFMPA <- rbind(oneM_DFMPA %>% filter(CommonName != "Wakame (Adult)" &
-                                           CommonName != "Wakame (Juvenile)" &
-                                           CommonName != "Devil Weed (Juvenile)" &
-                                           CommonName != "Devil Weed (Adult)" &
-                                           CommonName != "Giant Kelp (Adult)" &
-                                           CommonName != "Giant-spined Sea Star"),
-                      fiveM_DFMPA %>% filter(CommonName != "Wakame (Adult)" &
-                                            CommonName != "Wakame (Juvenile)"),
-                      bands_DFMPA %>% filter(CommonName != "Devil Weed (Juvenile)" &
-                                            CommonName != "Devil Weed (Adult)" &
-                                            CommonName != "Giant-spined Sea Star")) %>% 
-    group_by(SurveyYear, IslandName) %>% 
-    mutate(MPA_Date = mean(MPA_Date),
-           MPA_Name = ifelse(IslandName == "Santa Rosa Island", "South Point SMR at Santa Rosa Island ", 
-                             ifelse(IslandName == "Santa Cruz Island", "Scorpion SMR at Santa Cruz Island",
-                                    ifelse(IslandName == "Anacapa Island", "Anacapa Island SMR", "Santa Barbara Island SMR"))))
+  core_DF <- read_csv("core_Summary.csv")
+  core_Levels <- unique(all_species$CommonName)
+  core_DF$IslandName <- factor(core_DF$IslandName, levels = IslandLevels)
+  core_DF$SiteName <- factor(core_DF$SiteName, levels = unique(siteInfo2$SiteName))
+  core_DF$CommonName <- factor(core_DF$CommonName, levels = core_Levels)
   
+  core_DFMPA <- read_csv("core_MPA.csv") %>% 
+    filter(SiteCode != "KH") 
 }
 
 { # .. NHSF_DF   ----
