@@ -533,10 +533,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                    selected = "Purple Urchin"),
                        radioButtons(inputId = "NHSF_Graph_SD_Isl",
                                     label = "Choose a graph:",
-                                    choices = c("Boxplot", "Violin Plot", "Joy Plot")),
-                       radioButtons(inputId = "NHSF_DataSummary_SD_Isl",
-                                    label = "Choose a data Summary:",
-                                    choices = c("Island Mean", "Site Means")),
+                                    choices = c("Boxplot", "Violin Plot")),
                        radioButtons(inputId = "NHSF_FreeOrLock_SD_Isl",
                                     label =  "Axis Options:",
                                     choices = c("Locked Scales", "Free Scales")),
@@ -557,7 +554,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                    selected = "Purple Urchin"),
                        radioButtons(inputId = "NHSF_Graph_SD_MPA",
                                     label = "Choose a graph:",
-                                    choices = c("Boxplot", "Violin Plot", "Joy Plot")),
+                                    choices = c("Boxplot", "Violin Plot")),
                        radioButtons(inputId = "NHSF_FreeOrLock_SD_MPA",
                                     label =  "Axis Options:",
                                     choices = c("Locked Scales", "Free Scales")),
@@ -1128,9 +1125,6 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                                                 height = 200)),
                                           column(2, imageOutput(outputId = "NHSF_TopSitePhoto_SD_One",
                                                                 height = 200))),
-                         
-                         
-                         
                          conditionalPanel(condition = "input.NHSF_allORone_MS == 'One Species by Site' &&
                                                        input.NHSF_distORmean_One=='Mean Sizes' ||
                                                        input.NHSF_allORone_MS == 'One Species by Island' || 
