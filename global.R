@@ -164,12 +164,14 @@
   NHSF_DF <- read_csv("NHSF_Summary.csv")
   NHSF_DF$IslandName <- factor(NHSF_DF$IslandName, levels = IslandLevels)
   
-  NHSF_DFMPA <- read_csv("NHSF_MPA.csv")
-  NHSF_DFMPA$IslandName <- factor(NHSF_DFMPA$IslandName, levels = MPA_Levels)
-  
   NHSF_DFRaw<- read_csv("NHSF_Raw.csv")
   NHSF_DFRaw$IslandName <- factor(NHSF_DFRaw$IslandName, levels = IslandLevels)
   
+  NHSF_DFMPA <- read_csv("NHSF_MPA.csv")
+  NHSF_DFMPA$IslandName <- factor(NHSF_DFMPA$IslandName, levels = MPA_Levels)
+  
+  NHSF_DFRawMPA <- read_csv("NHSF_MPA_Raw.csv")
+  NHSF_DFRawMPA$IslandName <- factor(NHSF_DFRawMPA$IslandName, levels = MPA_Levels)
   
 } 
 

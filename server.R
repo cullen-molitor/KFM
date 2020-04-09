@@ -295,55 +295,31 @@ server <- function(input, output, session) {
       
       output$oneM_TopPhoto_One <- renderImage({
         
-        if (input$oneM_allORone ==  'One Species by Site' && input$oneM_SpeciesName_One == unique(oneM_Filter_One()$CommonName)) {
+        if (input$oneM_allORone =='One Species by Site') {
           return(list(
             src = glue("www/Indicator_Species/{unique(oneM_Filter_One()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(oneM_Filter_One()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
+            contentType = "image/jpg", width = 210, height = 210))
         }
-        else if (input$oneM_allORone ==  'One Species by Island' && input$oneM_SpeciesName_Isl == unique(oneM_FilterByIsl_Isl()$CommonName)) {
+        else if (input$oneM_allORone == 'One Species by Island') {
           return(list(
             src = glue("www/Indicator_Species/{unique(oneM_FilterByIsl_Isl()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
+            contentType = "image/jpg", width = 210, height = 210))
         }
-        else if (input$oneM_allORone ==  'One Species by MPA' && input$oneM_SpeciesName_MPA == unique(oneM_Filter_MPA()$CommonName)) {
+        else if (input$oneM_allORone == 'One Species by MPA') {
           return(list(
             src = glue("www/Indicator_Species/{unique(oneM_Filter_MPA()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(oneM_Filter_MPA()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
+            contentType = "image/jpg", width = 210, height = 210))
         }
-        else if (input$oneM_allORone ==  'Two Species by Site' && input$oneM_SpeciesName_Two_One == unique(oneM_Filter_Two_One()$CommonName)) {
+        else if (input$oneM_allORone == 'Two Species by Site') {
           return(list(
             src = glue("www/Indicator_Species/{unique(oneM_Filter_Two_One()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(oneM_Filter_Two_One()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
+            contentType = "image/jpg", width = 210, height = 210))
         }
       }, deleteFile = FALSE) # Small species photo above plot
       
       output$oneM_TopPhoto_Two <- renderImage({
-        
-        if (input$oneM_allORone ==  'Two Species by Site' && input$oneM_SpeciesName_Two_Two == unique(oneM_Filter_Two_Two()$CommonName)) {
-          return(list(
-            src = glue("www/Indicator_Species/{unique(oneM_Filter_Two_Two()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(oneM_Filter_Two_Two()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
-        }
+        list(src = glue("www/Indicator_Species/{unique(oneM_Filter_Two_Two()$Species)}.jpg"),
+             contentType = "image/jpg", width = 210, height = 210)
       }, deleteFile = FALSE) # 2nd Small species photo above plot
       
       output$oneM_LargeSpPhoto_One <- renderImage({
@@ -2586,55 +2562,31 @@ server <- function(input, output, session) {
       
       output$fiveM_TopPhoto_One <- renderImage({
         
-        if (input$fiveM_allORone ==  'One Species by Site' && input$fiveM_SpeciesName_One == unique(fiveM_Filter_One()$CommonName)) {
+        if (input$fiveM_allORone =='One Species by Site') {
           return(list(
             src = glue("www/Indicator_Species/{unique(fiveM_Filter_One()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(fiveM_Filter_One()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
+            contentType = "image/jpg", width = 210, height = 210))
         }
-        else if (input$fiveM_allORone ==  'One Species by Island' && input$fiveM_SpeciesName_Isl == unique(fiveM_FilterByIsl_Isl()$CommonName)) {
+        else if (input$fiveM_allORone == 'One Species by Island') {
           return(list(
             src = glue("www/Indicator_Species/{unique(fiveM_FilterByIsl_Isl()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(fiveM_FilterByIsl_Isl()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
+            contentType = "image/jpg", width = 210, height = 210))
         }
-        else if (input$fiveM_allORone ==  'One Species by MPA' && input$fiveM_SpeciesName_MPA == unique(fiveM_Filter_MPA()$CommonName)) {
+        else if (input$fiveM_allORone == 'One Species by MPA') {
           return(list(
             src = glue("www/Indicator_Species/{unique(fiveM_Filter_MPA()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(fiveM_Filter_MPA()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
+            contentType = "image/jpg", width = 210, height = 210))
         }
-        else if (input$fiveM_allORone ==  'Two Species by Site' && input$fiveM_SpeciesName_Two_One == unique(fiveM_Filter_Two_One()$CommonName)) {
+        else if (input$fiveM_allORone == 'Two Species by Site') {
           return(list(
             src = glue("www/Indicator_Species/{unique(fiveM_Filter_Two_One()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(fiveM_Filter_Two_One()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
+            contentType = "image/jpg", width = 210, height = 210))
         }
       }, deleteFile = FALSE) # Small species photo above plot
       
       output$fiveM_TopPhoto_Two <- renderImage({
-        
-        if (input$fiveM_allORone ==  'Two Species by Site' && input$fiveM_SpeciesName_Two_Two == unique(fiveM_Filter_Two_Two()$CommonName)) {
-          return(list(
-            src = glue("www/Indicator_Species/{unique(fiveM_Filter_Two_Two()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(fiveM_Filter_Two_Two()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
-        }
+        list(src = glue("www/Indicator_Species/{unique(fiveM_Filter_Two_Two()$Species)}.jpg"),
+             contentType = "image/jpg", width = 210, height = 210)
       }, deleteFile = FALSE) # 2nd Small species photo above plot
       
       output$fiveM_LargeSpPhoto_One <- renderImage({
@@ -2884,8 +2836,7 @@ server <- function(input, output, session) {
           geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(fiveM_alphaPDO_UW_one()), show.legend = FALSE) +
           scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-          geom_boxplot(data = fiveM_RawFilter_One(), 
-                       aes(x = Date, y = Count, group = SurveyYear, color = CommonName)) +
+          geom_boxplot(data = fiveM_RawFilter_One(), aes(x = Date, y = Count, group = SurveyYear, color = CommonName)) +
           scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 1)) +
           geom_point(data = fiveM_RawFilter_One(), aes(x = Date, y = Mean),
                      size = 2, color = "black") +
@@ -10292,10 +10243,7 @@ server <- function(input, output, session) {
                          tags$hr(),
                          DTOutput(outputId = "NHSF_DToutData_SD_One",
                                   height = 550),
-                         tags$hr(), tags$hr(),
-                         imageOutput(outputId = "NHSF_LargeSitePhoto_SD_One",
-                                     height = 625),
-                         tags$hr()
+                         tags$hr(), tags$hr()
       )
     } 
     else if(input$NHSF_allORone_SD == "One Species by Island" &&
@@ -10304,11 +10252,13 @@ server <- function(input, output, session) {
                          tags$hr(),
                          plotOutput(outputId = "NHSF_Plot_SD_Isl",
                                     height = 1000),
+                         tags$hr(),
                          conditionalPanel("input.NHSF_GraphOptions_SD_Isl == 'With ONI' ||
                                            input.NHSF_GraphOptions_SD_Isl == 'With PDO (NOAA)' ||
                                            input.NHSF_GraphOptions_SD_Isl == 'With PDO (UW)'",
                                           imageOutput(outputId = "NHSF_ONIpdoPIC_SD_Isl",
-                                                      height = 75)),
+                                                      height = 75),
+                                          tags$hr()),
                          conditionalPanel("input.NHSF_GraphOptions_SD_Isl == 'With ONI'",
                                           ONI_tagList,
                                           tags$hr()),
@@ -10606,10 +10556,23 @@ server <- function(input, output, session) {
       
       NHSF_RawFilter_One <- reactive({ 
         NHSF_DFRaw %>%
+          expandRows(count = "NoOfInd") %>%
           filter(SiteName == input$NHSF_SiteName_SD_One,
                  CommonName == input$NHSF_SpeciesName_SD_One) %>% 
           group_by(SurveyYear) %>%
-          mutate(TotalCount = length(Size_mm))
+          mutate(TotalCount = length(Size_mm)) %>%
+          select(SiteNumber, SurveyYear, Date, IslandName, SiteName, ScientificName, CommonName, 
+                 Size_mm, TotalCount, IslandCode, SiteCode, Species, ReserveStatus, MeanDepth)
+      }) # filtered  NHSF raw table
+      
+      NHSF_RawFilterSummary_One <- reactive({ 
+        NHSF_DFRaw %>%
+          filter(SiteName == input$NHSF_SiteName_SD_One,
+                 CommonName == input$NHSF_SpeciesName_SD_One) %>% 
+          group_by(SurveyYear) %>%
+          mutate(TotalCount = length(Size_mm)) %>%
+          select(SiteNumber, SurveyYear, Date, IslandName, SiteName, ScientificName, CommonName, 
+                 Size_mm, NoOfInd, TotalCount, IslandCode, SiteCode, Species, ReserveStatus, MeanDepth)
       }) # filtered  NHSF raw table
       
       NHSF_SpeciesClass_SD_One <- reactive({ 
@@ -10633,15 +10596,15 @@ server <- function(input, output, session) {
         
         if (input$NHSF_allORone_SD == 'One Species by Site') {
           return(list(src = glue("www/Indicator_Species/{unique(NHSF_RawFilter_One()$Species)}.jpg"),
-                      contentType = "image/jpg", width = 200, height = 200))
+                      contentType = "image/jpg", width = 210, height = 210))
         }
-        else if (input$NHSF_allORone_SD == 'One Species by Island') {
+        else if (input$NHSF_allORone_SD == "One Species by Island") {
           return(list(src = glue("www/Indicator_Species/{unique(NHSF_RawFilter_Isl()$Species)}.jpg"),
-                      contentType = "image/jpg", width = 200, height = 200))
+                      contentType = "image/jpg", width = 210, height = 210))
         }
         else if (input$NHSF_allORone_SD == 'One Species by MPA') {
           return(list(src = glue("www/Indicator_Species/{unique(NHSF_RawFilter_MPA()$Species)}.jpg"),
-                      contentType = "image/jpg", width = 200, height = 200))
+                      contentType = "image/jpg", width = 210, height = 210))
         }
       }, deleteFile = FALSE) # Small species photo above plot
       
@@ -10651,13 +10614,34 @@ server <- function(input, output, session) {
       }, deleteFile = FALSE) # Large species photo below plot
       
       output$NHSF_TopSitePhoto_SD_One <- renderImage({
-        list(src = glue("www/Sat_Imagery/{unique(NHSF_RawFilter_One()$SiteCode)}.png"),
-             contentType = "image/png", width = 430, height = 210)
+        if (input$NHSF_allORone_SD == 'One Species by Site') {
+          return(list(src = glue("www/Sat_Imagery/{unique(NHSF_RawFilter_One()$SiteCode)}.png"),
+                      contentType = "image/png", width = 430, height = 210))
+        }
+        else if (input$NHSF_allORone_SD == "One Species by Island") {
+          return(list(src = "www/Sat_Imagery/CHISisl.png",
+                      contentType = "image/png", width = 430, height = 210))
+        }
+        else if (input$NHSF_allORone_SD == 'One Species by MPA') {
+          return(list(src = "www/Sat_Imagery/CHISisl.png",
+                      contentType = "image/png", width = 430, height = 210))
+        }
+        
       }, deleteFile = FALSE) # Small Site photo above plot
       
       output$NHSF_LargeSitePhoto_SD_One <- renderImage({
-        list(src = glue("www/Sat_Imagery/{unique(NHSF_RawFilter_One()$SiteCode)}.png"),
-             contentType = "image/png", width = 1287, height = 625)
+        if (input$NHSF_allORone_SD == 'One Species by Site') {
+          return(list(src = glue("www/Sat_Imagery/{unique(NHSF_RawFilter_One()$SiteCode)}.png"),
+                      contentType = "image/png", width = 1287, height = 625))
+        }
+        else if (input$NHSF_allORone_SD == "One Species by Island") {
+          return(list(src = "www/Sat_Imagery/CHISisl.png",
+                      contentType = "image/png", width = 1287, height = 625))
+        }
+        else if (input$NHSF_allORone_SD == 'One Species by MPA') {
+          return(list(src = "www/Sat_Imagery/CHISisl.png",
+                      contentType = "image/png", width = 1287, height = 625))
+        }
       }, deleteFile = FALSE) # Large Site photo below plot
       
       output$NHSF_DToutClass_SD_One <- renderDT({
@@ -10887,7 +10871,7 @@ server <- function(input, output, session) {
       }, deleteFile = FALSE) # Boxplot drawing/explanation
       
       output$NHSF_DToutData_SD_One <- renderDT({
-        datatable(NHSF_RawFilter_One(),
+        datatable(NHSF_RawFilterSummary_One(),
                   extensions = c('Buttons', 'ColReorder'),
                   options = list(
                     initComplete = JS(
@@ -10904,7 +10888,7 @@ server <- function(input, output, session) {
                     columnDefs = c(list(list(className = 'dt-center', targets = 0:11))),
                     colReorder = TRUE),
                   rownames = FALSE) %>% 
-          formatStyle(names(NHSF_RawFilter_One()),
+          formatStyle(names(NHSF_RawFilterSummary_One()),
                       color = "black",
                       backgroundColor = 'white')
       }) # Filtered data table output
@@ -10915,6 +10899,7 @@ server <- function(input, output, session) {
       
       NHSF_RawFilter_Isl <- reactive({
         NHSF_DFRaw %>%
+          expandRows(count = "NoOfInd") %>%
           filter(CommonName == input$NHSF_SpeciesName_SD_Isl) %>%
           group_by(SurveyYear) %>% 
           mutate(Date = mean(as.Date(Date))) %>% 
@@ -11116,38 +11101,22 @@ server <- function(input, output, session) {
         if (input$NHSF_allORone_MS ==  'One Species by Site' && input$NHSF_SpeciesName_One == unique(NHSF_Filter_One()$CommonName)) {
           return(list(
             src = glue("www/Indicator_Species/{unique(NHSF_Filter_One()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(NHSF_Filter_One()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
+            contentType = "image/jpg", width = 210, height = 210))
         }
         else if (input$NHSF_allORone_MS ==  'One Species by Island' && input$NHSF_SpeciesName_Isl == unique(NHSF_FilterByIsl_Isl()$CommonName)) {
           return(list(
             src = glue("www/Indicator_Species/{unique(NHSF_FilterByIsl_Isl()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(NHSF_FilterByIsl_Isl()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
+            contentType = "image/jpg", width = 210, height = 210))
         }
         else if (input$NHSF_allORone_MS ==  'One Species by MPA' && input$NHSF_SpeciesName_MPA == unique(NHSF_Filter_MPA()$CommonName)) {
           return(list(
             src = glue("www/Indicator_Species/{unique(NHSF_Filter_MPA()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(NHSF_Filter_MPA()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
+            contentType = "image/jpg", width = 210, height = 210))
         }
         else if (input$NHSF_allORone_MS ==  'Two Species by Site' && input$NHSF_SpeciesName_Two_One == unique(NHSF_Filter_Two_One()$CommonName)) {
           return(list(
             src = glue("www/Indicator_Species/{unique(NHSF_Filter_Two_One()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(NHSF_Filter_Two_One()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
+            contentType = "image/jpg", width = 210, height = 210))
         }
       }, deleteFile = FALSE) # Small species photo above plot
       
@@ -11156,11 +11125,7 @@ server <- function(input, output, session) {
         if (input$NHSF_allORone_MS ==  'Two Species by Site' && input$NHSF_SpeciesName_Two_Two == unique(NHSF_Filter_Two_Two()$CommonName)) {
           return(list(
             src = glue("www/Indicator_Species/{unique(NHSF_Filter_Two_Two()$Species)}.jpg"),
-            contentType = "image/jpg",
-            alt = glue("{unique(NHSF_Filter_Two_Two()$CommonName)}"),
-            width = 200,
-            height = 200
-          ))
+            contentType = "image/jpg", width = 210, height = 210))
         }
       }, deleteFile = FALSE) # 2nd Small species photo above plot
       
@@ -14281,7 +14246,7 @@ server <- function(input, output, session) {
         return(
           selectInput(inputId = "SpeciesECD",
                       label = "Choose a Species:",
-                      choices =unique(nhsfRaw$CommonName)))
+                      choices =unique(NHSF_DFRaw$CommonName)))
       }
       else if(input$statProtocol == "One Meter"){
         return(
@@ -14311,7 +14276,7 @@ server <- function(input, output, session) {
         return(
           selectInput(inputId = "SpeciesECD1",
                       label = "Choose a Species:",
-                      choices =unique(nhsfRaw$CommonName)))
+                      choices =unique(NHSF_DFRaw$CommonName)))
       }
       else if(input$statProtocol == "One Meter"){
         return(
@@ -14341,7 +14306,7 @@ server <- function(input, output, session) {
         return(
           selectInput(inputId = "SpeciesECD2",
                       label = "Choose a Species:",
-                      choices =unique(nhsfRaw$CommonName)))
+                      choices =unique(NHSF_DFRaw$CommonName)))
       }
       else if(input$statProtocol == "One Meter"){
         return(
@@ -14362,7 +14327,6 @@ server <- function(input, output, session) {
                       choices =unique(bands_DFRaw$CommonName)))
       }
     
-  
     })
     
     output$StatDataOut3 <- renderUI({ # by_All   ----
@@ -14372,7 +14336,7 @@ server <- function(input, output, session) {
         return(
           selectInput(inputId = "SpeciesECD3",
                       label = "Choose a Species:",
-                      choices =unique(nhsfRaw$CommonName)))
+                      choices =unique(NHSF_DFRaw$CommonName)))
       }
       else if(input$statProtocol == "One Meter"){
         return(
@@ -14404,28 +14368,28 @@ server <- function(input, output, session) {
       EDCdata <-reactive({
         if(input$statProtocol == "NHSF" && input$SiteOrIslStat == "By Site"){
           return({
-            nhsfRaw %>%
+            NHSF_DFRaw %>%
               filter(SiteName == input$SiteNameECD,
                      CommonName == input$SpeciesECD)
           })
         }
         else if(input$statProtocol == "NHSF" && input$SiteOrIslStat == "By Island"){
           return({
-            nhsfRaw %>%
+            NHSF_DFRaw %>%
+              filter(IslandName == input$IslNameECD,
+                     CommonName == input$SpeciesECD1)
+          })
+        }
+        else if(input$statProtocol == "NHSF" && input$SiteOrIslStat == "By MPA"){
+          return({
+            NHSF_DFRaw %>%
               filter(SiteNumber != '5' &
                        SiteNumber != '6' & 
                        SiteNumber != '7' & 
                        SiteNumber != '8' &
                        SiteNumber != '10',
                      SurveyYear > 2004,
-                     IslandName == input$IslNameECD,
-                     CommonName == input$SpeciesECD1)
-          })
-        }
-        else if(input$statProtocol == "NHSF" && input$SiteOrIslStat == "By MPA"){
-          return({
-            nhsfRaw %>%
-              filter(IslandName == input$MPANameECD,
+                     IslandName == input$MPANameECD,
                      CommonName == input$SpeciesECD2)
           })
         }

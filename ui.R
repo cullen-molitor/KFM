@@ -930,7 +930,9 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
         "a {color: #00c0ef;}",
         "hr {border-top: 2px solid white;}",
         ".nav-tabs {border-bottom: 0px ;}",
-        "ul.sidebar-menu hr {border-top: 2px solid white; margin-top: 10px; margin-bottom: 10px;}"
+        "ul.sidebar-menu hr {border-top: 2px solid white; margin-top: 10px; margin-bottom: 10px;}",
+        "label {color: #f4f4f4;}",
+        "input {color: black;}"
         ))
   ),
   dashboardBody( # Dash_B_Body    ----
@@ -1119,8 +1121,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                                                           "Two Species by Site",
                                                                           "All Species"),
                                                               inline = FALSE))),
-                         conditionalPanel(condition = "input.NHSF_allORone_SD == 'One Species by Site' &&
-                                                       input.NHSF_distORmean_One=='Size Distribution'",
+                         conditionalPanel(condition = "input.NHSF_distORmean_One == 'Size Distribution'",
                                           column(2, imageOutput(outputId = "NHSF_TopPhoto_SD_One",
                                                                 height = 200)),
                                           column(2, imageOutput(outputId = "NHSF_TopSitePhoto_SD_One",
@@ -1142,7 +1143,11 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                                        input.NHSF_distORmean_One=='Mean Sizes'",
                                           column(2, imageOutput(outputId = "NHSF_TopSitePhoto_One",
                                                                 height = 200)))),
-                uiOutput(outputId = "NHSF_UIout")),
+                uiOutput(outputId = "NHSF_UIout"),
+                conditionalPanel(condition = "input.NHSF_distORmean_One == 'Size Distribution'",
+                                 imageOutput(outputId = "NHSF_LargeSitePhoto_SD_One",
+                                             height = 625),
+                                 tags$hr())),
        tabPanel("Temperature", value = "temps", #** Temp_TP    ----
                 fluidRow(column(6, offset = 3,tags$h1(tags$strong("Water Temperatures")))),
                 radioButtons(inputId = "allORonetemps",
