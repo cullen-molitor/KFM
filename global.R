@@ -161,14 +161,16 @@
 
 { # .. NHSF_DF   ----
   
-  nhsfRaw<- read_csv("NHSF_Raw.csv")
-  nhsfRaw$IslandName <- factor(nhsfRaw$IslandName, levels = IslandLevels)
+  NHSF_DF <- read_csv("NHSF_Summary.csv")
+  NHSF_DF$IslandName <- factor(NHSF_DF$IslandName, levels = IslandLevels)
   
-  nhsfMean <- read_csv("nhsfMean.csv")
-  nhsfMean$IslandName <- factor(nhsfMean$IslandName, levels = IslandLevels)
+  NHSF_DFMPA <- read_csv("NHSF_MPA.csv")
+  NHSF_DFMPA$IslandName <- factor(NHSF_DFMPA$IslandName, levels = MPA_Levels)
   
-  nhsfBYisland <- read_csv("nhsfByIsland.csv")
-  nhsfBYisland$IslandName <- factor(nhsfBYisland$IslandName, levels = IslandLevels)
+  NHSF_DFRaw<- read_csv("NHSF_Raw.csv")
+  NHSF_DFRaw$IslandName <- factor(NHSF_DFRaw$IslandName, levels = IslandLevels)
+  
+  
 } 
 
 { # .. RPC_DF   ----

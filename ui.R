@@ -501,45 +501,183 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                     choices = c("Line", "Bar")),
                        tags$hr()
       ),
-      # ~ NHSF_Conditonals  ----
-      # ...... One Species  ----
-      conditionalPanel(condition = "input.tabselected=='nhsf' && input.allORoneNHSF=='One Species by Site'",
+      # ~ NHSF_SD_Conditional  ----
+      # ...... One Species ----
+      conditionalPanel(condition = "input.tabselected=='NHSF_TP' && 
+                       input.NHSF_allORone_SD=='One Species by Site' &&
+                       input.NHSF_distORmean_One=='Size Distribution'",
+                       selectInput(inputId = "NHSF_SiteName_SD_One",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "NHSF_SpeciesName_SD_One",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(NHSF_DFRaw$CommonName)),
+                                   selected = "Bat Star"),
+                       radioButtons(inputId = "NHSF_Graph_SD_One",
+                                    label = "Choose a graph:",
+                                    choices = c("Boxplot", "Violin Plot", "Joy Plot")),
+                       radioButtons(inputId = "NHSF_GraphOptions_SD_One",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"))
+      ),
+      # ...... By Island ----
+      conditionalPanel(condition = "input.tabselected=='NHSF_TP' && 
+                       input.NHSF_allORone_SD=='One Species by Island' &&
+                       input.NHSF_distORmean_One=='Size Distribution'",
+                       selectInput(inputId = "NHSF_SpeciesName_SD_Isl",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(NHSF_DF$CommonName)),
+                                   selected = "Purple Urchin"),
+                       radioButtons(inputId = "NHSF_Graph_SD_Isl",
+                                    label = "Choose a graph:",
+                                    choices = c("Boxplot", "Violin Plot", "Joy Plot")),
+                       radioButtons(inputId = "NHSF_DataSummary_SD_Isl",
+                                    label = "Choose a data Summary:",
+                                    choices = c("Island Mean", "Site Means")),
+                       radioButtons(inputId = "NHSF_FreeOrLock_SD_Isl",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales")),
+                       radioButtons(inputId = "NHSF_GraphOptions_SD_Isl",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"))
+      ),
+      # ...... By MPA ----
+      conditionalPanel(condition = "input.tabselected=='NHSF_TP' && 
+                       input.NHSF_allORone_SD=='One Species by MPA' &&
+                       input.NHSF_distORmean_One=='Size Distribution'",
+                       selectInput(inputId = "NHSF_SpeciesName_SD_MPA",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(NHSF_DF$CommonName)),
+                                   selected = "Purple Urchin"),
+                       radioButtons(inputId = "NHSF_Graph_SD_MPA",
+                                    label = "Choose a graph:",
+                                    choices = c("Boxplot", "Violin Plot", "Joy Plot")),
+                       radioButtons(inputId = "NHSF_FreeOrLock_SD_MPA",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales")),
+                       radioButtons(inputId = "NHSF_GraphOptions_SD_MPA",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index", 
+                                                "With ONI", 
+                                                "With PDO (NOAA)", 
+                                                "With PDO (UW)"))
+      ),
+      # ~ NHSF_MS_Conditional  ----
+      # ...... One Species ----
+      conditionalPanel(condition = "input.tabselected=='NHSF_TP' && 
+                       input.NHSF_allORone_MS=='One Species by Site' &&
+                       input.NHSF_distORmean_One=='Mean Sizes'",
+                       selectInput(inputId = "NHSF_SiteName_One",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "NHSF_SpeciesName_One",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(NHSF_DF$CommonName)),
+                                   selected = "Bat Star"),
                        tags$hr(),
-                       selectInput(inputId = "nhsfgraph",
-                                   label = "Choose a graph:",
-                                   choices = c("Violin", "Boxplot", "Joyplot", "Mean Sizes")),
+                       radioButtons(inputId = "NHSF_Graph_One",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "NHSF_DataSummary_One",
+                                    label = "Choose a data Summary:",
+                                    choices = c("One species at one site" , "One species with island average")),
+                       radioButtons(inputId = "NHSF_GraphOptions_One",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"))
+      ),
+      # ...... By Island ----
+      conditionalPanel(condition = "input.tabselected=='NHSF_TP' && 
+                       input.NHSF_allORone_MS=='One Species by Island' &&
+                       input.NHSF_distORmean_One=='Mean Sizes'",
+                       selectInput(inputId = "NHSF_SpeciesName_Isl",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(NHSF_DF$CommonName)),
+                                   selected = "Purple Urchin"),
+                       radioButtons(inputId = "NHSF_Graph_Isl",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "NHSF_DataSummary_Isl",
+                                    label = "Choose a data Summary:",
+                                    choices = c("Island Mean", "Site Means (by Island)")),
+                       radioButtons(inputId = "NHSF_FreeOrLock_Isl",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales", "Single Plot")),
+                       radioButtons(inputId = "NHSF_GraphOptions_Isl",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"))
+      ),
+      # ...... By MPA ----
+      conditionalPanel(condition = "input.tabselected=='NHSF_TP' && 
+                       input.NHSF_allORone_MS=='One Species by MPA' &&
+                       input.NHSF_distORmean_One=='Mean Sizes'",
+                       selectInput(inputId = "NHSF_SpeciesName_MPA",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(NHSF_DF$CommonName)),
+                                   selected = "Purple Urchin"),
                        tags$hr(),
-                       selectInput(inputId = "SiteNamenhsf",
+                       radioButtons(inputId = "NHSF_Graph_MPA",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "NHSF_DataSummary_MPA",
+                                    label = "Choose a data Summary:",
+                                    choices = c("MPA Mean", "Site Means (by MPA)")),
+                       radioButtons(inputId = "NHSF_FreeOrLock_MPA",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales")),
+                       radioButtons(inputId = "NHSF_GraphOptions_MPA",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)")),
+                       tags$hr()
+      ),
+      # ...... Two Species ----
+      conditionalPanel(condition = "input.tabselected=='NHSF_TP' && 
+                       input.NHSF_allORone_MS=='Two Species by Site' &&
+                       input.NHSF_distORmean_One=='Mean Sizes'",
+                       selectInput(inputId = "NHSF_SiteName_Two",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "NHSF_SpeciesName_Two_One",
+                                   label = "Species One:",
+                                   choices = levels(factor(NHSF_DF$CommonName)),
+                                   selected = "Purple Urchin"),
+                       selectInput(inputId = "NHSF_SpeciesName_Two_Two",
+                                   label = "Species Two:",
+                                   choices = levels(factor(NHSF_DF$CommonName)),
+                                   selected = "Red Urchin"),
+                       tags$hr(),
+                       radioButtons(inputId = "NHSF_Graph_Two",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "NHSF_GraphOptions_Two",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)"
+                                    )
+                       )
+      ),
+      # ...... All Species ----
+      conditionalPanel(condition ="input.tabselected=='NHSF_TP' && 
+                       input.NHSF_allORone_MS=='All Species' &&
+                       input.NHSF_distORmean_One=='Mean Sizes'",
+                       tags$hr(),
+                       selectInput(inputId = "NHSF_SiteNameAll",
                                    label = "Choose a Site:",
                                    choices = SiteNames),
                        tags$hr(),
-                       selectInput(inputId = "nhsfSpeciesName",
-                                   label = "Choose a Species:",
-                                   choices = unique(nhsfRaw$CommonName)),
-                       tags$hr()
-      ),
-      # ...... By Island  ----
-      conditionalPanel(condition = "input.tabselected=='nhsf' && input.allORoneNHSF=='One Species by Island (Free Scales)'",
-                       tags$hr(),
-                       selectInput(inputId = "nhsfgraphbyIsl",
-                                   label = "Choose a graph:",
-                                   choices = c("Violin", "Boxplot", "Mean Sizes")),
-                       tags$hr(),
-                       selectInput(inputId = "nhsfSpeciesNamebyIsl",
-                                   label = "Choose a Species:",
-                                   choices = unique(nhsfRaw$CommonName)),
-                       tags$hr()
-      ),
-      # ...... Locked   ----
-      conditionalPanel(condition = "input.tabselected=='nhsf' && input.allORoneNHSF=='One Species by Island (Locked Scales)'",
-                       tags$hr(),
-                       selectInput(inputId = "nhsfgraphLocked",
-                                   label = "Choose a graph:",
-                                   choices = c("Violin", "Boxplot", "Mean Sizes")),
-                       tags$hr(),
-                       selectInput(inputId = "nhsfSpeciesNameLocked",
-                                   label = "Choose a Species:",
-                                   choices = unique(nhsfRaw$CommonName)),
+                       radioButtons(inputId = "NHSF_GraphAll",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar")),
                        tags$hr()
       ),
       # ~ Temperature_Conditional   ----
@@ -962,19 +1100,55 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                            imageOutput(outputId = "rpcs_TopSitePhoto_One",
                                        height = 200)))),
                 uiOutput(outputId = "rpcs_UIout")),
-       tabPanel("NHSF", value = "nhsf", # ** NHSF_TP      ----
-                fluidRow(column(10, offset = 1,tags$h1(tags$strong("Natural Habitat Size Frequency Distributions")))),
-                radioButtons(inputId = "allORoneNHSF",
-                             label = "What would you like to view?",
-                             choices = c("One Species by Site", 
-                                         "One Species by Island (Free Scales)",
-                                         "One Species by Island (Locked Scales)",
-                                         "One Species by MPA",
-                                         "One Species by MPA (Locked Scales)"),
-                             inline = TRUE),
-                uiOutput(outputId = "outNHSF"),
-                tags$hr()
-       ),
+       tabPanel("NHSF", value = "NHSF_TP", # ** NHSF_TP         ---- 
+                fluidRow(column(12, offset = 2, tags$h1(tags$strong("Natural Habitat Size Frequency Distributions")))),
+                fluidRow(column(3, radioButtons(inputId = "NHSF_distORmean_One",
+                                                label = "What would you like to view?",
+                                                choices = c("Size Distribution",
+                                                            "Mean Sizes")),
+                                conditionalPanel("input.NHSF_distORmean_One == 'Size Distribution'",
+                                                 radioButtons(inputId = "NHSF_allORone_SD",
+                                                              label = "What would you like to view?",
+                                                              choices = c("One Species by Site",
+                                                                          "One Species by Island",
+                                                                          "One Species by MPA"),
+                                                              inline = FALSE)),
+                                conditionalPanel("input.NHSF_distORmean_One == 'Mean Sizes'",
+                                                 radioButtons(inputId = "NHSF_allORone_MS",
+                                                              label = "What would you like to view?",
+                                                              choices = c("One Species by Site",
+                                                                          "One Species by Island",
+                                                                          "One Species by MPA",
+                                                                          "Two Species by Site",
+                                                                          "All Species"),
+                                                              inline = FALSE))),
+                         conditionalPanel(condition = "input.NHSF_allORone_SD == 'One Species by Site' &&
+                                                       input.NHSF_distORmean_One=='Size Distribution'",
+                                          column(2, imageOutput(outputId = "NHSF_TopPhoto_SD_One",
+                                                                height = 200)),
+                                          column(2, imageOutput(outputId = "NHSF_TopSitePhoto_SD_One",
+                                                                height = 200))),
+                         
+                         
+                         
+                         conditionalPanel(condition = "input.NHSF_allORone_MS == 'One Species by Site' &&
+                                                       input.NHSF_distORmean_One=='Mean Sizes' ||
+                                                       input.NHSF_allORone_MS == 'One Species by Island' || 
+                                                       input.NHSF_allORone_MS == 'One Species by MPA' || 
+                                                       input.NHSF_allORone_MS == 'Two Species by Site'",
+                                          column(2, imageOutput(outputId = "NHSF_TopPhoto_One",
+                                                                height = 200))),
+                         conditionalPanel(condition = "input.NHSF_allORone_MS == 'Two Species by Site' &&
+                                                       input.NHSF_distORmean_One=='Mean Sizes'",
+                                          column(2,imageOutput(outputId = "NHSF_TopPhoto_Two",
+                                                               height = 200)),
+                                          column(2, imageOutput(outputId = "NHSF_TopSitePhoto_Two",
+                                                                height = 200))),
+                         conditionalPanel(condition = "input.NHSF_allORone_MS == 'One Species by Site' &&
+                                                       input.NHSF_distORmean_One=='Mean Sizes'",
+                                          column(2, imageOutput(outputId = "NHSF_TopSitePhoto_One",
+                                                                height = 200)))),
+                uiOutput(outputId = "NHSF_UIout")),
        tabPanel("Temperature", value = "temps", #** Temp_TP    ----
                 fluidRow(column(6, offset = 3,tags$h1(tags$strong("Water Temperatures")))),
                 radioButtons(inputId = "allORonetemps",
