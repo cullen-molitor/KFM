@@ -334,7 +334,7 @@ server <- function(input, output, session) {
       
       output$oneM_LargeSitePhoto_One <- renderImage({
         list(src = glue("www/Sat_Imagery/{unique(oneM_Filter_One()$SiteCode)}.png"),
-            contentType = "image/png", width = 1287, height = 625)
+            contentType = "image/png", width = 1250, height = 625)
       }, deleteFile = FALSE) # Large Site photo below plot
       
       output$oneM_DToutClass_One <- renderDT({
@@ -1888,7 +1888,7 @@ server <- function(input, output, session) {
             src = glue("www/Sat_Imagery/{unique(oneM_Filter_Two_One()$SiteCode)}.png"),
             contentType = "image/png",
             alt = glue("{unique(oneM_Filter_Two_One()$SiteName)}"),
-            width = 1287,
+            width = 1250,
             height = 625
           ))
         }
@@ -2601,7 +2601,7 @@ server <- function(input, output, session) {
       
       output$fiveM_LargeSitePhoto_One <- renderImage({
         list(src = glue("www/Sat_Imagery/{unique(fiveM_Filter_One()$SiteCode)}.png"),
-             contentType = "image/png", width = 1287, height = 625)
+             contentType = "image/png", width = 1250, height = 625)
       }, deleteFile = FALSE) # Large Site photo below plot
       
       output$fiveM_DToutClass_One <- renderDT({
@@ -4155,7 +4155,7 @@ server <- function(input, output, session) {
             src = glue("www/Sat_Imagery/{unique(fiveM_Filter_Two_One()$SiteCode)}.png"),
             contentType = "image/png",
             alt = glue("{unique(fiveM_Filter_Two_One()$SiteName)}"),
-            width = 1287,
+            width = 1250,
             height = 625
           ))
         }
@@ -4892,7 +4892,7 @@ server <- function(input, output, session) {
       
       output$bands_LargeSitePhoto_One <- renderImage({
         list(src = glue("www/Sat_Imagery/{unique(bands_Filter_One()$SiteCode)}.png"),
-             contentType = "image/png", width = 1287, height = 625)
+             contentType = "image/png", width = 1250, height = 625)
       }, deleteFile = FALSE) # Large Site photo below plot
       
       output$bands_DToutClass_One <- renderDT({
@@ -6447,7 +6447,7 @@ server <- function(input, output, session) {
             src = glue("www/Sat_Imagery/{unique(bands_Filter_Two_One()$SiteCode)}.png"),
             contentType = "image/png",
             alt = glue("{unique(bands_Filter_Two_One()$SiteName)}"),
-            width = 1287,
+            width = 1250,
             height = 625
           ))
         }
@@ -7086,21 +7086,21 @@ server <- function(input, output, session) {
           return(list(
             src = glue("www/Sat_Imagery/{unique(core_Filter_Two_One()$SiteCode)}.png"),
             contentType = "image/png",
-            width = 1287,
+            width = 1250,
             height = 625))
         }
         else if (input$core_allORone ==  'Two Species by Island') {
           return(list(
             src = glue("www/Sat_Imagery/{unique(core_Filter_Isl_One()$IslandCode)}.png"),
             contentType = "image/png",
-            width = 1287,
+            width = 1250,
             height = 625))
         }
         else if (input$core_allORone ==  'Two Species by MPA') {
           return(list(
             src = glue("www/Sat_Imagery/{unique(core_Filter_MPA_One()$IslandCode)}.png"),
             contentType = "image/png",
-            width = 1287,
+            width = 1250,
             height = 625))
         }
       }, deleteFile = FALSE)
@@ -8263,7 +8263,7 @@ server <- function(input, output, session) {
       
       output$rpcs_LargeSitePhoto_One <- renderImage({
         list(src = glue("www/Sat_Imagery/{unique(rpcs_Filter_One()$SiteCode)}.png"),
-             contentType = "image/png", width = 1287, height = 625)
+             contentType = "image/png", width = 1250, height = 625)
       }, deleteFile = FALSE) # Large Site photo below plot
       
       output$rpcs_DToutClass_One <- renderDT({
@@ -9818,7 +9818,7 @@ server <- function(input, output, session) {
             src = glue("www/Sat_Imagery/{unique(rpcs_Filter_Two_One()$SiteCode)}.png"),
             contentType = "image/png",
             alt = glue("{unique(rpcs_Filter_Two_One()$SiteName)}"),
-            width = 1287,
+            width = 1250,
             height = 625
           ))
         }
@@ -10275,7 +10275,7 @@ server <- function(input, output, session) {
       dyn_ui <- tabPanel("NHSF", value = 'NHSF_TP',  
                          tags$hr(),
                          plotOutput(outputId = "NHSF_Plot_SD_MPA",
-                                    height = 850),
+                                    height = 500),
                          tags$hr(),
                          conditionalPanel("input.NHSF_GraphOptions_SD_MPA == 'With ONI' ||
                                            input.NHSF_GraphOptions_SD_MPA == 'With PDO (NOAA)' ||
@@ -10295,8 +10295,6 @@ server <- function(input, output, session) {
                          MPA_tagList,
                          tags$hr())
     }
-    
-    
     else if(input$NHSF_allORone_MS == "One Species by Site" &&
             input$NHSF_distORmean_One=='Mean Sizes') { #  NHSF_TP_One     ----
       dyn_ui <- tabPanel("NHSF", value = 'NHSF_TP',  
@@ -10550,9 +10548,9 @@ server <- function(input, output, session) {
     return(dyn_ui)
   })
   
-  { # ........ NHSF_SizeDistribution ........     ----
+  { # ........ NHSF_SizeDist ........     ----
     
-    { # NHSF_MS_One_Species   ----
+    { # NHSF_SD_One_Species   ----
       
       NHSF_RawFilter_One <- reactive({ 
         NHSF_DFRaw %>%
@@ -10623,7 +10621,7 @@ server <- function(input, output, session) {
                       contentType = "image/png", width = 430, height = 210))
         }
         else if (input$NHSF_allORone_SD == 'One Species by MPA') {
-          return(list(src = "www/Sat_Imagery/CHISisl.png",
+          return(list(src = "www/Sat_Imagery/CHISmpa.png",
                       contentType = "image/png", width = 430, height = 210))
         }
         
@@ -10632,15 +10630,15 @@ server <- function(input, output, session) {
       output$NHSF_LargeSitePhoto_SD_One <- renderImage({
         if (input$NHSF_allORone_SD == 'One Species by Site') {
           return(list(src = glue("www/Sat_Imagery/{unique(NHSF_RawFilter_One()$SiteCode)}.png"),
-                      contentType = "image/png", width = 1287, height = 625))
+                      contentType = "image/png", width = 1250, height = 625))
         }
         else if (input$NHSF_allORone_SD == "One Species by Island") {
           return(list(src = "www/Sat_Imagery/CHISisl.png",
-                      contentType = "image/png", width = 1287, height = 625))
+                      contentType = "image/png", width = 1250, height = 625))
         }
         else if (input$NHSF_allORone_SD == 'One Species by MPA') {
-          return(list(src = "www/Sat_Imagery/CHISisl.png",
-                      contentType = "image/png", width = 1287, height = 625))
+          return(list(src = "www/Sat_Imagery/CHISmpa.png",
+                      contentType = "image/png", width = 1250, height = 625))
         }
       }, deleteFile = FALSE) # Large Site photo below plot
       
@@ -10895,7 +10893,7 @@ server <- function(input, output, session) {
       
     }
     
-    { # NHSF_Server_by_Island   ----
+    { # NHSF_SD_by_Island   ----
       
       NHSF_RawFilter_Isl <- reactive({
         NHSF_DFRaw %>%
@@ -10977,12 +10975,12 @@ server <- function(input, output, session) {
         }
       }) # Facet Plot Axis Scale free or fixed 
       
-      output$NHSF_Plot_SD_Isl <- renderPlot({ # Facet plots    ---- 
+      output$NHSF_Plot_SD_Isl <- renderPlot({  
         
         if (is.null(input$NHSF_Graph_Isl))
           return(NULL) 
         
-        else if(input$NHSF_Graph_SD_Isl == "Boxplot") { # Line   ----
+        else if(input$NHSF_Graph_SD_Isl == "Boxplot") { 
           return({   
             ggplot() +
               geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
@@ -11003,7 +11001,7 @@ server <- function(input, output, session) {
                    subtitle = glue("{unique(NHSF_RawFilter_Isl()$CommonName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = "Mean Size (mm)") +
+                   y = "Size Distribution (mm)") +
               facet_grid(rows = vars(IslandName), scales = NHSF_AxisScale_SD_Isl()) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
@@ -11021,7 +11019,7 @@ server <- function(input, output, session) {
                     strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
           })
         } 
-        else if(input$NHSF_Graph_SD_Isl == "Violin Plot") { # Line   ----
+        else if(input$NHSF_Graph_SD_Isl == "Violin Plot") { 
           return({   
             ggplot() +
               geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
@@ -11042,7 +11040,7 @@ server <- function(input, output, session) {
                    subtitle = glue("{unique(NHSF_RawFilter_Isl()$CommonName)}"),
                    color = "Common Name",
                    x = "Year",
-                   y = "Mean Size (mm)") +
+                   y = "Size Distribution (mm)") +
               facet_grid(rows = vars(IslandName), scales = NHSF_AxisScale_SD_Isl()) +
               scale_fill_manual(values = SpeciesColor) +
               theme_classic() +
@@ -11058,6 +11056,172 @@ server <- function(input, output, session) {
                     axis.text.y = element_text(size = 12, face = "bold"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
                     strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+      })
+      
+    }
+    
+    { # NHSF_MS_Server_byMPA ----
+      
+      NHSF_RawFilter_MPA <- reactive({
+        NHSF_DFRawMPA %>%
+          filter(IslandName == input$NHSF_IslandName_MPA,
+                 CommonName == input$NHSF_SpeciesName_SD_MPA) %>%
+          group_by(SurveyYear, ReserveStatus) %>%
+          mutate(TotalCount = length(Size_mm),
+                 MeanSize = mean(Size_mm)) %>% 
+          ungroup() %>% 
+          group_by(SurveyYear) %>% 
+          mutate(Date =  mean(as.Date(Date)))
+      })
+      
+      NHSF_alphaONI_SD_MPA <- reactive({
+        if(input$NHSF_GraphOptions_SD_MPA == "With No Index"){
+          return(0)
+        }
+        else if(input$NHSF_GraphOptions_SD_MPA == "With ONI"){
+          return(1)
+        }
+        else if(input$NHSF_GraphOptions_SD_MPA == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$NHSF_GraphOptions_SD_MPA == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      NHSF_alphaPDO_NOAA_SD_MPA <- reactive({
+        if(input$NHSF_GraphOptions_SD_MPA == "With No Index"){
+          return(0)
+        }
+        if(input$NHSF_GraphOptions_SD_MPA == "With ONI"){
+          return(0)
+          
+        }
+        if(input$NHSF_GraphOptions_SD_MPA == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$NHSF_GraphOptions_SD_MPA == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      NHSF_alphaPDO_UW_SD_MPA <- reactive({
+        if(input$NHSF_GraphOptions_SD_MPA == "With No Index"){
+          return(0)
+        }
+        if(input$NHSF_GraphOptions_SD_MPA == "With ONI"){
+          return(0)
+          
+        }
+        if(input$NHSF_GraphOptions_SD_MPA == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$NHSF_GraphOptions_SD_MPA == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$NHSF_ONIpdoPIC_SD_MPA <- renderImage({
+        if(input$NHSF_GraphOptions_SD_MPA == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$NHSF_GraphOptions_SD_MPA == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$NHSF_GraphOptions_SD_MPA == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
+      NHSF_AxisScale_SD_MPA <- reactive({
+        if(input$NHSF_FreeOrLock_SD_MPA == "Locked Scales"){
+          return("fixed")
+        }
+        if(input$NHSF_FreeOrLock_SD_MPA == "Free Scales"){
+          return("free")
+        }
+      }) # Facet Plot Axis Scale free or fixed 
+      
+      output$NHSF_Plot_SD_MPA <- renderPlot({
+        if (is.null(input$NHSF_Graph_SD_MPA))
+          return(NULL)
+        
+        else if(input$NHSF_Graph_SD_MPA == "Boxplot") { 
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(NHSF_alphaONI_SD_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_SD_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(NHSF_alphaPDO_UW_SD_MPA()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_boxplot(data = NHSF_RawFilter_MPA(), width = 150,
+                           aes(x = Date, y = Size_mm, group = SurveyYear, color = CommonName)) +
+              geom_point(data = NHSF_RawFilter_MPA(), size = 1, color = "black",
+                         aes(x = Date, y = MeanSize, group = SurveyYear, color = CommonName)) +
+              scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_MPA()$Date), expand = c(0.01, 0),
+                           limits = c(min(NHSF_RawFilter_MPA()$Date) - 150, max(NHSF_RawFilter_MPA()$Date) + 150)) +
+              labs(title = glue("{unique(NHSF_RawFilter_MPA()$ScientificName)}"),
+                   subtitle = NHSF_RawFilter_MPA()$MPA_Name, 
+                   colour = "Common Name",
+                   x = "Year",
+                   y = "Size Distribution (mm)") +
+              facet_grid(rows = vars(ReserveStatus), scales = NHSF_AxisScale_SD_MPA()) +
+              scale_color_manual(values = SpeciesColor) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold")) 
+          })
+        } 
+        else if(input$NHSF_Graph_SD_MPA == "Violin Plot") { 
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                        position = "identity", alpha = as.numeric(NHSF_alphaONI_SD_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_SD_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(NHSF_alphaPDO_UW_SD_MPA()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_violin(data = NHSF_RawFilter_MPA(), width = 150,
+                          aes(x = Date, y = Size_mm, group = SurveyYear, fill = CommonName)) +
+              geom_point(data = NHSF_RawFilter_MPA(), size = 1, color = "black",
+                         aes(x = Date, y = MeanSize, group = SurveyYear)) +
+              scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_MPA()$Date), expand = c(0.01, 0),
+                           limits = c(min(NHSF_RawFilter_MPA()$Date) - 150, max(NHSF_RawFilter_MPA()$Date) + 150)) +
+              labs(title = glue("{unique(NHSF_RawFilter_MPA()$ScientificName)}"),
+                   subtitle = NHSF_RawFilter_MPA()$MPA_Name,
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Size Distribution (mm)") +
+              facet_grid(rows = vars(ReserveStatus), scales = NHSF_AxisScale_SD_MPA()) +
+              scale_fill_manual(values = SpeciesColor) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold")) 
           })
         }
       })
@@ -11141,7 +11305,7 @@ server <- function(input, output, session) {
       
       output$NHSF_LargeSitePhoto_One <- renderImage({
         list(src = glue("www/Sat_Imagery/{unique(NHSF_Filter_One()$SiteCode)}.png"),
-             contentType = "image/png", width = 1287, height = 625)
+             contentType = "image/png", width = 1250, height = 625)
       }, deleteFile = FALSE) # Large Site photo below plot
       
       output$NHSF_DToutClass_One <- renderDT({
@@ -11459,7 +11623,7 @@ server <- function(input, output, session) {
       
     }
     
-    { # NHSF_MS_Server_by_Island   ----
+    { # NHSF_MS_by_Island   ----
       
       NHSF_Filter_Isl <- reactive({
         NHSF_DF <- NHSF_DF %>%
@@ -12135,7 +12299,7 @@ server <- function(input, output, session) {
       
     }
     
-    { # NHSF_MS_Server_byMPA ----
+    { # NHSF_MS__byMPA ----
       
       NHSF_Filter_MPA <- reactive({
         NHSF_DFMPA %>%
@@ -12274,7 +12438,7 @@ server <- function(input, output, session) {
                             aes(x = MPA_Date, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
                             width = 0, color = "black", alpha = as.numeric(input$NHSF_EB_MPA)) +
               labs(title = glue("{unique(NHSF_Filter_MPA()$ScientificName)}"),
-                   subtitle = glue("{unique(NHSF_Filter_MPA()$CommonName)}"),
+                   subtitle = NHSF_Filter_MPA()$CommonName,
                    color = "Reserve Status",
                    linetype = "Reserve Status",
                    x = "Year",
@@ -12320,7 +12484,7 @@ server <- function(input, output, session) {
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$NHSF_EB_MPA)) +
-                labs(title = m$IslandName,
+                labs(title = m$MPA_Name,
                      color = "Site Name",
                      linetype = "Site Name",
                      caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
@@ -12346,7 +12510,7 @@ server <- function(input, output, session) {
             
             do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
                                           labels = glue("{unique(NHSF_Filter_MPA()$ScientificName)}"),
-                                          label_size = 20,
+                                          label_size = 16,
                                           label_fontface = "bold.italic"
             ))
           })
@@ -12386,7 +12550,7 @@ server <- function(input, output, session) {
                                       max(as.Date(NHSF_Filter_MPA()$MPA_Date)) + 360),
                            expand = c(0.01, 0)) +
               labs(title = glue("{unique(NHSF_Filter_MPA()$ScientificName)}"),
-                   subtitle = glue("{unique(NHSF_Filter_MPA()$CommonName)}"),
+                   subtitle = NHSF_Filter_MPA()$CommonName,
                    color = "Reserve Status",
                    linetype = "Reserve Status",
                    x = "Year",
@@ -12444,7 +12608,7 @@ server <- function(input, output, session) {
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
                              expand = c(0.01, 0)) +
-                labs(title = m$IslandName,
+                labs(title = m$MPA_Name,
                      fill = "Outside",
                      x = "Year",
                      y = "Mean Size (mm)") +
@@ -12468,7 +12632,7 @@ server <- function(input, output, session) {
             
             do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
                                           labels = glue("{unique(NHSF_Filter_MPA()$ScientificName)}"),
-                                          label_size = 20,
+                                          label_size = 16,
                                           label_fontface = "bold.italic"
             ))
           })
@@ -12495,7 +12659,7 @@ server <- function(input, output, session) {
                                       max(as.Date(NHSF_Filter_MPA()$MPA_Date))),
                            expand = c(0.01, 0)) +
               labs(title = glue("{unique(NHSF_Filter_MPA()$ScientificName)}"),
-                   subtitle = glue("{unique(NHSF_Filter_MPA()$CommonName)}"),
+                   subtitle = NHSF_Filter_MPA()$CommonName,
                    color = "Reserve Status",
                    linetype = "Reserve Status",
                    x = "Year",
@@ -12538,7 +12702,7 @@ server <- function(input, output, session) {
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
                              expand = c(0.01, 0)) +
                 scale_y_continuous(limits = c(0, max(NHSF_Filter_MPA()$MaxSum)), expand = c(0.01, 0)) +
-                labs(title = m$IslandName,
+                labs(title = m$MPA_Name,
                      color = "Site Name",
                      linetype = "Site Name",
                      caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
@@ -12564,7 +12728,7 @@ server <- function(input, output, session) {
             
             do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
                                           labels = glue("{unique(NHSF_Filter_MPA()$ScientificName)}"),
-                                          label_size = 20,
+                                          label_size = 16,
                                           label_fontface = "bold.italic"
             ))
           })
@@ -12573,7 +12737,7 @@ server <- function(input, output, session) {
       
     }
     
-    { # NHSF_MS_Server_Two_Species    ----
+    { # NHSF_MS_Two_Species    ----
       
       NHSF_Filter_Two_One <- reactive({
         NHSF_DF %>%
@@ -12646,7 +12810,7 @@ server <- function(input, output, session) {
             src = glue("www/Sat_Imagery/{unique(NHSF_Filter_Two_One()$SiteCode)}.png"),
             contentType = "image/png",
             alt = glue("{unique(NHSF_Filter_Two_One()$SiteName)}"),
-            width = 1287,
+            width = 1250,
             height = 625
           ))
         }
@@ -12928,7 +13092,7 @@ server <- function(input, output, session) {
       
     }
     
-    { # NHSF_MS_Server_all   ----
+    { # NHSF_MS_all   ----
       
       NHSF_Filter_All <- reactive({
         NHSF_DF %>%
@@ -13029,10 +13193,10 @@ server <- function(input, output, session) {
   }
   
   output$outTemp <- renderUI({ # Temp_UI ----
-    if (is.null(input$allORonetemps))
+    if (is.null(input$temp_allORone))
       return(NULL)
     
-    if(input$allORonetemps == "One Site") {
+    if(input$temp_allORone == "Benthic Temperature by Site") {
       dyn_ui <- tabPanel("Temperature", value = 'temps', # Temp_TP_one       ----
                          plotOutput(outputId = "temp_Zoom_One",
                                     height = 500),
@@ -13054,7 +13218,7 @@ server <- function(input, output, session) {
                          tags$hr()
       )
     }
-    else if (input$allORonetemps == "By Island") {
+    else if (input$temp_allORone == "Benthic Temperature by Island") {
       dyn_ui <- tabPanel("Temperature", value = 'temps', # Temp_TP_averaged  ----
                          plotOutput(outputId = "temp_Zoom_Isl",
                                     height = 400),
@@ -13076,7 +13240,7 @@ server <- function(input, output, session) {
                          tags$hr(),
       )
     }
-    else if (input$allORonetemps == "Oceanic Nino Index (ONI)") {
+    else if (input$temp_allORone == "Oceanic Nino Index (ONI)") {
       dyn_ui <- tabPanel("Temperature", value = 'temps', # Temp_TP_ONI       ----
                          plotOutput(outputId = "oniZoom",
                                     height = 400),
@@ -13086,7 +13250,7 @@ server <- function(input, output, session) {
                          tags$hr()
       )
     }
-    else if (input$allORonetemps == "Pacific Decadal Oscillation (PDO)") {
+    else if (input$temp_allORone == "Pacific Decadal Oscillation (PDO)") {
       dyn_ui <- tabPanel("Temperature", value = 'temps', # Temp_TP_PDO       ----
                          plotOutput(outputId = "pdoZoom",
                                     height = 400),
@@ -13096,7 +13260,7 @@ server <- function(input, output, session) {
                          tags$hr()
       )
     }
-    else if (input$allORonetemps == "Scripps Institute of Oceanography (SIO)") {
+    else if (input$temp_allORone == "Scripps Institute of Oceanography (SIO)") {
       dyn_ui <- tabPanel("Temperature", value = 'temps', # Temp_TP_SIO       ----
                          plotOutput(outputId = "sioZoom",
                                     height = 400),
@@ -13112,6 +13276,60 @@ server <- function(input, output, session) {
   { # ........ Temp_Servers ........   ----
     
     { # Temp_OneSite   ----
+      
+      output$temp_TopSitePhoto <- renderImage({
+        if(is.null(input$temp_allORone)){
+          return(NULL)
+          }
+        else if(input$temp_allORone == "Benthic Temperature by Site") {
+          return(list(src = glue("www/Sat_Imagery/{unique(temp_Filter_One()$SiteCode)}.png"),
+                      contentType = "image/png", width = 430, height = 210)) 
+        }
+        else if(input$temp_allORone == "Benthic Temperature by Island") {
+          return(list(src = glue("www/Sat_Imagery/{unique(temp_Filter_Isl()$IslandCode)}.png"),
+                      contentType = "image/png", width = 430, height = 210))
+        }
+        else if(input$temp_allORone == "Oceanic Nino Index (ONI)") {
+          return(list(src = "www/Sat_Imagery/ONI3.4.png",
+                      contentType = "image/png", width = 420, height = 210))
+        }
+        else if(input$temp_allORone == "Pacific Decadal Oscillation (PDO)") {
+          return(list(src =  "www/Sat_Imagery/PDO.png",
+                      contentType = "image/png", width = 375, height = 210)) 
+        }
+        else if(input$temp_allORone == "Scripps Institute of Oceanography (SIO)") {
+          return(
+                 list(src = "www/Sat_Imagery/SIO.png",
+                           contentType = "image/png", width = 450, height = 210)
+          ) 
+        }
+      }, deleteFile = FALSE)
+      
+      output$temp_BottomSitePhoto <- renderImage({
+        if(is.null(input$temp_allORone)){
+          return(NULL)
+        }
+        else if(input$temp_allORone == "Benthic Temperature by Site") {
+          return(list(src = glue("www/Sat_Imagery/{unique(temp_Filter_One()$SiteCode)}.png"),
+                      contentType = "image/png", width = 1250, height = 625)) 
+        }
+        else if(input$temp_allORone == "Benthic Temperature by Island") {
+          return(list(src = glue("www/Sat_Imagery/{unique(temp_Filter_Isl()$IslandCode)}.png"),
+                      contentType = "image/png", width = 1250, height = 625)) 
+        }
+        else if(input$temp_allORone == "Oceanic Nino Index (ONI)") {
+          return(list(src = "www/Sat_Imagery/ONI3.4.png",
+                      contentType = "image/png", width = 1250, height = 625)) 
+        }
+        else if(input$temp_allORone == "Pacific Decadal Oscillation (PDO)") {
+          return(list(src = "www/Sat_Imagery/PDO.png",
+                      contentType = "image/png", width = 1120, height = 625)) 
+        }
+        else if(input$temp_allORone == "Scripps Institute of Oceanography (SIO)") {
+          return(list(src = "www/Sat_Imagery/SIO.png",
+                      contentType = "image/png", width = 1250, height = 600)) 
+        }
+      }, deleteFile = FALSE)
       
       temp_Filter_One <- reactive({
         temp %>%filter(SiteName == input$SiteNameTemp)
@@ -13256,7 +13474,7 @@ server <- function(input, output, session) {
                                          ymin = -Inf, ymax = Inf, fill = pdoAnom),
                     position = "identity", alpha = as.numeric(temp_alphaPDO_one()), show.legend = FALSE) +
           scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
-          geom_ribbon(data = temp_Filter_One(), aes(x= Date, ymin = MinTemp, ymax = MaxTemp, fill = SiteCode), 
+          geom_ribbon(data = temp_Filter_One(), aes(x= Date, ymin = MinTemp, ymax = MaxTemp), 
                       alpha = as.numeric(input$temp_minMax_One), fill = "deepskyblue2") +
           geom_line(data = temp_Filter_One(), aes(x= Date, y = MeanTemp), alpha = 1, color = "black") +
           labs(title = NULL,
@@ -13360,11 +13578,11 @@ server <- function(input, output, session) {
             scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
             geom_ribbon(data = temp_Filter_Isl(), aes(x= Date, ymin = MinTemp, ymax = MaxTemp),
                         alpha = as.numeric(input$temp_minMax_Isl), fill = "deepskyblue2") +
-            geom_line(data = temp_Filter_Isl(), size = 1, aes(x= Date, y = MeanTemp, color = SiteCode), color = "black") +
+            geom_line(data = temp_Filter_Isl(), size = 1, aes(x= Date, y = MeanTemp), color = "black") +
             stat_smooth(geom = 'line', data = temp_Filter_Isl(), aes(x= Date, y = MeanTemp),se = FALSE, span = 0.75, 
                         alpha = as.numeric(input$temp_Smooth_Isl), size = 1, color = "green2") +
             labs(title = temp_Filter_Isl()$IslandName,
-                 subtitle = "Weekly Water temperatures",
+                 subtitle = "Weekly Benthic Water Temperatures",
                  color = "Mean Weekly Water Temperature",
                  x = NULL,
                  y = "Temperature (°C)") +
@@ -13398,11 +13616,11 @@ server <- function(input, output, session) {
               scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
               geom_ribbon(data = temp_Filter_Isl(), aes(x= Date, ymin = MinTemp, ymax = MaxTemp), 
                           alpha = as.numeric(input$temp_minMax_Isl), fill = "deepskyblue2") +
-              geom_line(data = temp_Filter_Isl(), size = 0.5, aes(x= Date, y = MeanTemp, color = SiteCode), color = "black") +
+              geom_line(data = temp_Filter_Isl(), size = 0.5, aes(x= Date, y = MeanTemp), color = "black") +
               stat_smooth(geom = 'line', data = temp_Filter_Isl(), aes(x= Date, y = MeanTemp), se = FALSE, span = 0.75,
                           alpha = as.numeric(input$temp_Smooth_Isl), size = 1, color = "green2") +
               labs(title = temp_Filter_Isl()$IslandName,
-                   subtitle = "Weekly Water temperatures",
+                   subtitle = "Weekly Benthic Water Temperatures",
                    color = "Mean Weekly Water Temperature",
                    x = NULL,
                    y = "Temperature (°C)") +
@@ -13435,9 +13653,9 @@ server <- function(input, output, session) {
                                          ymin = -Inf, ymax = Inf, fill = pdoAnom),
                     position = "identity", alpha = as.numeric(temp_alphaPDO_Isl())) +
           scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
-          geom_ribbon(data = temp_Filter_Isl(), aes(x= Date, ymin = MinTemp, ymax = MaxTemp, fill = SiteCode), 
+          geom_ribbon(data = temp_Filter_Isl(), aes(x= Date, ymin = MinTemp, ymax = MaxTemp), 
                       alpha = as.numeric(input$temp_minMax_Isl), fill = "deepskyblue2") +
-          geom_line(data = temp_Filter_Isl(), aes(x= Date, y = MeanTemp, color = SiteName), 
+          geom_line(data = temp_Filter_Isl(), aes(x= Date, y = MeanTemp), 
                     alpha = 1,  color = "black") +
           labs(title = NULL,
                caption = glue(
@@ -15012,7 +15230,7 @@ server <- function(input, output, session) {
         list(
           src = glue("www/Sat_Imagery/{statMapSiteCode()$SiteCode}.png"),
           contentType = "image/png",
-          width = 1287,
+          width = 1250,
           height = 625
         )
       }, deleteFile = FALSE)

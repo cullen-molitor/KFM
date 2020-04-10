@@ -170,7 +170,7 @@
   NHSF_DFMPA <- read_csv("NHSF_MPA.csv")
   NHSF_DFMPA$IslandName <- factor(NHSF_DFMPA$IslandName, levels = MPA_Levels)
   
-  NHSF_DFRawMPA <- read_csv("NHSF_MPA_Raw.csv")
+  NHSF_DFRawMPA <- read_csv("NHSF_MPA_Raw.csv") 
   NHSF_DFRawMPA$IslandName <- factor(NHSF_DFRawMPA$IslandName, levels = MPA_Levels)
   
 } 
@@ -199,7 +199,10 @@
   
   temp <- read_csv("Temp_weekly_summary.csv")
   
-  tempByIsland <- read_csv("Temp_weekly_summary_byIsl.csv") 
+  tempByIsland <- read_csv("Temp_weekly_summary_byIsl.csv")
+  # %>% 
+  #   mutate(Date = as.Date(Date, format='%m/%d/%Y')) %>% 
+  #   write_csv("Temp_weekly_summary_byIsl.csv")
   
   oni <- read_csv("nino34.csv") 
   

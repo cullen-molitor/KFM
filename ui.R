@@ -548,6 +548,9 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
       conditionalPanel(condition = "input.tabselected=='NHSF_TP' && 
                        input.NHSF_allORone_SD=='One Species by MPA' &&
                        input.NHSF_distORmean_One=='Size Distribution'",
+                       selectInput(inputId = "NHSF_IslandName_MPA",
+                                   label = "Choose an MPA:",
+                                   choices = MPA_Levels),
                        selectInput(inputId = "NHSF_SpeciesName_SD_MPA",
                                    label = "Choose a Species:",
                                    choices = levels(factor(NHSF_DF$CommonName)),
@@ -679,7 +682,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
       ),
       # ~ Temperature_Conditional   ----
       # ...... One Site    ----
-      conditionalPanel(condition = "input.tabselected=='temps' && input.allORonetemps=='One Site'",
+      conditionalPanel(condition = "input.tabselected=='temps' && input.temp_allORone=='Benthic Temperature by Site'",
                        tags$hr(),
                        selectInput(inputId = "SiteNameTemp",
                                    label = "Choose a Site:",
@@ -699,7 +702,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                        
       ),
       # ...... By Island    ----
-      conditionalPanel(condition = "input.tabselected=='temps' && input.allORonetemps=='By Island'",
+      conditionalPanel(condition = "input.tabselected=='temps' && input.temp_allORone=='Benthic Temperature by Island'",
                        radioButtons(inputId = "temp_IslandName_Isl",
                                     label = "Show the Min-Max Ribbon?",
                                     choices = c("All Islands", IslandLevels)),
@@ -718,7 +721,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                        
       ),
       # ...... Oceanic Nino Index  ----
-      conditionalPanel(condition = "input.tabselected=='temps' && input.allORonetemps=='Oceanic Nino Index (ONI)'",
+      conditionalPanel(condition = "input.tabselected=='temps' && input.temp_allORone=='Oceanic Nino Index (ONI)'",
                        tags$hr(),
                        radioButtons(inputId = "graphONI",
                                    label = "Choose a graph:",
@@ -726,7 +729,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                        tags$hr()
       ),
       # ...... Pacific Decadal Oscillation   ----
-      conditionalPanel(condition = "input.tabselected=='temps' && input.allORonetemps=='Pacific Decadal Oscillation (PDO)'",
+      conditionalPanel(condition = "input.tabselected=='temps' && input.temp_allORone=='Pacific Decadal Oscillation (PDO)'",
                        tags$hr(),
                        radioButtons(inputId = "graphPDO",
                                    label = "Choose a graph:",
@@ -737,7 +740,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                    choices = c("NOAA", "University of Washington"))
       ),
       # ...... Scripps Institute of Oceanography   ----
-      conditionalPanel(condition = "input.tabselected=='temps' && input.allORonetemps=='Scripps Institute of Oceanography (SIO)'",
+      conditionalPanel(condition = "input.tabselected=='temps' && input.temp_allORone=='Scripps Institute of Oceanography (SIO)'",
                        tags$hr(),
                        radioButtons(inputId = "dataSIO",
                                    label = "Choose a Data Type:",
@@ -1150,15 +1153,19 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                  tags$hr())),
        tabPanel("Temperature", value = "temps", #** Temp_TP    ----
                 fluidRow(column(6, offset = 3,tags$h1(tags$strong("Water Temperatures")))),
-                radioButtons(inputId = "allORonetemps",
-                             label = "What would you like to view?",
-                             choices = c("One Site",
-                                         "By Island",
-                                         "Oceanic Nino Index (ONI)",
-                                         "Pacific Decadal Oscillation (PDO)",
-                                         "Scripps Institute of Oceanography (SIO)"),
-                             inline = TRUE),
-                uiOutput(outputId = "outTemp")
+                fluidRow(column(3, radioButtons(inputId = "temp_allORone",
+                                                label = "What would you like to view?",
+                                                choices = c("Benthic Temperature by Site",
+                                                            "Benthic Temperature by Island",
+                                                            "Oceanic Nino Index (ONI)",
+                                                            "Pacific Decadal Oscillation (PDO)",
+                                                            "Scripps Institute of Oceanography (SIO)"),
+                                                inline = FALSE)),
+                         column(3, imageOutput(outputId = "temp_TopSitePhoto", height = 200))),
+                tags$hr(),
+                uiOutput(outputId = "outTemp"),
+                imageOutput(outputId = "temp_BottomSitePhoto", height = 625),
+                tags$hr()
        ),
        tabPanel("Stats", value = 'stat', # ** Stats_TP      ----
                 fluidRow(column(6, offset = 3,tags$h1(tags$strong("Statistical Tests")))),
