@@ -62,7 +62,9 @@
 
 { # .. Species_Info    ----
   
-  SpeciesName <- read_csv("SpeciesComplete.csv") 
+  SpeciesName <- read_csv("SpeciesComplete.csv")
+  
+  SpeciesFish <- read_csv("Species_Fish.csv")
   
   Indicators <- SpeciesName %>%
     drop_na(Species) 
@@ -81,6 +83,9 @@
   
   SpeciesColor <- c(as.character(SpeciesName$Color), "blue3", "forestgreen", "gold", "orangered", "red3")
   names(SpeciesColor) <- c(SpeciesName$CommonName, IslandLevels)
+  
+  FishColor <- SpeciesFish$Color
+  names(FishColor) <- SpeciesFish$CommonName
   
 }
 
@@ -195,6 +200,22 @@
   
 }
 
+{ # .. Fish Size Frequency   ----
+  
+  FSF_DF <- read_csv("FSF_Summary.csv")
+  FSF_DF$IslandName <- factor(FSF_DF$IslandName, levels = IslandLevels)
+  
+  FSF_DFMPA <- read_csv("FSF_MPA.csv")
+  FSF_DFMPA$IslandName <- factor(FSF_DFMPA$IslandName, levels = MPA_Levels)
+  
+  FSF_DFRaw <- read_csv("FSF_Raw.csv")
+  # FSF_DFRaw <- filter(FSF_DFRaw, CommonName == "California sheephead, male")
+  FSF_DFRaw$IslandName <- factor(FSF_DFRaw$IslandName, levels = IslandLevels)
+  
+  FSF_DFRawMPA <- read_csv("FSF_MPA_Raw.csv")
+  FSF_DFRawMPA$IslandName <- factor(FSF_DFRawMPA$IslandName, levels = MPA_Levels)
+}
+
 { # .. Temperature_DF   ----
   
   temp <- read_csv("Temp_weekly_summary.csv")
@@ -204,10 +225,25 @@
   #   mutate(Date = as.Date(Date, format='%m/%d/%Y')) %>% 
   #   write_csv("Temp_weekly_summary_byIsl.csv")
   
-  oni <- read_csv("nino34.csv") 
+  oni <- read_csv("nino34.csv")
+  
+  # oni <- read.table("https://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/detrend.nino34.ascii.txt", header = T) %>%
+  #   mutate(Date = as.Date(ISOdate(oni$YR, oni$MON, 1))) 
+  # oni$DateStart <- as.Date(ISOdate(oni$YR, oni$MON, 1))
+  # oni$DateEnd <- ceiling_date(oni$DateStart, "month")
+  # write_csv(oni, path = "nino34.csv")
   
   pdo_uw <- read_csv("PDO.csv") 
-  pdo_noaa <- read_csv("PDOold.csv")
+  pdo_noaa <- read_csv("PDO_NOAA.csv")
+  
+  # PDO <- read.table("https://www.ncdc.noaa.gov/teleconnections/pdo/data.csv",
+  #                   skip = 1, header = T, sep = ",") %>% 
+  #   separate(Date, c('Year','Month'), sep = 4) %>% 
+  #   mutate(Date = as.Date(ISOdate(PDO$Year, PDO$Month, 1))) %>% 
+  #   dplyr::rename(pdoAnom = Value)
+  # PDO$DateStart <- as.Date(ISOdate(PDO$Year, PDO$Month, 1))
+  # PDO$DateEnd <- ceiling_date(PDO$DateStart, "month") 
+  # write_csv(PDO, path = "PDO_NOAA.csv")
   
   scrippsTemp <- read_csv("SIO_Temp_Weekly.csv")
   

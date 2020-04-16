@@ -680,6 +680,185 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                     choices = c("Line", "Bar")),
                        tags$hr()
       ),
+      # ~ FSF_SD_Conditional  ----
+      # ...... One Species ----
+      conditionalPanel(condition = "input.tabselected=='FSF_TP' && 
+                       input.FSF_allORone_SD=='One Species by Site' &&
+                       input.FSF_distORmean_One=='Size Distribution'",
+                       selectInput(inputId = "FSF_SiteName_SD_One",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "FSF_SpeciesName_SD_One",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(FSF_DFRaw$CommonName)),
+                                   selected = "California sheephead, male"),
+                       radioButtons(inputId = "FSF_Graph_SD_One",
+                                    label = "Choose a graph:",
+                                    choices = c("Boxplot", "Violin Plot", "Joy Plot")),
+                       radioButtons(inputId = "FSF_GraphOptions_SD_One",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"))
+      ),
+      # ...... By Island ----
+      conditionalPanel(condition = "input.tabselected=='FSF_TP' && 
+                       input.FSF_allORone_SD=='One Species by Island' &&
+                       input.FSF_distORmean_One=='Size Distribution'",
+                       selectInput(inputId = "FSF_SpeciesName_SD_Isl",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(FSF_DF$CommonName)),
+                                   selected = "California sheephead, male"),
+                       radioButtons(inputId = "FSF_Graph_SD_Isl",
+                                    label = "Choose a graph:",
+                                    choices = c("Boxplot", "Violin Plot")),
+                       radioButtons(inputId = "FSF_FreeOrLock_SD_Isl",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales")),
+                       radioButtons(inputId = "FSF_GraphOptions_SD_Isl",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"))
+      ),
+      # ...... By MPA ----
+      conditionalPanel(condition = "input.tabselected=='FSF_TP' && 
+                       input.FSF_allORone_SD=='One Species by MPA' &&
+                       input.FSF_distORmean_One=='Size Distribution'",
+                       selectInput(inputId = "FSF_IslandName_MPA",
+                                   label = "Choose an MPA:",
+                                   choices = MPA_Levels),
+                       selectInput(inputId = "FSF_SpeciesName_SD_MPA",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(FSF_DF$CommonName)),
+                                   selected = "California sheephead, male"),
+                       radioButtons(inputId = "FSF_Graph_SD_MPA",
+                                    label = "Choose a graph:",
+                                    choices = c("Boxplot", "Violin Plot")),
+                       radioButtons(inputId = "FSF_FreeOrLock_SD_MPA",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales")),
+                       radioButtons(inputId = "FSF_GraphOptions_SD_MPA",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index", 
+                                                "With ONI", 
+                                                "With PDO (NOAA)", 
+                                                "With PDO (UW)"))
+      ),
+      # ~ FSF_MS_Conditional  ----
+      # ...... One Species ----
+      conditionalPanel(condition = "input.tabselected=='FSF_TP' && 
+                       input.FSF_allORone_MS=='One Species by Site' &&
+                       input.FSF_distORmean_One=='Mean Sizes'",
+                       selectInput(inputId = "FSF_SiteName_One",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "FSF_SpeciesName_One",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(FSF_DF$CommonName)),
+                                   selected = "California sheephead, male"),
+                       tags$hr(),
+                       radioButtons(inputId = "FSF_Graph_One",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "FSF_DataSummary_One",
+                                    label = "Choose a data Summary:",
+                                    choices = c("One species at one site" , "One species with island average")),
+                       radioButtons(inputId = "FSF_GraphOptions_One",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"))
+      ),
+      # ...... By Island ----
+      conditionalPanel(condition = "input.tabselected=='FSF_TP' && 
+                       input.FSF_allORone_MS=='One Species by Island' &&
+                       input.FSF_distORmean_One=='Mean Sizes'",
+                       selectInput(inputId = "FSF_SpeciesName_Isl",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(FSF_DF$CommonName)),
+                                   selected = "California sheephead, male"),
+                       radioButtons(inputId = "FSF_Graph_Isl",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "FSF_DataSummary_Isl",
+                                    label = "Choose a data Summary:",
+                                    choices = c("Island Mean", "Site Means (by Island)")),
+                       radioButtons(inputId = "FSF_FreeOrLock_Isl",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales", "Single Plot")),
+                       radioButtons(inputId = "FSF_GraphOptions_Isl",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"))
+      ),
+      # ...... By MPA ----
+      conditionalPanel(condition = "input.tabselected=='FSF_TP' && 
+                       input.FSF_allORone_MS=='One Species by MPA' &&
+                       input.FSF_distORmean_One=='Mean Sizes'",
+                       selectInput(inputId = "FSF_SpeciesName_MPA",
+                                   label = "Choose a Species:",
+                                   choices = levels(factor(FSF_DF$CommonName)),
+                                   selected = "California sheephead, male"),
+                       tags$hr(),
+                       radioButtons(inputId = "FSF_Graph_MPA",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "FSF_DataSummary_MPA",
+                                    label = "Choose a data Summary:",
+                                    choices = c("MPA Mean", "Site Means (by MPA)")),
+                       radioButtons(inputId = "FSF_FreeOrLock_MPA",
+                                    label =  "Axis Options:",
+                                    choices = c("Locked Scales", "Free Scales")),
+                       radioButtons(inputId = "FSF_GraphOptions_MPA",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)")),
+                       tags$hr()
+      ),
+      # ...... Two Species ----
+      conditionalPanel(condition = "input.tabselected=='FSF_TP' && 
+                       input.FSF_allORone_MS=='Two Species by Site' &&
+                       input.FSF_distORmean_One=='Mean Sizes'",
+                       selectInput(inputId = "FSF_SiteName_Two",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       selectInput(inputId = "FSF_SpeciesName_Two_One",
+                                   label = "Species One:",
+                                   choices = levels(factor(FSF_DF$CommonName)),
+                                   selected = "California sheephead, male"),
+                       selectInput(inputId = "FSF_SpeciesName_Two_Two",
+                                   label = "Species Two:",
+                                   choices = levels(factor(FSF_DF$CommonName)),
+                                   selected = "California sheephead, female"),
+                       tags$hr(),
+                       radioButtons(inputId = "FSF_Graph_Two",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "FSF_GraphOptions_Two",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)"
+                                    )
+                       )
+      ),
+      # ...... All Species ----
+      conditionalPanel(condition ="input.tabselected=='FSF_TP' && 
+                       input.FSF_allORone_MS=='All Species' &&
+                       input.FSF_distORmean_One=='Mean Sizes'",
+                       tags$hr(),
+                       selectInput(inputId = "FSF_SiteNameAll",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       tags$hr(),
+                       radioButtons(inputId = "FSF_GraphAll",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar")),
+                       tags$hr()
+      ),
       # ~ Temperature_Conditional   ----
       # ...... One Site    ----
       conditionalPanel(condition = "input.tabselected=='temps' && input.temp_allORone=='Benthic Temperature by Site'",
@@ -1149,6 +1328,55 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                 uiOutput(outputId = "NHSF_UIout"),
                 conditionalPanel(condition = "input.NHSF_distORmean_One == 'Size Distribution'",
                                  imageOutput(outputId = "NHSF_LargeSitePhoto_SD_One",
+                                             height = 625),
+                                 tags$hr())),
+       tabPanel("Fish Sizes", value = "FSF_TP", # ** FSF_TP         ---- 
+                fluidRow(column(12, offset = 2, tags$h1(tags$strong("Fish Size Frequency Distributions")))),
+                fluidRow(column(3, radioButtons(inputId = "FSF_distORmean_One",
+                                                label = "What would you like to view?",
+                                                choices = c("Size Distribution",
+                                                            "Mean Sizes")),
+                                conditionalPanel("input.FSF_distORmean_One == 'Size Distribution'",
+                                                 radioButtons(inputId = "FSF_allORone_SD",
+                                                              label = "What would you like to view?",
+                                                              choices = c("One Species by Site",
+                                                                          "One Species by Island",
+                                                                          "One Species by MPA"),
+                                                              inline = FALSE)),
+                                conditionalPanel("input.FSF_distORmean_One == 'Mean Sizes'",
+                                                 radioButtons(inputId = "FSF_allORone_MS",
+                                                              label = "What would you like to view?",
+                                                              choices = c("One Species by Site",
+                                                                          "One Species by Island",
+                                                                          "One Species by MPA",
+                                                                          "Two Species by Site",
+                                                                          "All Species"),
+                                                              inline = FALSE))),
+                         conditionalPanel(condition = "input.FSF_distORmean_One == 'Size Distribution'",
+                                          column(2, imageOutput(outputId = "FSF_TopPhoto_SD_One",
+                                                                height = 200)),
+                                          column(2, imageOutput(outputId = "FSF_TopSitePhoto_SD_One",
+                                                                height = 200))),
+                         conditionalPanel(condition = "input.FSF_allORone_MS == 'One Species by Site' &&
+                                                       input.FSF_distORmean_One=='Mean Sizes' ||
+                                                       input.FSF_allORone_MS == 'One Species by Island' || 
+                                                       input.FSF_allORone_MS == 'One Species by MPA' || 
+                                                       input.FSF_allORone_MS == 'Two Species by Site'",
+                                          column(2, imageOutput(outputId = "FSF_TopPhoto_One",
+                                                                height = 200))),
+                         conditionalPanel(condition = "input.FSF_allORone_MS == 'Two Species by Site' &&
+                                                       input.FSF_distORmean_One=='Mean Sizes'",
+                                          column(2,imageOutput(outputId = "FSF_TopPhoto_Two",
+                                                               height = 200)),
+                                          column(2, imageOutput(outputId = "FSF_TopSitePhoto_Two",
+                                                                height = 200))),
+                         conditionalPanel(condition = "input.FSF_allORone_MS == 'One Species by Site' &&
+                                                       input.FSF_distORmean_One=='Mean Sizes'",
+                                          column(2, imageOutput(outputId = "FSF_TopSitePhoto_One",
+                                                                height = 200)))),
+                uiOutput(outputId = "FSF_UIout"),
+                conditionalPanel(condition = "input.FSF_distORmean_One == 'Size Distribution'",
+                                 imageOutput(outputId = "FSF_LargeSitePhoto_SD_One",
                                              height = 625),
                                  tags$hr())),
        tabPanel("Temperature", value = "temps", #** Temp_TP    ----

@@ -12,22 +12,25 @@ server <- function(input, output, session) {
                          tags$hr(),
                          plotOutput(outputId = "oneM_Plot_One",
                                     height = 500),
-                         tags$hr(),
+                         conditionalPanel("input.oneM_Graph_One == 'Line' 
+                                          || input.oneM_Graph_One == 'Bar' 
+                                          || input.oneM_Graph_One == 'Smooth Line'",
+                                          tags$hr()),
                          fluidRow(
-                           column(3, conditionalPanel("input.oneM_Graph_One == 'Line' || input.oneM_Graph_One == 'Bar'",
-                                                      radioButtons(inputId = "oneM_EB_one",
+                           conditionalPanel("input.oneM_Graph_One == 'Line' || input.oneM_Graph_One == 'Bar'",
+                                                      column(3, radioButtons(inputId = "oneM_EB_one",
                                                                    label = "Show error bars?",
                                                                    choices = c("Yes" = 1, "No" = 0),
                                                                    inline = TRUE))),
-                           column(3, conditionalPanel("input.oneM_Graph_One == 'Bar'",
-                                                      radioButtons(inputId = "oneM_Bar_Text_One",
+                           conditionalPanel("input.oneM_Graph_One == 'Bar'",
+                                                      column(3, radioButtons(inputId = "oneM_Bar_Text_One",
                                                                    label = "Show density value?",
                                                                    choices = c("Yes" = 1, "No" = 0), selected = 0,
                                                                    inline = TRUE))),
-                           column(6, conditionalPanel("input.oneM_GraphOptions_One == 'With ONI' ||
+                           conditionalPanel("input.oneM_GraphOptions_One == 'With ONI' ||
                                                       input.oneM_GraphOptions_One == 'With PDO (NOAA)' ||
                                                       input.oneM_GraphOptions_One == 'With PDO (UW)'",
-                                                      imageOutput(outputId = "oneM_ONIpdoPIC_One",
+                                                      column(6, imageOutput(outputId = "oneM_ONIpdoPIC_One",
                                                                   height = 75)))),
                          conditionalPanel("input.oneM_Graph_One == 'Smooth Line'",
                                           sliderInput(inputId = "oneM_SmoothSlide_One",
@@ -438,7 +441,7 @@ server <- function(input, output, session) {
       
       oneM_LinePlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(oneM_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -478,7 +481,7 @@ server <- function(input, output, session) {
       
       oneM_BarPlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(oneM_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -524,7 +527,7 @@ server <- function(input, output, session) {
       
       oneM_SmoothPlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(oneM_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -562,7 +565,7 @@ server <- function(input, output, session) {
       
       oneM_BoxPlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(oneM_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -831,7 +834,7 @@ server <- function(input, output, session) {
         else if(input$oneM_Graph_Isl == "Line" && input$oneM_DataSummary_Isl == "Island Mean") { # Line   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -874,7 +877,7 @@ server <- function(input, output, session) {
             out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -926,7 +929,7 @@ server <- function(input, output, session) {
         else if(input$oneM_Graph_Isl == "Bar" && input$oneM_DataSummary_Isl == "Island Mean") { # Bar   ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -977,7 +980,7 @@ server <- function(input, output, session) {
             out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -1022,7 +1025,7 @@ server <- function(input, output, session) {
         else if(input$oneM_Graph_Isl == "Smooth Line" && input$oneM_DataSummary_Isl == "Island Mean") { # Smooth   -----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -1063,7 +1066,7 @@ server <- function(input, output, session) {
             out <- by(data = oneM_Filter_Isl(), INDICES = oneM_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -1118,7 +1121,7 @@ server <- function(input, output, session) {
         else if(input$oneM_Graph_Isl == "Line" && input$oneM_DataSummary_Isl == "Island Mean") { # Line   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -1158,7 +1161,7 @@ server <- function(input, output, session) {
         else if(input$oneM_Graph_Isl == "Line" && input$oneM_DataSummary_Isl == "Site Means (by Island)") {
           return({
             ggplot() + 
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -1215,7 +1218,7 @@ server <- function(input, output, session) {
         else if(input$oneM_Graph_Isl == "Bar" && input$oneM_DataSummary_Isl == "Island Mean") { # Bar -----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -1302,7 +1305,7 @@ server <- function(input, output, session) {
         else if(input$oneM_Graph_Isl == "Smooth Line" && input$oneM_DataSummary_Isl == "Island Mean") { # Smooth   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -1339,7 +1342,7 @@ server <- function(input, output, session) {
         else if(input$oneM_Graph_Isl == "Smooth Line" && input$oneM_DataSummary_Isl == "Site Means (by Island)") {
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(oneM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -1498,7 +1501,7 @@ server <- function(input, output, session) {
         else if(input$oneM_Graph_MPA == "Line" && input$oneM_DataSummary_MPA == "MPA Mean") {  # Line    ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(oneM_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -1543,7 +1546,7 @@ server <- function(input, output, session) {
             out <- by(data = oneM_Filter_MPA(), INDICES = oneM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(oneM_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -1596,7 +1599,7 @@ server <- function(input, output, session) {
         else if(input$oneM_Graph_MPA == "Bar" && input$oneM_DataSummary_MPA == "MPA Mean") { # Bar    -----
           return({ 
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(oneM_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -1654,7 +1657,7 @@ server <- function(input, output, session) {
             out <- by(data = oneM_FilterBarSite_MPA(), INDICES = oneM_FilterBarSite_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(oneM_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -1718,7 +1721,7 @@ server <- function(input, output, session) {
         else if(input$oneM_Graph_MPA == "Smooth Line" && input$oneM_DataSummary_MPA == "MPA Mean") {  # Smooth       ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(oneM_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -1764,7 +1767,7 @@ server <- function(input, output, session) {
             out <- by(data = oneM_Filter_MPA(), INDICES = oneM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(oneM_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -1961,7 +1964,7 @@ server <- function(input, output, session) {
         else if(input$oneM_Graph_Two == "Line"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(oneM_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -2013,7 +2016,7 @@ server <- function(input, output, session) {
         else if(input$oneM_Graph_Two == "Bar") {
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(oneM_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -2068,7 +2071,7 @@ server <- function(input, output, session) {
         else if(input$oneM_Graph_Two == "Smooth Line"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(oneM_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -2705,7 +2708,7 @@ server <- function(input, output, session) {
       
       fiveM_LinePlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(fiveM_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -2745,7 +2748,7 @@ server <- function(input, output, session) {
       
       fiveM_BarPlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(fiveM_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -2791,7 +2794,7 @@ server <- function(input, output, session) {
       
       fiveM_SmoothPlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(fiveM_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -2829,7 +2832,7 @@ server <- function(input, output, session) {
       
       fiveM_BoxPlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(fiveM_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -3098,7 +3101,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_Isl == "Line" && input$fiveM_DataSummary_Isl == "Island Mean") { # Line   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(fiveM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -3141,7 +3144,7 @@ server <- function(input, output, session) {
             out <- by(data = fiveM_Filter_Isl(), INDICES = fiveM_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(fiveM_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -3193,7 +3196,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_Isl == "Bar" && input$fiveM_DataSummary_Isl == "Island Mean") { # Bar   ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(fiveM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -3244,7 +3247,7 @@ server <- function(input, output, session) {
             out <- by(data = fiveM_Filter_Isl(), INDICES = fiveM_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(fiveM_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -3289,7 +3292,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_Isl == "Smooth Line" && input$fiveM_DataSummary_Isl == "Island Mean") { # Smooth   -----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(fiveM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -3330,7 +3333,7 @@ server <- function(input, output, session) {
             out <- by(data = fiveM_Filter_Isl(), INDICES = fiveM_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(fiveM_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -3385,7 +3388,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_Isl == "Line" && input$fiveM_DataSummary_Isl == "Island Mean") { # Line   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(fiveM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -3425,7 +3428,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_Isl == "Line" && input$fiveM_DataSummary_Isl == "Site Means (by Island)") {
           return({
             ggplot() + 
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(fiveM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -3482,7 +3485,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_Isl == "Bar" && input$fiveM_DataSummary_Isl == "Island Mean") { # Bar -----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(fiveM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -3569,7 +3572,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_Isl == "Smooth Line" && input$fiveM_DataSummary_Isl == "Island Mean") { # Smooth   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(fiveM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -3606,7 +3609,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_Isl == "Smooth Line" && input$fiveM_DataSummary_Isl == "Site Means (by Island)") {
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(fiveM_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -3765,7 +3768,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_MPA == "Line" && input$fiveM_DataSummary_MPA == "MPA Mean") {  # Line    ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(fiveM_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -3810,7 +3813,7 @@ server <- function(input, output, session) {
             out <- by(data = fiveM_Filter_MPA(), INDICES = fiveM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(fiveM_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -3863,7 +3866,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_MPA == "Bar" && input$fiveM_DataSummary_MPA == "MPA Mean") { # Bar    -----
           return({ 
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(fiveM_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -3921,7 +3924,7 @@ server <- function(input, output, session) {
             out <- by(data = fiveM_FilterBarSite_MPA(), INDICES = fiveM_FilterBarSite_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(fiveM_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -3985,7 +3988,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_MPA == "Smooth Line" && input$fiveM_DataSummary_MPA == "MPA Mean") {  # Smooth       ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(fiveM_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -4031,7 +4034,7 @@ server <- function(input, output, session) {
             out <- by(data = fiveM_Filter_MPA(), INDICES = fiveM_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(fiveM_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -4228,7 +4231,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_Two == "Line"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(fiveM_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -4280,7 +4283,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_Two == "Bar") {
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(fiveM_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -4335,7 +4338,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_Two == "Smooth Line"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(fiveM_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -4996,7 +4999,7 @@ server <- function(input, output, session) {
       
       bands_LinePlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(bands_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -5036,7 +5039,7 @@ server <- function(input, output, session) {
       
       bands_BarPlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(bands_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -5082,7 +5085,7 @@ server <- function(input, output, session) {
       
       bands_SmoothPlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(bands_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -5120,7 +5123,7 @@ server <- function(input, output, session) {
       
       bands_BoxPlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(bands_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -5390,7 +5393,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_Isl == "Line" && input$bands_DataSummary_Isl == "Island Mean") { # Line   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(bands_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -5433,7 +5436,7 @@ server <- function(input, output, session) {
             out <- by(data = bands_Filter_Isl(), INDICES = bands_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(bands_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -5485,7 +5488,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_Isl == "Bar" && input$bands_DataSummary_Isl == "Island Mean") { # Bar   ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(bands_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -5536,7 +5539,7 @@ server <- function(input, output, session) {
             out <- by(data = bands_Filter_Isl(), INDICES = bands_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(bands_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -5581,7 +5584,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_Isl == "Smooth Line" && input$bands_DataSummary_Isl == "Island Mean") { # Smooth   -----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(bands_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -5622,7 +5625,7 @@ server <- function(input, output, session) {
             out <- by(data = bands_Filter_Isl(), INDICES = bands_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(bands_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -5677,7 +5680,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_Isl == "Line" && input$bands_DataSummary_Isl == "Island Mean") { # Line   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(bands_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -5717,7 +5720,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_Isl == "Line" && input$bands_DataSummary_Isl == "Site Means (by Island)") {
           return({
             ggplot() + 
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(bands_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -5774,7 +5777,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_Isl == "Bar" && input$bands_DataSummary_Isl == "Island Mean") { # Bar -----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(bands_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -5861,7 +5864,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_Isl == "Smooth Line" && input$bands_DataSummary_Isl == "Island Mean") { # Smooth   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(bands_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -5898,7 +5901,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_Isl == "Smooth Line" && input$bands_DataSummary_Isl == "Site Means (by Island)") {
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(bands_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -6057,7 +6060,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_MPA == "Line" && input$bands_DataSummary_MPA == "MPA Mean") {  # Line    ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(bands_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -6102,7 +6105,7 @@ server <- function(input, output, session) {
             out <- by(data = bands_Filter_MPA(), INDICES = bands_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(bands_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -6155,7 +6158,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_MPA == "Bar" && input$bands_DataSummary_MPA == "MPA Mean") { # Bar    -----
           return({ 
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(bands_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -6213,7 +6216,7 @@ server <- function(input, output, session) {
             out <- by(data = bands_FilterBarSite_MPA(), INDICES = bands_FilterBarSite_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(bands_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -6277,7 +6280,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_MPA == "Smooth Line" && input$bands_DataSummary_MPA == "MPA Mean") {  # Smooth       ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(bands_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -6323,7 +6326,7 @@ server <- function(input, output, session) {
             out <- by(data = bands_Filter_MPA(), INDICES = bands_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(bands_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -6520,7 +6523,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_Two == "Line"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(bands_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -6572,7 +6575,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_Two == "Bar") {
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(bands_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -6627,7 +6630,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_Two == "Smooth Line"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(bands_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -7201,7 +7204,7 @@ server <- function(input, output, session) {
         else if(input$core_Graph_Two == "Line"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(core_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -7253,7 +7256,7 @@ server <- function(input, output, session) {
         else if(input$core_Graph_Two == "Bar") {
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(core_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -7308,7 +7311,7 @@ server <- function(input, output, session) {
         if(input$core_Graph_Two == "Smooth Line"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(core_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -7505,7 +7508,7 @@ server <- function(input, output, session) {
         else if(input$core_Graph_Isl == "Line") { # Line   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(core_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -7554,7 +7557,7 @@ server <- function(input, output, session) {
         else if(input$core_Graph_Isl == "Bar") { # Bar -----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(core_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -7605,7 +7608,7 @@ server <- function(input, output, session) {
         else if(input$core_Graph_Isl == "Smooth Line") { # Smooth   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(core_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -7746,7 +7749,7 @@ server <- function(input, output, session) {
         else if(input$core_Graph_MPA == "Line") { # Line   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(core_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -7800,7 +7803,7 @@ server <- function(input, output, session) {
         else if(input$core_Graph_MPA == "Bar") { # Bar -----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(core_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -7852,7 +7855,7 @@ server <- function(input, output, session) {
         else if(input$core_Graph_MPA == "Smooth Line") { # Smooth   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(core_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(core_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -8367,7 +8370,7 @@ server <- function(input, output, session) {
       
       rpcs_LinePlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(rpcs_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -8407,7 +8410,7 @@ server <- function(input, output, session) {
       
       rpcs_BarPlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(rpcs_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -8453,7 +8456,7 @@ server <- function(input, output, session) {
       
       rpcs_SmoothPlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(rpcs_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -8491,7 +8494,7 @@ server <- function(input, output, session) {
       
       rpcs_BoxPlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(rpcs_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -8761,7 +8764,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_Isl == "Line" && input$rpcs_DataSummary_Isl == "Island Mean") { # Line   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -8804,7 +8807,7 @@ server <- function(input, output, session) {
             out <- by(data = rpcs_Filter_Isl(), INDICES = rpcs_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -8856,7 +8859,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_Isl == "Bar" && input$rpcs_DataSummary_Isl == "Island Mean") { # Bar   ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -8907,7 +8910,7 @@ server <- function(input, output, session) {
             out <- by(data = rpcs_Filter_Isl(), INDICES = rpcs_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -8952,7 +8955,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_Isl == "Smooth Line" && input$rpcs_DataSummary_Isl == "Island Mean") { # Smooth   -----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -8993,7 +8996,7 @@ server <- function(input, output, session) {
             out <- by(data = rpcs_Filter_Isl(), INDICES = rpcs_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -9048,7 +9051,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_Isl == "Line" && input$rpcs_DataSummary_Isl == "Island Mean") { # Line   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -9088,7 +9091,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_Isl == "Line" && input$rpcs_DataSummary_Isl == "Site Means (by Island)") {
           return({
             ggplot() + 
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -9145,7 +9148,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_Isl == "Bar" && input$rpcs_DataSummary_Isl == "Island Mean") { # Bar -----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -9232,7 +9235,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_Isl == "Smooth Line" && input$rpcs_DataSummary_Isl == "Island Mean") { # Smooth   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -9269,7 +9272,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_Isl == "Smooth Line" && input$rpcs_DataSummary_Isl == "Site Means (by Island)") {
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(rpcs_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -9428,7 +9431,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_MPA == "Line" && input$rpcs_DataSummary_MPA == "MPA Mean") {  # Line    ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(rpcs_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -9473,7 +9476,7 @@ server <- function(input, output, session) {
             out <- by(data = rpcs_Filter_MPA(), INDICES = rpcs_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(rpcs_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -9526,7 +9529,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_MPA == "Bar" && input$rpcs_DataSummary_MPA == "MPA Mean") { # Bar    -----
           return({ 
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(rpcs_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -9584,7 +9587,7 @@ server <- function(input, output, session) {
             out <- by(data = rpcs_FilterBarSite_MPA(), INDICES = rpcs_FilterBarSite_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(rpcs_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -9648,7 +9651,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_MPA == "Smooth Line" && input$rpcs_DataSummary_MPA == "MPA Mean") {  # Smooth       ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(rpcs_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -9694,7 +9697,7 @@ server <- function(input, output, session) {
             out <- by(data = rpcs_Filter_MPA(), INDICES = rpcs_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(rpcs_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -9891,7 +9894,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_Two == "Line"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(rpcs_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -9943,7 +9946,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_Two == "Bar") {
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(rpcs_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -9998,7 +10001,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_Two == "Smooth Line"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(rpcs_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -10749,7 +10752,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_SD_One == "Boxplot"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_SD_one()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_SD_one()), show.legend = FALSE) +
@@ -10788,7 +10791,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_SD_One == "Violin Plot"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_SD_one()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_SD_one()), show.legend = FALSE) +
@@ -10829,7 +10832,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_SD_One == "Joy Plot"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(ymin= DateStart, ymax = DateEnd,xmin = 0, xmax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(ymin= DateStart, ymax = DateEnd,xmin = 0, xmax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_SD_one()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(ymin= DateStart, ymax = DateEnd, xmin = 0, xmax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_SD_one()), show.legend = FALSE) +
@@ -10983,7 +10986,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_SD_Isl == "Boxplot") { 
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_SD_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_SD_Isl()), show.legend = FALSE) +
@@ -11022,7 +11025,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_SD_Isl == "Violin Plot") { 
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_SD_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_SD_Isl()), show.legend = FALSE) +
@@ -11151,7 +11154,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_SD_MPA == "Boxplot") { 
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_SD_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_SD_MPA()), show.legend = FALSE) +
@@ -11189,7 +11192,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_SD_MPA == "Violin Plot") { 
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_SD_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_SD_MPA()), show.legend = FALSE) +
@@ -11409,7 +11412,7 @@ server <- function(input, output, session) {
       
       NHSF_LinePlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(NHSF_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -11449,7 +11452,7 @@ server <- function(input, output, session) {
       
       NHSF_BarPlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(NHSF_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -11495,7 +11498,7 @@ server <- function(input, output, session) {
       
       NHSF_SmoothPlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(NHSF_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -11753,7 +11756,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_Isl == "Line" && input$NHSF_DataSummary_Isl == "Island Mean") { # Line   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -11796,7 +11799,7 @@ server <- function(input, output, session) {
             out <- by(data = NHSF_Filter_Isl(), INDICES = NHSF_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(NHSF_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -11848,7 +11851,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_Isl == "Bar" && input$NHSF_DataSummary_Isl == "Island Mean") { # Bar   ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -11899,7 +11902,7 @@ server <- function(input, output, session) {
             out <- by(data = NHSF_Filter_Isl(), INDICES = NHSF_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(NHSF_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -11944,7 +11947,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_Isl == "Smooth Line" && input$NHSF_DataSummary_Isl == "Island Mean") { # Smooth   -----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -11985,7 +11988,7 @@ server <- function(input, output, session) {
             out <- by(data = NHSF_Filter_Isl(), INDICES = NHSF_Filter_Isl()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(NHSF_alphaONI_Isl()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -12040,7 +12043,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_Isl == "Line" && input$NHSF_DataSummary_Isl == "Island Mean") { # Line   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -12080,7 +12083,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_Isl == "Line" && input$NHSF_DataSummary_Isl == "Site Means (by Island)") {
           return({
             ggplot() + 
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -12137,7 +12140,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_Isl == "Bar" && input$NHSF_DataSummary_Isl == "Island Mean") { # Bar -----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -12224,7 +12227,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_Isl == "Smooth Line" && input$NHSF_DataSummary_Isl == "Island Mean") { # Smooth   ----
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -12261,7 +12264,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_Isl == "Smooth Line" && input$NHSF_DataSummary_Isl == "Site Means (by Island)") {
           return({   
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_Isl()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
@@ -12420,7 +12423,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_MPA == "Line" && input$NHSF_DataSummary_MPA == "MPA Mean") {  # Line    ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -12465,7 +12468,7 @@ server <- function(input, output, session) {
             out <- by(data = NHSF_Filter_MPA(), INDICES = NHSF_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(NHSF_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -12518,7 +12521,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_MPA == "Bar" && input$NHSF_DataSummary_MPA == "MPA Mean") { # Bar    -----
           return({ 
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -12576,7 +12579,7 @@ server <- function(input, output, session) {
             out <- by(data = NHSF_FilterBarSite_MPA(), INDICES = NHSF_FilterBarSite_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() +
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(NHSF_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -12640,7 +12643,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_MPA == "Smooth Line" && input$NHSF_DataSummary_MPA == "MPA Mean") {  # Smooth       ----
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_MPA()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -12686,7 +12689,7 @@ server <- function(input, output, session) {
             out <- by(data = NHSF_Filter_MPA(), INDICES = NHSF_Filter_MPA()$IslandName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                           position = "identity", alpha = as.numeric(NHSF_alphaONI_MPA()), show.legend = FALSE) +
                 geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                           position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
@@ -12883,7 +12886,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_Two == "Line"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -12935,7 +12938,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_Two == "Bar") {
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -12990,7 +12993,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_Two == "Smooth Line"){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(NHSF_alphaONI_Two()), show.legend = FALSE) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_NOAA_Two()), show.legend = FALSE) +
@@ -13192,6 +13195,2993 @@ server <- function(input, output, session) {
     
   }
   
+  output$FSF_UIout <- renderUI({ # FSF_UI   ----
+    if (is.null(input$FSF_allORone_MS))
+      return(NULL)
+    
+    else if(input$FSF_allORone_SD == "One Species by Site" &&
+            input$FSF_distORmean_One=='Size Distribution') { #  FSF_TP_One     ----
+      dyn_ui <- tabPanel("Fish Sizes", value = 'FSF_TP',  
+                         tags$hr(),
+                         plotOutput(outputId = "FSF_Plot_SD_One",
+                                    height = ifelse(input$FSF_Graph_SD_One == "Joy Plot", 1000, 500),
+                                    width = ifelse(input$FSF_Graph_SD_One == "Joy Plot", '75%', '100%')),
+                         tags$hr(),
+                         conditionalPanel("input.FSF_GraphOptions_SD_One == 'With ONI' ||
+                                           input.FSF_GraphOptions_SD_One == 'With PDO (NOAA)' ||
+                                           input.FSF_GraphOptions_SD_One == 'With PDO (UW)'",
+                                          imageOutput(outputId = "FSF_ONIpdoPIC_SD_One",
+                                                      height = 75),
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_SD_One == 'With ONI'",
+                                          ONI_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_SD_One == 'With PDO (NOAA)'",
+                                          PDO_NOAA_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_SD_One == 'With PDO (UW)'",
+                                          PDO_UW_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_Graph_SD_One == 'Boxplot'",
+                                          imageOutput(outputId = "FSF_BoxplotDescription_SD_One"),
+                                          tags$hr()),
+                         fluidRow(column(4, tags$h2(tags$strong(input$FSF_SpeciesName_One)),
+                                         imageOutput(outputId = "FSF_LargeSpPhoto_SD_One",
+                                                     height = 500)),
+                                  column(3, tags$h2(tags$strong("Species Classification")),
+                                         DTOutput(outputId = "FSF_DToutClass_SD_One",
+                                                  height = 500)),
+                                  column(5, tags$h2(tags$strong("Species Description")),
+                                         DTOutput(outputId = "FSF_DToutDesc_SD_One",
+                                                  height = 500))),
+                         
+                         tags$hr(),
+                         DTOutput(outputId = "FSF_DToutData_SD_One",
+                                  height = 550),
+                         tags$hr(), tags$hr()
+      )
+    } 
+    else if(input$FSF_allORone_SD == "One Species by Island" &&
+            input$FSF_distORmean_One=='Size Distribution') { #  FSF_TP_by_Isl      ---- 
+      dyn_ui <- tabPanel("Fish Sizes", value = 'FSF_TP',
+                         tags$hr(),
+                         plotOutput(outputId = "FSF_Plot_SD_Isl",
+                                    height = 1000),
+                         tags$hr(),
+                         conditionalPanel("input.FSF_GraphOptions_SD_Isl == 'With ONI' ||
+                                           input.FSF_GraphOptions_SD_Isl == 'With PDO (NOAA)' ||
+                                           input.FSF_GraphOptions_SD_Isl == 'With PDO (UW)'",
+                                          imageOutput(outputId = "FSF_ONIpdoPIC_SD_Isl",
+                                                      height = 75),
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_SD_Isl == 'With ONI'",
+                                          ONI_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_SD_Isl == 'With PDO (NOAA)'",
+                                          PDO_NOAA_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_SD_Isl == 'With PDO (UW)'",
+                                          PDO_UW_tagList,
+                                          tags$hr())
+      )
+    } 
+    else if(input$FSF_allORone_SD == "One Species by MPA" &&
+            input$FSF_distORmean_One=='Size Distribution') { #  FSF_TP_byMPA     ---- 
+      dyn_ui <- tabPanel("Fish Sizes", value = 'FSF_TP',  
+                         tags$hr(),
+                         plotOutput(outputId = "FSF_Plot_SD_MPA",
+                                    height = 500),
+                         tags$hr(),
+                         conditionalPanel("input.FSF_GraphOptions_SD_MPA == 'With ONI' ||
+                                           input.FSF_GraphOptions_SD_MPA == 'With PDO (NOAA)' ||
+                                           input.FSF_GraphOptions_SD_MPA == 'With PDO (UW)'",
+                                          imageOutput(outputId = "FSF_ONIpdoPIC_SD_MPA",
+                                                      height = 75),
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_SD_MPA == 'With ONI'",
+                                          ONI_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_SD_MPA == 'With PDO (NOAA)'",
+                                          PDO_NOAA_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_SD_MPA == 'With PDO (UW)'",
+                                          PDO_UW_tagList,
+                                          tags$hr()),
+                         MPA_tagList,
+                         tags$hr())
+    }
+    else if(input$FSF_allORone_MS == "One Species by Site" &&
+            input$FSF_distORmean_One=='Mean Sizes') { #  FSF_TP_One     ----
+      dyn_ui <- tabPanel("Fish Sizes", value = 'FSF_TP',  
+                         tags$hr(),
+                         plotOutput(outputId = "FSF_Plot_One",
+                                    height = 500),
+                         tags$hr(),
+                         fluidRow(
+                           column(3, conditionalPanel("input.FSF_Graph_One == 'Line' || input.FSF_Graph_One == 'Bar'",
+                                                      radioButtons(inputId = "FSF_EB_one",
+                                                                   label = "Show error bars?",
+                                                                   choices = c("Yes" = 1, "No" = 0),
+                                                                   inline = TRUE))),
+                           column(3, conditionalPanel("input.FSF_Graph_One == 'Bar'",
+                                                      radioButtons(inputId = "FSF_Bar_Text_One",
+                                                                   label = "Show density value?",
+                                                                   choices = c("Yes" = 1, "No" = 0), selected = 0,
+                                                                   inline = TRUE))),
+                           column(6, conditionalPanel("input.FSF_GraphOptions_One == 'With ONI' ||
+                                                      input.FSF_GraphOptions_One == 'With PDO (NOAA)' ||
+                                                      input.FSF_GraphOptions_One == 'With PDO (UW)'",
+                                                      imageOutput(outputId = "FSF_ONIpdoPIC_One",
+                                                                  height = 75)))),
+                         conditionalPanel("input.FSF_Graph_One == 'Smooth Line'",
+                                          sliderInput(inputId = "FSF_SmoothSlide_One",
+                                                      label = "Span: Controls the amount of smoothing for the loess smoother. 
+                                                      Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
+                                                      min = 0, max = 1, step = .05, value = .5, width = "100%"),
+                                          fluidRow(column(3, radioButtons(inputId = "FSF_SmoothSE_One",
+                                                                          label = "Show the standard error?",
+                                                                          choices = c("Yes" = TRUE, "No" = FALSE),
+                                                                          inline = TRUE)),
+                                                   column(3, radioButtons(inputId = "FSF_SmoothPoint_One",
+                                                                          label = "Show the mean values?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE)))),
+                         conditionalPanel("input.FSF_GraphOptions_One == 'With ONI'",
+                                          tags$hr(),
+                                          ONI_tagList),
+                         conditionalPanel("input.FSF_GraphOptions_One == 'With PDO (NOAA)'",
+                                          tags$hr(),
+                                          PDO_NOAA_tagList),
+                         conditionalPanel("input.FSF_GraphOptions_One == 'With PDO (UW)'",
+                                          tags$hr(),
+                                          PDO_UW_tagList),
+                         conditionalPanel("input.FSF_Graph_One == 'Boxplot'",
+                                          tags$hr(),
+                                          imageOutput(outputId = "FSF_BoxplotDescription_One")),
+                         tags$hr(),
+                         fluidRow(column(4, tags$h2(tags$strong(input$FSF_SpeciesName_One)),
+                                         imageOutput(outputId = "FSF_LargeSpPhoto_One",
+                                                     height = 500)),
+                                  column(3, tags$h2(tags$strong("Species Classification")),
+                                         DTOutput(outputId = "FSF_DToutClass_One",
+                                                  height = 500)),
+                                  column(5, tags$h2(tags$strong("Species Description")),
+                                         DTOutput(outputId = "FSF_DToutDesc_One",
+                                                  height = 500))),
+                         
+                         tags$hr(),
+                         DTOutput(outputId = "FSF_DToutData_One",
+                                  height = 550),
+                         tags$hr(), tags$hr(),
+                         imageOutput(outputId = "FSF_LargeSitePhoto_One",
+                                     height = 625),
+                         tags$hr()
+      )
+    } 
+    else if(input$FSF_allORone_MS == "One Species by Island" &&
+            input$FSF_distORmean_One=='Mean Sizes') { #  FSF_TP_by_Isl      ---- 
+      dyn_ui <- tabPanel("Fish Sizes", value = 'FSF_TP',
+                         tags$hr(),
+                         conditionalPanel("input.FSF_FreeOrLock_Isl == 'Locked Scales' ||
+                                          input.FSF_FreeOrLock_Isl == 'Free Scales'",
+                                          plotOutput(outputId = "FSF_Plot_Isl1",
+                                                     height = 1000)),
+                         conditionalPanel("input.FSF_FreeOrLock_Isl == 'Single Plot'", 
+                                          plotOutput(outputId = "FSF_Plot_Isl2",
+                                                     height = 500)),
+                         tags$hr(),
+                         fluidRow(conditionalPanel("input.FSF_Graph_Isl == 'Line' || (input.FSF_Graph_Isl == 'Bar' && 
+                                                   input.FSF_DataSummary_Isl == 'Island Mean' && 
+                                                   input.FSF_FreeOrLock_Isl != 'Single Plot')",
+                                                   column(3, radioButtons(inputId = "FSF_EB_Isl",
+                                                                          label = "Show error bars?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE))),
+                                  conditionalPanel("input.FSF_Graph_Isl == 'Bar' && 
+                                                   input.FSF_DataSummary_Isl == 'Island Mean' && 
+                                                   input.FSF_FreeOrLock_Isl != 'Single Plot'",
+                                                   column(3, radioButtons(inputId = "FSF_Bar_Text_Isl",
+                                                                          label = "Show density value?",
+                                                                          choices = c("Yes" = 1, "No" = 0), selected = 0,
+                                                                          inline = TRUE))),
+                                  conditionalPanel("(input.FSF_Graph_Isl == 'Bar' && 
+                                                   input.FSF_DataSummary_Isl == 'Island Mean' && 
+                                                   input.FSF_FreeOrLock_Isl != 'Locked Scales' && 
+                                                   input.FSF_FreeOrLock_Isl != 'Free Scales') ||
+                                                   (input.FSF_Graph_Isl == 'Bar' && 
+                                                   input.FSF_DataSummary_Isl == 'Site Means (by Island)')",
+                                                   column(3, radioButtons(inputId = "FSF_BarOptions_Isl",
+                                                                          label =  "Bar Graph Options:",
+                                                                          choices = c("Stack" = "stack", "Fill" = "fill", "Dodge" = "dodge"),
+                                                                          inline = TRUE))),
+                                  conditionalPanel("input.FSF_GraphOptions_Isl == 'With ONI' ||
+                                                      input.FSF_GraphOptions_Isl == 'With PDO (NOAA)' ||
+                                                      input.FSF_GraphOptions_Isl == 'With PDO (UW)'",
+                                                   column(6, imageOutput(outputId = "FSF_ONIpdoPIC_Isl",
+                                                                         height = 75)))),
+                         fluidRow(conditionalPanel("input.FSF_Graph_Isl == 'Line' || input.FSF_Graph_Isl == 'Bar'",
+                                                   tags$hr())),
+                         conditionalPanel("input.FSF_Graph_Isl == 'Smooth Line'",
+                                          sliderInput(inputId = "FSF_SmoothSlide_Isl",
+                                                      label = "Span: Controls the amount of smoothing for the loess smoother. 
+                                                      Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
+                                                      min = 0, max = 1, step = .05, value = .5, width = "100%"),
+                                          fluidRow(column(3, radioButtons(inputId = "FSF_SmoothSE_Isl",
+                                                                          label = "Show the standard error?",
+                                                                          choices = c("Yes" = TRUE, "No" = FALSE),
+                                                                          inline = TRUE)),
+                                                   column(3, radioButtons(inputId = "FSF_SmoothPoint_Isl",
+                                                                          label = "Show the mean values?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE))),
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_Isl == 'With ONI'",
+                                          ONI_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_Isl == 'With PDO (NOAA)'",
+                                          PDO_NOAA_tagList,
+                                          tags$hr())
+      )
+    } 
+    else if(input$FSF_allORone_MS == "One Species by MPA" &&
+            input$FSF_distORmean_One=='Mean Sizes') { #  FSF_TP_byMPA     ---- 
+      dyn_ui <- tabPanel("Fish Sizes", value = 'FSF_TP',  
+                         tags$hr(),
+                         plotOutput(outputId = "FSF_Plot_MPA",
+                                    height = 850),
+                         tags$hr(),
+                         fluidRow(conditionalPanel("input.FSF_Graph_MPA == 'Line' || (input.FSF_Graph_MPA == 'Bar' && 
+                                                   input.FSF_DataSummary_MPA == 'MPA Mean')",
+                                                   column(3, radioButtons(inputId = "FSF_EB_MPA",
+                                                                          label = "Show error bars?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE))),
+                                  conditionalPanel("input.FSF_Graph_MPA == 'Bar' && input.FSF_DataSummary_MPA == 'MPA Mean'",
+                                                   column(3, radioButtons(inputId = "FSF_Bar_Text_MPA",
+                                                                          label = "Show density value?",
+                                                                          choices = c("Yes" = 1, "No" = 0), selected = 0,
+                                                                          inline = TRUE))),
+                                  conditionalPanel("input.FSF_GraphOptions_MPA == 'With ONI' ||
+                                                      input.FSF_GraphOptions_MPA == 'With PDO (NOAA)' ||
+                                                      input.FSF_GraphOptions_MPA == 'With PDO (UW)'",
+                                                   column(6, imageOutput(outputId = "FSF_ONIpdoPIC_MPA",
+                                                                         height = 75)))),
+                         fluidRow(conditionalPanel("input.FSF_Graph_MPA == 'Line' || input.FSF_Graph_MPA == 'Bar'",
+                                                   tags$hr())),
+                         conditionalPanel("input.FSF_Graph_MPA == 'Smooth Line'",
+                                          sliderInput(inputId = "FSF_SmoothSlide_MPA",
+                                                      label = "Span: Controls the amount of smoothing for the loess smoother. 
+                                                      Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
+                                                      min = 0, max = 1, step = .05, value = .5, width = "100%"),
+                                          fluidRow(column(3, radioButtons(inputId = "FSF_SmoothSE_MPA",
+                                                                          label = "Show the standard error?",
+                                                                          choices = c("Yes" = TRUE, "No" = FALSE),
+                                                                          inline = TRUE)),
+                                                   column(3, radioButtons(inputId = "FSF_SmoothPoint_MPA",
+                                                                          label = "Show the mean values?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE))),
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_MPA == 'With ONI'",
+                                          ONI_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_MPA == 'With PDO (NOAA)'",
+                                          PDO_NOAA_tagList,
+                                          tags$hr()),
+                         MPA_tagList,
+                         tags$hr())
+    }
+    else if(input$FSF_allORone_MS == "Two Species by Site" &&
+            input$FSF_distORmean_One=='Mean Sizes') { #  FSF_TP_Two     ----
+      dyn_ui <- tabPanel("Fish Sizes", value = 'FSF_TP',  
+                         tags$hr(),
+                         plotOutput(outputId = "FSF_Plot_Two",
+                                    height = 500),
+                         tags$hr(),
+                         sliderInput(inputId = "FSF_Y_Slide_Two",
+                                     label = "Adjust the second y-axis by a multiple of:",
+                                     min = 1, max = 50, step = 1, value = 1, width = "100%", ticks = T),
+                         conditionalPanel("input.FSF_Graph_Two == 'Smooth Line'",
+                                          sliderInput(inputId = "FSF_SmoothSlide_Two",
+                                                      label = "Span: Controls the amount of smoothing for the loess smoother. 
+                                                      Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
+                                                      min = 0, max = 1, step = .05, value = .5, width = "100%"),
+                                          fluidRow(column(3, radioButtons(inputId = "FSF_SmoothSE_Two",
+                                                                          label = "Show the standard error?",
+                                                                          choices = c("Yes" = TRUE, "No" = FALSE),
+                                                                          inline = TRUE)),
+                                                   column(3, radioButtons(inputId = "FSF_SmoothPoint_Two",
+                                                                          label = "Show the mean values?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE)))),
+                         fluidRow(
+                           conditionalPanel("input.FSF_Graph_Two == 'Line' || input.FSF_Graph_Two == 'Bar'",
+                                            column(3, radioButtons(inputId = "FSF_EB_Two",
+                                                                   label = "Show error bars?",
+                                                                   choices = c("Yes" = 1, "No" = 0),
+                                                                   inline = TRUE))),
+                           conditionalPanel("input.FSF_GraphOptions_Two == 'With ONI' ||
+                                                      input.FSF_GraphOptions_Two == 'With PDO (NOAA)' ||
+                                                      input.FSF_GraphOptions_Two == 'With PDO (UW)'",
+                                            column(6, imageOutput(outputId = "FSF_ONIpdoPIC_Two",
+                                                                  height = 75)))),
+                         tags$hr(),
+                         conditionalPanel("input.FSF_GraphOptions_Two == 'With ONI'",
+                                          ONI_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_Two == 'With PDO (NOAA)'",
+                                          PDO_NOAA_tagList,
+                                          tags$hr()),
+                         conditionalPanel("input.FSF_GraphOptions_Two == 'With PDO (UW)'",
+                                          PDO_UW_tagList,
+                                          tags$hr()),
+                         fluidRow(column(6, tags$h1(tags$strong(input$FSF_SpeciesName_Two_One)),
+                                         imageOutput(outputId = "FSF_LargeSpPhoto_Two_1",
+                                                     height = 450)),
+                                  column(6, tags$h1(tags$strong(input$FSF_SpeciesName_Two_Two)),
+                                         imageOutput(outputId = "FSF_LargeSpPhoto_Two_2",
+                                                     height = 450))),
+                         tags$hr(),
+                         fluidRow(column(6, tags$h1(tags$strong(input$FSF_SpeciesName_Two_One)),
+                                         DTOutput(outputId = "FSF_DToutData_Two_1")),
+                                  column(6, tags$h1(tags$strong(input$FSF_SpeciesName_Two_Two)),
+                                         DTOutput(outputId = "FSF_DToutData_Two_2"))),
+                         tags$hr(),
+                         imageOutput(outputId = "FSF_LargeSitePhoto_Two",
+                                     height = 625),
+                         tags$hr()
+      )
+    }
+    else if(input$FSF_allORone_MS == "All Species" &&
+            input$FSF_distORmean_One=='Mean Sizes') { # FSF_TP_all   ----
+      dyn_ui <- tabPanel("Fish Sizes", value = 'FSF_TP',  
+                         fluidRow(column(12, tags$h1(tags$strong(
+                           "This section has the species in the order they appear on the datasheet")))),
+                         plotOutput(outputId = "FSF_Plot_All",
+                                    height = 7000))
+    }
+    return(dyn_ui)
+  })
+  
+  { # ........ FSF_SizeDist ........     ----
+    
+    { # FSF_SD_One_Species   ----
+      
+      FSF_RawFilter_One <- reactive({ 
+        FSF_DFRaw %>%
+          filter(SiteName == input$FSF_SiteName_SD_One,
+                 CommonName == input$FSF_SpeciesName_SD_One) %>% 
+          group_by(SurveyYear) %>%
+          mutate(TotalCount = length(Size_cm)) %>%
+          select(SiteNumber, SurveyYear, Date, IslandName, SiteName, ScientificName, CommonName, 
+                 Size_cm, TotalCount, IslandCode, SiteCode, ReserveStatus, MeanDepth, Species)
+      }) # filtered  FSF_ raw table
+      
+      FSF_RawFilterSummary_One <- reactive({ 
+        FSF_DFRaw %>%
+          filter(SiteName == input$FSF_SiteName_SD_One,
+                 CommonName == input$FSF_SpeciesName_SD_One) %>% 
+          group_by(SurveyYear) %>%
+          mutate(TotalCount = length(Size_cm)) %>%
+          select(SiteNumber, SurveyYear, Date, IslandName, SiteName, ScientificName, CommonName, 
+                 Size_cm, TotalCount, IslandCode, SiteCode, ReserveStatus, MeanDepth, Species)
+      }) # filtered  FSF_ raw table
+      
+      FSF_SpeciesClass_SD_One <- reactive({ 
+        SpeciesFish %>%
+          filter(CommonName == input$FSF_SpeciesName_SD_One) %>%
+          select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
+                 Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
+          pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
+          select(Rank, Name)
+      }) # filtered Species classification table
+      
+      FSF_SpeciesDescription_SD_One <- reactive({
+        SpeciesFish %>%
+          filter(CommonName == input$FSF_SpeciesName_SD_One) %>%
+          select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
+          pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
+          select(Category, Information)
+      }) # filtered Species Description table  
+      
+      output$FSF_TopPhoto_SD_One <- renderImage({
+        
+        if (input$FSF_allORone_SD == 'One Species by Site') {
+          return(list(src = glue("www/Indicator_Species/{unique(FSF_RawFilter_One()$Species)}.jpg"),
+                      contentType = "image/jpg", width = 210, height = 210))
+        }
+        else if (input$FSF_allORone_SD == "One Species by Island") {
+          return(list(src = glue("www/Indicator_Species/{unique(FSF_RawFilter_Isl()$Species)}.jpg"),
+                      contentType = "image/jpg", width = 210, height = 210))
+        }
+        else if (input$FSF_allORone_SD == 'One Species by MPA') {
+          return(list(src = glue("www/Indicator_Species/{unique(FSF_RawFilter_MPA()$Species)}.jpg"),
+                      contentType = "image/jpg", width = 210, height = 210))
+        }
+      }, deleteFile = FALSE) # Small species photo above plot
+      
+      output$FSF_LargeSpPhoto_SD_One <- renderImage({
+        list(src = glue("www/Indicator_Species/{unique(FSF_RawFilter_One()$Species)}.jpg"),
+             contentType = "image/jpg", width = 400, height = 400)
+      }, deleteFile = FALSE) # Large species photo below plot
+      
+      output$FSF_TopSitePhoto_SD_One <- renderImage({
+        if (input$FSF_allORone_SD == 'One Species by Site') {
+          return(list(src = glue("www/Sat_Imagery/{unique(FSF_RawFilter_One()$SiteCode)}.png"),
+                      contentType = "image/png", width = 430, height = 210))
+        }
+        else if (input$FSF_allORone_SD == "One Species by Island") {
+          return(list(src = "www/Sat_Imagery/CHISisl.png",
+                      contentType = "image/png", width = 430, height = 210))
+        }
+        else if (input$FSF_allORone_SD == 'One Species by MPA') {
+          return(list(src = "www/Sat_Imagery/CHISmpa.png",
+                      contentType = "image/png", width = 430, height = 210))
+        }
+        
+      }, deleteFile = FALSE) # Small Site photo above plot
+      
+      output$FSF_LargeSitePhoto_SD_One <- renderImage({
+        if (input$FSF_allORone_SD == 'One Species by Site') {
+          return(list(src = glue("www/Sat_Imagery/{unique(FSF_RawFilter_One()$SiteCode)}.png"),
+                      contentType = "image/png", width = 1250, height = 625))
+        }
+        else if (input$FSF_allORone_SD == "One Species by Island") {
+          return(list(src = "www/Sat_Imagery/CHISisl.png",
+                      contentType = "image/png", width = 1250, height = 625))
+        }
+        else if (input$FSF_allORone_SD == 'One Species by MPA') {
+          return(list(src = "www/Sat_Imagery/CHISmpa.png",
+                      contentType = "image/png", width = 1250, height = 625))
+        }
+      }, deleteFile = FALSE) # Large Site photo below plot
+      
+      output$FSF_DToutClass_SD_One <- renderDT({
+        datatable(FSF_SpeciesClass_SD_One(), 
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    searching = FALSE,
+                    lengthChange = FALSE,
+                    paging = FALSE,
+                    ordering = FALSE,
+                    info = FALSE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(FSF_SpeciesClass_SD_One()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      }) # Species Classification data table
+      
+      output$FSF_DToutDesc_SD_One <- renderDT({
+        datatable(FSF_SpeciesDescription_One(), 
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    searching = FALSE,
+                    lengthChange = FALSE,
+                    paging = FALSE,
+                    ordering = FALSE,
+                    info = FALSE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(FSF_SpeciesDescription_One()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      }) # Species Description data table
+      
+      FSF_alphaONI_SD_one <- reactive({
+        if(input$FSF_GraphOptions_SD_One == "With No Index"){
+          return(0)
+        }
+        else if(input$FSF_GraphOptions_SD_One == "With ONI"){
+          return(1)
+        }
+        else if(input$FSF_GraphOptions_SD_One == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$FSF_GraphOptions_SD_One == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      FSF_alphaPDO_NOAA_SD_one <- reactive({
+        if(input$FSF_GraphOptions_SD_One == "With No Index"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_SD_One == "With ONI"){
+          return(0)
+          
+        }
+        if(input$FSF_GraphOptions_SD_One == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$FSF_GraphOptions_SD_One == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      FSF_alphaPDO_UW_SD_one <- reactive({
+        if(input$FSF_GraphOptions_SD_One == "With No Index"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_SD_One == "With ONI"){
+          return(0)
+          
+        }
+        if(input$FSF_GraphOptions_SD_One == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_SD_One == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$FSF_ONIpdoPIC_SD_One <- renderImage({
+        if(input$FSF_GraphOptions_SD_One == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$FSF_GraphOptions_SD_One == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$FSF_GraphOptions_SD_One == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
+      output$FSF_Plot_SD_One <- renderPlot({
+        
+        if (is.null(input$FSF_Graph_SD_One))
+          return(NULL) 
+        
+        else if(input$FSF_Graph_SD_One == "Boxplot"){
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_SD_one()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_SD_one()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_SD_one()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_boxplot(data = FSF_RawFilter_One(), width = 150,
+                           aes(x = Date, y = Size_cm, group = SurveyYear, color = CommonName)) +
+              geom_point(data = FSF_RawFilter_One(), size = 1, color = "black",
+                         aes(x = Date, y = mean(Size_cm), group = SurveyYear)) +
+              geom_text(data = FSF_RawFilter_One(), size = 4, fontface = "plain",
+                        aes(x = Date, y = -1, group = Date, label = paste(' n = \n', FSF_RawFilter_One()$TotalCount))) +
+              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_One()$Date), expand = c(0.01, 0),
+                           limits = c(min(FSF_RawFilter_One()$Date) - 150, max(FSF_RawFilter_One()$Date) + 150)) +
+              labs(title = glue("{unique(FSF_RawFilter_One()$ScientificName)}"),
+                   subtitle= glue("{unique(FSF_RawFilter_One()$IslandName)} {unique(FSF_RawFilter_One()$SiteName)}"), 
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Size Distribution (mm)") +
+               
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$FSF_Graph_SD_One == "Violin Plot"){
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_SD_one()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_SD_one()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_SD_one()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_violin(data = FSF_RawFilter_One(), width = 150,
+                          aes(x = Date, y = Size_cm, group = SurveyYear, color = CommonName, fill = CommonName)) +
+              geom_point(data = FSF_RawFilter_One(), size = 1, color = "black",
+                         aes(x = Date, y = mean(Size_cm), group = SurveyYear)) +
+              geom_text(data = FSF_RawFilter_One(), aes(x = Date, y = -1, group = Date, 
+                                                        label = paste(' n = \n', FSF_RawFilter_One()$TotalCount)), size = 4) +
+              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_One()$Date), expand = c(0.01, 0),
+                           limits = c(min(FSF_RawFilter_One()$Date) - 150, max(FSF_RawFilter_One()$Date) + 150)) +
+              labs(title = glue("{unique(FSF_RawFilter_One()$ScientificName)}"),
+                   subtitle= glue("{unique(FSF_RawFilter_One()$IslandName)} {unique(FSF_RawFilter_One()$SiteName)}"), 
+                   color = "Common Name",
+                   fill = "Common Name",
+                   x = "Year",
+                   y = "Size Distribution (mm)") +
+               
+               
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$FSF_Graph_SD_One == "Joy Plot"){
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(ymin= DateStart, ymax = DateEnd,xmin = 0, xmax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_SD_one()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(ymin= DateStart, ymax = DateEnd, xmin = 0, xmax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_SD_one()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(ymin= DateStart, ymax = DateEnd, xmin = 0, xmax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_SD_one()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_density_ridges(data = FSF_RawFilter_One(), 
+                                  aes(x = Size_cm, y = Date, group = SurveyYear, fill = CommonName, height = ..density..),
+                                  rel_min_height = .01, alpha = .9, stat = "density", scale = 1) +
+              scale_y_date(date_labels = "%Y", breaks = FSF_RawFilter_One()$Date, expand = c(0.05, 0),
+                           limits = c(min(FSF_RawFilter_One()$Date) - 150, max(FSF_RawFilter_One()$Date) + 360)) +
+              scale_x_continuous(limits = c(0, max(FSF_RawFilter_One()$Size_cm))) +
+              labs(title = glue("{unique(FSF_RawFilter_One()$ScientificName)}"),
+                   subtitle= glue("{unique(FSF_RawFilter_One()$IslandName)} {unique(FSF_RawFilter_One()$SiteCode)}"),
+                   fill = "Common Name",
+                   x = "Size Distribution (mm)",
+                   y = "Year") +
+               
+              theme_minimal() +
+              theme(legend.position = "bottom",
+                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                    legend.text = element_text(size = 14, vjust = .5),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
+          })
+        }
+        
+      }) # Main Plot for FSF_SD Quadrats with one species 
+      
+      output$FSF_BoxplotDescription_SD_One <- renderImage({
+        list(src = glue("www/Boxplot_Description.jpg"), contentType = "image/jpg", width = 550, height = 400)
+      }, deleteFile = FALSE) # Boxplot drawing/explanation
+      
+      output$FSF_DToutData_SD_One <- renderDT({
+        datatable(FSF_RawFilterSummary_One(),
+                  extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    scrollY = "500px",
+                    scrollX = TRUE, 
+                    paging = FALSE,
+                    ordering = TRUE,
+                    info = FALSE,
+                    dom = 'Bfrtip',
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    columnDefs = c(list(list(className = 'dt-center', targets = 0:11))),
+                    colReorder = TRUE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(FSF_RawFilterSummary_One()),
+                      color = "black",
+                      backgroundColor = 'white')
+      }) # Filtered data table output
+      
+    }
+    
+    { # FSF_SD_by_Island   ----
+      
+      FSF_RawFilter_Isl <- reactive({
+        FSF_DFRaw %>%
+          filter(CommonName == input$FSF_SpeciesName_SD_Isl) %>%
+          group_by(SurveyYear) %>% 
+          mutate(Date = mean(as.Date(Date))) %>% 
+          ungroup() %>% 
+          group_by(SurveyYear, IslandName, CommonName) %>%
+          mutate(TotalCount = length(Size_cm),
+                 MeanSize = mean(Size_cm))
+      })
+      
+      FSF_alphaONI_SD_Isl <- reactive({
+        if(input$FSF_GraphOptions_SD_Isl == "With No Index"){
+          return(0)
+        }
+        else if(input$FSF_GraphOptions_SD_Isl == "With ONI"){
+          return(1)
+        }
+        else if(input$FSF_GraphOptions_SD_Isl == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$FSF_GraphOptions_SD_Isl == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      FSF_alphaPDO_NOAA_SD_Isl <- reactive({
+        if(input$FSF_GraphOptions_SD_Isl == "With No Index"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_SD_Isl == "With ONI"){
+          return(0)
+          
+        }
+        if(input$FSF_GraphOptions_SD_Isl == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$FSF_GraphOptions_SD_Isl == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      FSF_alphaPDO_UW_SD_Isl <- reactive({
+        if(input$FSF_GraphOptions_SD_Isl == "With No Index"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_SD_Isl == "With ONI"){
+          return(0)
+          
+        }
+        if(input$FSF_GraphOptions_SD_Isl == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_SD_Isl == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$FSF_ONIpdoPIC_SD_Isl <- renderImage({
+        if(input$FSF_GraphOptions_SD_Isl == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$FSF_GraphOptions_SD_Isl == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$FSF_GraphOptions_SD_Isl == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
+      FSF_AxisScale_SD_Isl <- reactive({
+        if(input$FSF_FreeOrLock_SD_Isl == "Locked Scales"){
+          return("fixed")
+        }
+        if(input$FSF_FreeOrLock_SD_Isl == "Free Scales"){
+          return("free")
+        }
+      }) # Facet Plot Axis Scale free or fixed 
+      
+      output$FSF_Plot_SD_Isl <- renderPlot({  
+        
+        if (is.null(input$FSF_Graph_Isl))
+          return(NULL) 
+        
+        else if(input$FSF_Graph_SD_Isl == "Boxplot") { 
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_SD_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_SD_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_SD_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_boxplot(data = FSF_RawFilter_Isl(), width = 150,
+                           aes(x = Date, y = Size_cm, group = SurveyYear, color = CommonName)) +
+              geom_point(data = FSF_RawFilter_Isl(), size = 1, color = "black",
+                         aes(x = Date, y = MeanSize, group = SurveyYear)) +
+              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_Isl()$Date), expand = c(0.01, 0),
+                           limits = c(min(FSF_RawFilter_Isl()$Date) - 150, max(FSF_RawFilter_Isl()$Date) + 150)) +
+              labs(title = glue("{unique(FSF_RawFilter_Isl()$ScientificName)}"),
+                   subtitle = glue("{unique(FSF_RawFilter_Isl()$CommonName)}"), 
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Size Distribution (mm)") +
+              facet_grid(rows = vars(IslandName), scales = FSF_AxisScale_SD_Isl()) +
+               
+              theme_classic() +
+              theme(legend.position = "none",
+                    legend.justification = c(0,0.5),
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        } 
+        else if(input$FSF_Graph_SD_Isl == "Violin Plot") { 
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_SD_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_SD_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_SD_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_violin(data = FSF_RawFilter_Isl(), width = 150,
+                          aes(x = Date, y = Size_cm, group = SurveyYear, fill = CommonName)) +
+              geom_point(data = FSF_RawFilter_Isl(), size = 1, color = "black",
+                         aes(x = Date, y = MeanSize, group = SurveyYear)) +
+              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_Isl()$Date), expand = c(0.01, 0),
+                           limits = c(min(FSF_RawFilter_Isl()$Date) - 150, max(FSF_RawFilter_Isl()$Date) + 150)) +
+              labs(title = glue("{unique(FSF_RawFilter_Isl()$ScientificName)}"),
+                   subtitle = glue("{unique(FSF_RawFilter_Isl()$CommonName)}"),
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Size Distribution (mm)") +
+              facet_grid(rows = vars(IslandName), scales = FSF_AxisScale_SD_Isl()) +
+               
+              theme_classic() +
+              theme(legend.position = "none",
+                    legend.justification = c(0,0.5),
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+      })
+      
+    }
+    
+    { # FSF_MS_Server_byMPA ----
+      
+      FSF_RawFilter_MPA <- reactive({
+        FSF_DFRawMPA %>%
+          filter(IslandName == input$FSF_IslandName_MPA,
+                 CommonName == input$FSF_SpeciesName_SD_MPA) %>%
+          group_by(SurveyYear, ReserveStatus) %>%
+          mutate(TotalCount = length(Size_cm),
+                 MeanSize = mean(Size_cm)) %>% 
+          ungroup() %>% 
+          group_by(SurveyYear) %>% 
+          mutate(Date =  mean(as.Date(Date)))
+      })
+      
+      FSF_alphaONI_SD_MPA <- reactive({
+        if(input$FSF_GraphOptions_SD_MPA == "With No Index"){
+          return(0)
+        }
+        else if(input$FSF_GraphOptions_SD_MPA == "With ONI"){
+          return(1)
+        }
+        else if(input$FSF_GraphOptions_SD_MPA == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$FSF_GraphOptions_SD_MPA == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      FSF_alphaPDO_NOAA_SD_MPA <- reactive({
+        if(input$FSF_GraphOptions_SD_MPA == "With No Index"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_SD_MPA == "With ONI"){
+          return(0)
+          
+        }
+        if(input$FSF_GraphOptions_SD_MPA == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$FSF_GraphOptions_SD_MPA == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      FSF_alphaPDO_UW_SD_MPA <- reactive({
+        if(input$FSF_GraphOptions_SD_MPA == "With No Index"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_SD_MPA == "With ONI"){
+          return(0)
+          
+        }
+        if(input$FSF_GraphOptions_SD_MPA == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_SD_MPA == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$FSF_ONIpdoPIC_SD_MPA <- renderImage({
+        if(input$FSF_GraphOptions_SD_MPA == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$FSF_GraphOptions_SD_MPA == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$FSF_GraphOptions_SD_MPA == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
+      FSF_AxisScale_SD_MPA <- reactive({
+        if(input$FSF_FreeOrLock_SD_MPA == "Locked Scales"){
+          return("fixed")
+        }
+        if(input$FSF_FreeOrLock_SD_MPA == "Free Scales"){
+          return("free")
+        }
+      }) # Facet Plot Axis Scale free or fixed 
+      
+      output$FSF_Plot_SD_MPA <- renderPlot({
+        if (is.null(input$FSF_Graph_SD_MPA))
+          return(NULL)
+        
+        else if(input$FSF_Graph_SD_MPA == "Boxplot") { 
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_SD_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_SD_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_SD_MPA()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_boxplot(data = FSF_RawFilter_MPA(), width = 150,
+                           aes(x = Date, y = Size_cm, group = SurveyYear, color = CommonName)) +
+              geom_point(data = FSF_RawFilter_MPA(), size = 1, color = "black",
+                         aes(x = Date, y = MeanSize, group = SurveyYear, color = CommonName)) +
+              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_MPA()$Date), expand = c(0.01, 0),
+                           limits = c(min(FSF_RawFilter_MPA()$Date) - 150, max(FSF_RawFilter_MPA()$Date) + 150)) +
+              labs(title = glue("{unique(FSF_RawFilter_MPA()$ScientificName)}"),
+                   subtitle = FSF_RawFilter_MPA()$MPA_Name, 
+                   colour = "Common Name",
+                   x = "Year",
+                   y = "Size Distribution (mm)") +
+              facet_grid(rows = vars(ReserveStatus), scales = FSF_AxisScale_SD_MPA()) +
+               
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold")) 
+          })
+        } 
+        else if(input$FSF_Graph_SD_MPA == "Violin Plot") { 
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_SD_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_SD_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_SD_MPA()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_violin(data = FSF_RawFilter_MPA(), width = 150,
+                          aes(x = Date, y = Size_cm, group = SurveyYear, fill = CommonName)) +
+              geom_point(data = FSF_RawFilter_MPA(), size = 1, color = "black",
+                         aes(x = Date, y = MeanSize, group = SurveyYear)) +
+              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_MPA()$Date), expand = c(0.01, 0),
+                           limits = c(min(FSF_RawFilter_MPA()$Date) - 150, max(FSF_RawFilter_MPA()$Date) + 150)) +
+              labs(title = glue("{unique(FSF_RawFilter_MPA()$ScientificName)}"),
+                   subtitle = FSF_RawFilter_MPA()$MPA_Name,
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Size Distribution (mm)") +
+              facet_grid(rows = vars(ReserveStatus), scales = FSF_AxisScale_SD_MPA()) +
+               
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold")) 
+          })
+        }
+      })
+      
+    }
+    
+  }
+  
+  { # ........ FSF_MeanSizes ........   ----
+    
+    { # FSF_MS_One_Species   ----
+      
+      FSF_Filter_One <- reactive({ 
+        FSF_DF %>%
+          filter(SiteName == input$FSF_SiteName_One,
+                 CommonName == input$FSF_SpeciesName_One) %>%
+          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
+                 StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
+                 SiteNumber, IslandCode, SiteCode, IslandSE, Species) 
+      }) # filtered one meter summary table
+      
+      FSF_SpeciesClass_One <- reactive({ 
+        SpeciesFish %>%
+          filter(CommonName == input$FSF_SpeciesName_One) %>%
+          select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
+                 Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
+          pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
+          select(Rank, Name)
+      }) # filtered Species classification table
+      
+      FSF_SpeciesDescription_One <- reactive({
+        SpeciesFish %>%
+          filter(CommonName == input$FSF_SpeciesName_One) %>%
+          select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
+          pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
+          select(Category, Information)
+      }) # filtered Species Description table  
+      
+      output$FSF_TopPhoto_One <- renderImage({
+        
+        if (input$FSF_allORone_MS ==  'One Species by Site' && input$FSF_SpeciesName_One == unique(FSF_Filter_One()$CommonName)) {
+          return(list(
+            src = glue("www/Indicator_Species/{unique(FSF_Filter_One()$Species)}.jpg"),
+            contentType = "image/jpg", width = 210, height = 210))
+        }
+        else if (input$FSF_allORone_MS ==  'One Species by Island' && input$FSF_SpeciesName_Isl == unique(FSF_FilterByIsl_Isl()$CommonName)) {
+          return(list(
+            src = glue("www/Indicator_Species/{unique(FSF_FilterByIsl_Isl()$Species)}.jpg"),
+            contentType = "image/jpg", width = 210, height = 210))
+        }
+        else if (input$FSF_allORone_MS ==  'One Species by MPA' && input$FSF_SpeciesName_MPA == unique(FSF_Filter_MPA()$CommonName)) {
+          return(list(
+            src = glue("www/Indicator_Species/{unique(FSF_Filter_MPA()$Species)}.jpg"),
+            contentType = "image/jpg", width = 210, height = 210))
+        }
+        else if (input$FSF_allORone_MS ==  'Two Species by Site' && input$FSF_SpeciesName_Two_One == unique(FSF_Filter_Two_One()$CommonName)) {
+          return(list(
+            src = glue("www/Indicator_Species/{unique(FSF_Filter_Two_One()$Species)}.jpg"),
+            contentType = "image/jpg", width = 210, height = 210))
+        }
+      }, deleteFile = FALSE) # Small species photo above plot
+      
+      output$FSF_TopPhoto_Two <- renderImage({
+        
+        if (input$FSF_allORone_MS ==  'Two Species by Site' && input$FSF_SpeciesName_Two_Two == unique(FSF_Filter_Two_Two()$CommonName)) {
+          return(list(
+            src = glue("www/Indicator_Species/{unique(FSF_Filter_Two_Two()$Species)}.jpg"),
+            contentType = "image/jpg", width = 210, height = 210))
+        }
+      }, deleteFile = FALSE) # 2nd Small species photo above plot
+      
+      output$FSF_LargeSpPhoto_One <- renderImage({
+        list(src = glue("www/Indicator_Species/{unique(FSF_Filter_One()$Species)}.jpg"),
+             contentType = "image/jpg", width = 400, height = 400)
+      }, deleteFile = FALSE) # Large species photo below plot
+      
+      output$FSF_TopSitePhoto_One <- renderImage({
+        list(src = glue("www/Sat_Imagery/{unique(FSF_Filter_One()$SiteCode)}.png"),
+             contentType = "image/png", width = 430, height = 210)
+      }, deleteFile = FALSE) # Small Site photo above plot
+      
+      output$FSF_LargeSitePhoto_One <- renderImage({
+        list(src = glue("www/Sat_Imagery/{unique(FSF_Filter_One()$SiteCode)}.png"),
+             contentType = "image/png", width = 1250, height = 625)
+      }, deleteFile = FALSE) # Large Site photo below plot
+      
+      output$FSF_DToutClass_One <- renderDT({
+        datatable(FSF_SpeciesClass_One(), 
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    searching = FALSE,
+                    lengthChange = FALSE,
+                    paging = FALSE,
+                    ordering = FALSE,
+                    info = FALSE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(FSF_SpeciesClass_One()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      }) # Species Classification data table
+      
+      output$FSF_DToutDesc_One <- renderDT({
+        datatable(FSF_SpeciesDescription_One(), 
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    searching = FALSE,
+                    lengthChange = FALSE,
+                    paging = FALSE,
+                    ordering = FALSE,
+                    info = FALSE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(FSF_SpeciesDescription_One()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      }) # Species Description data table
+      
+      FSF_alphaONI_one <- reactive({
+        if(input$FSF_GraphOptions_One == "With No Index"){
+          return(0)
+        }
+        else if(input$FSF_GraphOptions_One == "With ONI"){
+          return(1)
+        }
+        else if(input$FSF_GraphOptions_One == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$FSF_GraphOptions_One == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      FSF_alphaPDO_NOAA_one <- reactive({
+        if(input$FSF_GraphOptions_One == "With No Index"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_One == "With ONI"){
+          return(0)
+          
+        }
+        if(input$FSF_GraphOptions_One == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$FSF_GraphOptions_One == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      FSF_alphaPDO_UW_one <- reactive({
+        if(input$FSF_GraphOptions_One == "With No Index"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_One == "With ONI"){
+          return(0)
+          
+        }
+        if(input$FSF_GraphOptions_One == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_One == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$FSF_ONIpdoPIC_One <- renderImage({
+        if(input$FSF_GraphOptions_One == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$FSF_GraphOptions_One == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$FSF_GraphOptions_One == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
+      FSF_LinePlot_One <- reactive({
+        ggplot() +
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                    position = "identity", alpha = as.numeric(FSF_alphaONI_one()), show.legend = FALSE) +
+          geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                    position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_one()), show.legend = FALSE) +
+          geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                    position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_one()), show.legend = FALSE) +
+          scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+          geom_line(data = FSF_Filter_One(),
+                    aes(x = Date, y = MeanSize, group = ScientificName, color = CommonName), 
+                    size = 1) +
+          geom_errorbar(data = FSF_Filter_One(),
+                        aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
+                        width = 0, color = "black", alpha = as.numeric(input$FSF_EB_one)) +
+          scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_One()$Date),
+                       limits = c(min(as.Date(FSF_Filter_One()$Date))-365, max(as.Date(FSF_Filter_One()$Date))+365),
+                       expand = c(0.01, 0)) +
+          labs(title = glue("{unique(FSF_Filter_One()$ScientificName)}"),
+               subtitle = glue("{unique(FSF_Filter_One()$IslandName)} {unique(FSF_Filter_One()$SiteName)}"),
+               color = "Common Name",
+               fill = "Oceanic Nino \nIndex Gradient",
+               caption = glue("{FSF_Filter_One()$SiteName} is typically surveyed in {
+                       month(round(mean(month(FSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       } and has a mean depth of {round(mean(FSF_Filter_One()$MeanDepth), 2)} ft"),
+               x = "Year",
+               y = "Mean Size (cm)") +
+           
+          theme_classic() +
+          theme(legend.position = "bottom",
+                legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                legend.text = element_text(size = 14, vjust = .5),
+                plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                plot.subtitle = element_text(hjust = 0.5, size = 18),
+                plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                axis.title = element_text(size = 16, face = "bold"),
+                axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+                axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
+      }) # Main Line Plot
+      
+      FSF_BarPlot_One <- reactive({
+        ggplot() +
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                    position = "identity", alpha = as.numeric(FSF_alphaONI_one()), show.legend = FALSE) +
+          geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                    position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_one()), show.legend = FALSE) +
+          geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                    position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_one()), show.legend = FALSE) +
+          scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+          new_scale_fill() +
+          geom_col(data = FSF_Filter_One(), aes(x = Date - ifelse(input$FSF_DataSummary_One == "One species at one site", 0, 50),
+                                                y = MeanSize, fill = CommonName), 
+                   position = "dodge", width = ifelse(input$FSF_DataSummary_One == "One species at one site", 250, 100)) +
+          geom_errorbar(data = FSF_Filter_One(),
+                        aes(x = Date - ifelse(input$FSF_DataSummary_One == "One species at one site", 0, 50), 
+                            ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
+                        width = 0, color = "black", alpha = as.numeric(input$FSF_EB_one)) +
+          geom_text(data = FSF_Filter_One(),
+                    aes(x = Date - ifelse(input$FSF_DataSummary_One == "One species at one site", 0, 50),
+                        y = MeanSize, label = round(MeanSize, digits = 2)),
+                    vjust = -.2, hjust = .5, alpha = as.numeric(input$FSF_Bar_Text_One)) +
+          scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_One()$Date),
+                       limits = c(min(as.Date(FSF_Filter_One()$Date))-365,  max(as.Date(FSF_Filter_One()$Date))+365),
+                       expand = c(0.01, 0)) +
+          labs(title = glue("{unique(FSF_Filter_One()$ScientificName)}"),
+               subtitle = glue("{unique(FSF_Filter_One()$IslandName)} {unique(FSF_Filter_One()$SiteName)}"),
+               color = "Common Name",
+               fill = "Common Name",
+               caption = glue("{FSF_Filter_One()$SiteName} is typically surveyed in {
+                 month(round(mean(month(FSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                 } and has a mean depth of {round(mean(FSF_Filter_One()$MeanDepth), 2)} ft"),
+               x = "Year",
+               y = "Mean Size (cm)") +
+           
+          theme_classic() +
+          theme(legend.position = "bottom",
+                legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                legend.text = element_text(size = 14, vjust = .5),
+                plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                plot.subtitle = element_text(hjust = 0.5, size = 18),
+                plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                axis.title = element_text(size = 16, face = "bold"),
+                axis.text.y = element_text(size = 12, face = "bold", color = "black"),
+                axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
+      }) # Main Bar Plot
+      
+      FSF_SmoothPlot_One <- reactive({
+        ggplot() +
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                    position = "identity", alpha = as.numeric(FSF_alphaONI_one()), show.legend = FALSE) +
+          geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                    position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_one()), show.legend = FALSE) +
+          geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                    position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_one()), show.legend = FALSE) +
+          scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+          stat_smooth(data = FSF_Filter_One(), 
+                      aes(x = Date, y = MeanSize, group = ScientificName, color = CommonName), 
+                      size = 1, span = input$FSF_SmoothSlide_One, se = as.logical(input$FSF_SmoothSE_One)) +
+          scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 1)) +
+          geom_point(data = FSF_Filter_One(), aes(x = Date, y = MeanSize, color = CommonName), 
+                     size = 2, alpha = as.numeric(input$FSF_SmoothPoint_One)) +
+          scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_One()$Date), 
+                       limits = c(min(as.Date(FSF_Filter_One()$Date))-365, 
+                                  max(as.Date(FSF_Filter_One()$Date))+365),
+                       expand = c(0.01, 0)) +
+          labs(title = glue("{unique(FSF_Filter_One()$ScientificName)}"), 
+               subtitle = glue("{unique(FSF_Filter_One()$IslandName)} {unique(FSF_Filter_One()$SiteName)}"),
+               color = "Common Name",
+               caption = glue("{FSF_Filter_One()$SiteName} is typically surveyed in {
+                       month(round(mean(month(FSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       } and has a mean depth of {round(mean(FSF_Filter_One()$MeanDepth), 2)} ft"),
+               x = "Year", y = "Smoothed Conditional Mean Values") +
+          theme_classic() +
+          theme(legend.position = "bottom",
+                legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                legend.text = element_text(size = 14, vjust = .5),
+                plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                plot.subtitle = element_text(hjust = 0.5, size = 18),
+                plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                axis.title = element_text(size = 16, face = "bold"),
+                axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+                axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
+      }) # Main Smooth Line Plot
+      
+      output$FSF_Plot_One <- renderPlot({
+        
+        if (is.null(input$FSF_Graph_One))
+          return(NULL) 
+        
+        else if(input$FSF_Graph_One == "Line" && input$FSF_DataSummary_One == "One species at one site")
+        {
+          p <- FSF_LinePlot_One()
+        } 
+        else if(input$FSF_Graph_One == "Line" && input$FSF_DataSummary_One == "One species with island average")
+        {
+          p <- FSF_LinePlot_One() +
+            new_scale_color() +
+            geom_line(data = FSF_Filter_One(),
+                      aes(x = Date, y = Island_Mean, group = ScientificName, color = IslandName),
+                      size = 1) +
+            geom_errorbar(data = FSF_Filter_One(),
+                          aes(x = Date, ymin = Island_Mean - IslandSE,ymax = Island_Mean + IslandSE),
+                          width = 0, color = "black", alpha = as.numeric(input$FSF_EB_one)) +
+            labs(color = "Island Average") +
+            scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2))
+        }
+        else if(input$FSF_Graph_One == "Bar" && input$FSF_DataSummary_One == "One species at one site") 
+        {
+          p <- FSF_BarPlot_One()
+        }
+        else if(input$FSF_Graph_One == "Bar" && input$FSF_DataSummary_One == "One species with island average") 
+        {
+          p <- FSF_BarPlot_One() +
+            new_scale_fill() +
+            geom_col(data = FSF_Filter_One(),
+                     aes(x = Date + 50, y = Island_Mean, fill = IslandName),
+                     position = "dodge",
+                     width = 100) +
+            geom_errorbar(data = FSF_Filter_One(),
+                          aes(x = Date + 50, ymin = Island_Mean - IslandSE, ymax = Island_Mean + IslandSE),
+                          width = 0, color = "black", alpha = as.numeric(input$FSF_EB_one)) +
+            scale_fill_manual(values = SpeciesColor, guide = guide_legend(order = 2)) +
+            labs(fill = "Island Mean")
+        } 
+        else if(input$FSF_Graph_One == "Smooth Line" && input$FSF_DataSummary_One == "One species at one site")
+        {
+          p <- FSF_SmoothPlot_One()
+        }
+        else if(input$FSF_Graph_One == "Smooth Line" && input$FSF_DataSummary_One == "One species with island average")
+        {
+          p <- FSF_SmoothPlot_One() +
+            new_scale_color() +
+            stat_smooth(data = FSF_Filter_One(), 
+                        aes(x = Date, y = Island_Mean, group = ScientificName, color = IslandName), 
+                        size = 1,
+                        span = input$FSF_SmoothSlide_One,
+                        se = as.logical(input$FSF_SmoothSE_One)) +
+            geom_point(data = FSF_Filter_One(), aes(x = Date, y = Island_Mean, color = IslandName), 
+                       size = 2, alpha = as.numeric(input$FSF_SmoothPoint_One)) +
+            labs(color = "Island Average") +
+            scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2)) 
+        }
+        return(p)
+      }) # Main Plot for FSF_ Quadrats with one species 
+      
+      output$FSF_BoxplotDescription_One <- renderImage({
+        list(src = glue("www/Boxplot_Description.jpg"), contentType = "image/jpg", width = 550, height = 400)
+      }, deleteFile = FALSE) # Boxplot drawing/explanation
+      
+      output$FSF_DToutData_One <- renderDT({
+        datatable(FSF_Filter_One(),
+                  extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    scrollY = "500px",
+                    scrollX = TRUE, 
+                    paging = FALSE,
+                    ordering = TRUE,
+                    info = FALSE,
+                    dom = 'Bfrtip',
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    columnDefs = c(list(list(visible = FALSE, targets = c(10, 12, 13, 14, 15))), 
+                                   list(list(className = 'dt-center', targets = 0:11))),
+                    colReorder = TRUE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(FSF_Filter_One()),
+                      color = "black",
+                      backgroundColor = 'white'
+          )
+      }) # Filtered data table output
+      
+    }
+    
+    { # FSF_MS_by_Island   ----
+      
+      FSF_Filter_Isl <- reactive({
+        FSF_DF <- FSF_DF %>%
+          filter(CommonName == input$FSF_SpeciesName_Isl) %>%
+          group_by(SurveyYear, IslandName) %>%
+          mutate(Date = mean(Date),
+                 MaxSumBar = sum(MeanSize)) %>%
+          ungroup() %>%
+          group_by(SiteName, SurveyYear) %>%
+          mutate(MaxSum = max(sum(MeanSize)))
+        
+      })
+      
+      FSF_FilterByIsl_Isl <- reactive({
+        FSF_DF %>%
+          filter(CommonName == input$FSF_SpeciesName_Isl) %>%
+          group_by(IslandDate, IslandCode, IslandName, ScientificName, CommonName, SurveyYear) %>%
+          distinct(IslandDate, IslandCode, IslandName, ScientificName, CommonName, SurveyYear, 
+                   Island_Mean, IslandSD, IslandSE, IslandTotalCount, Species) %>%
+          ungroup() %>%
+          group_by(SurveyYear) %>%
+          mutate(IslandDate = mean(IslandDate))
+      })
+      
+      FSF_yValue_Isl <- reactive({
+        if(input$FSF_BarOptions_Isl == "stack"){
+          return({
+            max(FSF_Filter_Isl()$MaxSumBar)
+          }) 
+        }
+        else if(input$FSF_BarOptions_Isl == "dodge"){
+          return({
+            max(FSF_Filter_Isl()$MeanSize)
+          })
+        }
+        else if(input$FSF_BarOptions_Isl == "fill"){
+          return(1)
+        }
+      })
+      
+      FSF_yLabel_Isl <- reactive({
+        if(input$FSF_BarOptions_Isl == "stack"){
+          y <- "Combined Densities"
+        }
+        else if(input$FSF_BarOptions_Isl == "dodge"){
+          y <- "Seperated Densities"
+        }
+        else if(input$FSF_BarOptions_Isl == "fill"){
+          y <- "Normalized Densities"
+        }
+        y
+      })
+      
+      FSF_alphaONI_Isl <- reactive({
+        if(input$FSF_GraphOptions_Isl == "With No Index"){
+          return(0)
+        }
+        else if(input$FSF_GraphOptions_Isl == "With ONI"){
+          return(1)
+        }
+        else if(input$FSF_GraphOptions_Isl == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$FSF_GraphOptions_Isl == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      FSF_alphaPDO_NOAA_Isl <- reactive({
+        if(input$FSF_GraphOptions_Isl == "With No Index"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_Isl == "With ONI"){
+          return(0)
+          
+        }
+        if(input$FSF_GraphOptions_Isl == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$FSF_GraphOptions_Isl == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      FSF_alphaPDO_UW_Isl <- reactive({
+        if(input$FSF_GraphOptions_Isl == "With No Index"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_Isl == "With ONI"){
+          return(0)
+          
+        }
+        if(input$FSF_GraphOptions_Isl == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_Isl == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$FSF_ONIpdoPIC_Isl <- renderImage({
+        if(input$FSF_GraphOptions_Isl == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$FSF_GraphOptions_Isl == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$FSF_GraphOptions_Isl == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
+      FSF_AxisScale_Isl <- reactive({
+        if(input$FSF_FreeOrLock_Isl == "Locked Scales"){
+          return("fixed")
+        }
+        if(input$FSF_FreeOrLock_Isl == "Free Scales"){
+          return("free")
+        }
+      }) # Facet Plot Axis Scale free or fixed 
+      
+      output$FSF_Plot_Isl1 <- renderPlot({ # Facet plots    ---- 
+        
+        if (is.null(input$FSF_Graph_Isl))
+          return(NULL) 
+        
+        else if(input$FSF_Graph_Isl == "Line" && input$FSF_DataSummary_Isl == "Island Mean") { # Line   ----
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_line(data = FSF_FilterByIsl_Isl(), size = 1,
+                        aes(x = IslandDate, y = Island_Mean, group = IslandName, color = IslandName)) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365,
+                                      max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              geom_errorbar(data = FSF_FilterByIsl_Isl(), 
+                            aes(x = IslandDate, ymin = Island_Mean - IslandSE, ymax = Island_Mean + IslandSE),
+                            width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Isl)) +
+              labs(title = glue("{unique(FSF_FilterByIsl_Isl()$ScientificName)}"), 
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Mean Size (cm)") +
+              facet_grid(rows = vars(IslandName), scales = FSF_AxisScale_Isl()) +
+              theme_classic() +
+              theme(legend.position = "none",
+                    legend.justification = c(0,0.5),
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        } 
+        else if(input$FSF_Graph_Isl == "Line" && input$FSF_DataSummary_Isl == "Site Means (by Island)") {
+          return({
+            out <- by(data = FSF_Filter_Isl(), INDICES = FSF_Filter_Isl()$IslandName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() + 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                          position = "identity", alpha = as.numeric(FSF_alphaONI_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Isl()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+                geom_line(data = m, 
+                          aes(Date, MeanSize, group = SiteName, colour = SiteName, linetype = SiteName),
+                          size = 1) +
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
+                             limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365),
+                             expand = c(0.01, 0)) +
+                scale_y_continuous(limits = c(0, ifelse(input$FSF_FreeOrLock_Isl == "Locked Scales", 
+                                                        max(FSF_Filter_Isl()$MaxSum), max(m$MeanSize))),
+                                   expand = c(0.01, 0)) +
+                geom_errorbar(data = m, 
+                              aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
+                              width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Isl)) +
+                labs(title = m$IslandName,
+                     color = "Site Name",
+                     linetype ="Site Name",
+                     caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
+                     x = NULL,
+                     y = "Mean Size (cm)") +
+                scale_color_manual(values = SiteColor, breaks = as.character(m$SiteName)) +
+                scale_linetype_manual(values = SiteLine, breaks = as.character(m$SiteName)) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.key.width = unit(1, "cm"),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 12, colour = "black"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+            })
+            
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
+                                          labels = glue("{unique(FSF_Filter_Isl()$ScientificName)}"),
+                                          label_size = 20, label_fontface = "bold.italic"
+            ))
+          })
+        } 
+        else if(input$FSF_Graph_Isl == "Bar" && input$FSF_DataSummary_Isl == "Island Mean") { # Bar   ----
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_col(data = FSF_FilterByIsl_Isl(), 
+                       aes(x = IslandDate, y = Island_Mean, fill = IslandName),
+                       position = "dodge",
+                       width = 280) +
+              facet_grid(rows = vars(IslandName), scales = FSF_AxisScale_Isl()) +
+              geom_text(data = FSF_FilterByIsl_Isl(),
+                        aes(x = IslandDate, y = Island_Mean, label = round(Island_Mean, digits = 2)),
+                        position = position_dodge(1), vjust = -.2, hjust = .5, angle = 0, alpha = as.numeric(input$FSF_Bar_Text_Isl)) +
+              geom_errorbar(data = FSF_FilterByIsl_Isl(), 
+                            aes(x = IslandDate, ymin = Island_Mean - IslandSE, ymax = Island_Mean + IslandSE),
+                            width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Isl)) +
+              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_x_date(date_labels = "%b %Y", date_breaks = "1 year", 
+                           limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365, 
+                                      max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(FSF_FilterByIsl_Isl()$ScientificName)}"),
+                   subtitle = glue("{unique(FSF_FilterByIsl_Isl()$CommonName)}"),
+                   color = "Common Name",
+                   fill = "Common Name",
+                   x = "Year",
+                   y = "Mean Size (cm)") +
+              theme_classic() +
+              theme(legend.position = "none",
+                    legend.justification = c(0,0.5),
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$FSF_Graph_Isl == "Bar" && input$FSF_DataSummary_Isl == "Site Means (by Island)") {
+          return({
+            out <- by(data = FSF_Filter_Isl(), INDICES = FSF_Filter_Isl()$IslandName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() +
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                          position = "identity", alpha = as.numeric(FSF_alphaONI_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Isl()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+                new_scale_fill() +
+                geom_col(data = m, aes(x = Date, y = MeanSize, fill = SiteName),
+                         position = input$FSF_BarOptions_Isl, width = 280) +
+                coord_cartesian(ylim = c(0, ifelse(input$FSF_FreeOrLock_Isl == "Locked Scales", 
+                                                   FSF_yValue_Isl(), max(m$MaxSumBar)))) +
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = c(0.01, 0),
+                             limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365)) +
+                labs(title = m$IslandName,
+                     color = "Site Name",
+                     fill = "Site Name",
+                     x = "Year",
+                     y = FSF_yLabel_Isl()) +
+                scale_fill_manual(values = SiteColor) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.key.width = unit(1, "cm"),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 12, colour = "black"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+            })
+            
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
+                                          labels = glue("{unique(FSF_Filter_Isl()$ScientificName)}"),
+                                          label_size = 20, label_fontface = "bold.italic"
+            ))
+          })
+        } 
+        else if(input$FSF_Graph_Isl == "Smooth Line" && input$FSF_DataSummary_Isl == "Island Mean") { # Smooth   -----
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_smooth(data = FSF_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean, color = IslandName),
+                          se = as.logical(input$FSF_SmoothSE_Isl), span = input$FSF_SmoothSlide_Isl) +
+              geom_point(data = FSF_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean, color = IslandName),
+                         size = 1, alpha = as.numeric(input$FSF_SmoothPoint_Isl),inherit.aes = FALSE) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365, 
+                                      max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(FSF_FilterByIsl_Isl()$ScientificName)}"), 
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Mean Size (cm)") +
+              facet_grid(rows = vars(IslandName), scales = FSF_AxisScale_Isl()) +
+              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
+              theme_classic() +
+              theme(legend.position = "none",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$FSF_Graph_Isl == "Smooth Line" && input$FSF_DataSummary_Isl == "Site Means (by Island)") { 
+          return({
+            out <- by(data = FSF_Filter_Isl(), INDICES = FSF_Filter_Isl()$IslandName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() +
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                          position = "identity", alpha = as.numeric(FSF_alphaONI_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Isl()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+                geom_point(data = m, aes(x = Date, y = MeanSize, color = SiteName),
+                           size = 1, alpha = as.numeric(input$FSF_SmoothPoint_Isl), inherit.aes = FALSE) +
+                geom_smooth(data = m, aes(x = Date, y = MeanSize, color = SiteName),
+                            se = as.logical(input$FSF_SmoothSE_Isl),
+                            span = input$FSF_SmoothSlide_Isl) +
+                scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                             limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365, 
+                                        max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
+                             expand = c(0.01, 0)) +
+                scale_y_continuous(limits = c(0, ifelse(input$FSF_FreeOrLock_Isl == "Locked Scales", 
+                                                        max(FSF_Filter_Isl()$MaxSum), max(m$MeanSize))),
+                                   expand = c(0.01, 0)) +
+                labs(title = glue("{unique(m$IslandName)}"), 
+                     color = "Site Name",
+                     x = "Year",
+                     y = "Mean Size (cm)") +
+                scale_color_manual(values = SiteColor) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+            })
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
+                                          labels = glue("{unique(FSF_Filter_Isl()$ScientificName)}"),
+                                          label_size = 20, label_fontface = "bold.italic"
+            ))
+          })
+        }
+        
+      })
+      
+      output$FSF_Plot_Isl2 <- renderPlot({  # Single plot    ----
+        
+        if (is.null(input$FSF_Graph_Isl))
+          return(NULL) 
+        
+        else if(input$FSF_Graph_Isl == "Line" && input$FSF_DataSummary_Isl == "Island Mean") { # Line   ----
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_line(data = FSF_FilterByIsl_Isl(), 
+                        aes(x = IslandDate, y = Island_Mean, group = IslandName, color = IslandName),
+                        size = 1) +
+              scale_x_date(date_labels = "%Y", breaks = FSF_FilterByIsl_Isl()$IslandDate, 
+                           limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365,
+                                      max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              geom_errorbar(data = FSF_FilterByIsl_Isl(), 
+                            aes(x = IslandDate, ymin = Island_Mean - IslandSE, ymax = Island_Mean + IslandSE),
+                            width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Isl)) +
+              labs(title = glue("{unique(FSF_FilterByIsl_Isl()$ScientificName)}"), 
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Mean Size (cm)") +
+              
+              theme_classic() +
+              theme(legend.position = "right",
+                    legend.justification = c(0,0.5),
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        } 
+        else if(input$FSF_Graph_Isl == "Line" && input$FSF_DataSummary_Isl == "Site Means (by Island)") {
+          return({
+            ggplot() + 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_line(data = FSF_Filter_Isl(), 
+                        aes(Date, MeanSize, group = SiteName, colour = SiteName, linetype = SiteName),
+                        size = 1) +
+              scale_x_date(date_labels = "%Y", date_breaks = "1 year",
+                           limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365,
+                                      max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              scale_y_continuous(limits = c(0, max(FSF_Filter_Isl()$MaxSum)), expand = c(0.01, 0)) +
+              geom_errorbar(data = FSF_Filter_Isl(), 
+                            aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
+                            width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Isl)) +
+              labs(title = FSF_Filter_Isl()$IslandName,
+                   color = "Site Name",
+                   linetype ="Site Name",
+                   caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
+                   x = NULL,
+                   y = "Mean Size (cm)") +
+              geom_vline(size = 1, xintercept = as.Date("2005-07-01", format = "%Y-%m-%d")) +
+              geom_text(x = as.Date("2005-07-01", format = "%Y-%m-%d"), 
+                        y= Inf, aes(label = "16 New Sites Added"),
+                        hjust = 0,
+                        vjust = 1,
+                        inherit.aes = FALSE) +
+              geom_vline(size = 1, xintercept = as.Date("2001-06-01", format = "%Y-%m-%d")) +
+              geom_text(x = as.Date("2001-06-01", format = "%Y-%m-%d"), 
+                        y= Inf, aes(label = "Miracle Mile Added"),
+                        hjust = 1,
+                        vjust = 1,
+                        inherit.aes = FALSE) +
+              scale_color_manual(values = SiteColor2, guide = guide_legend(ncol = 10)) +
+              scale_linetype_manual(values = SiteLine, guide = guide_legend(ncol = 10)) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.justification = c(0,0.5),
+                    legend.background = element_rect(),
+                    legend.key.width = unit(1.5, "cm"),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 12, colour = "black"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$FSF_Graph_Isl == "Bar" && input$FSF_DataSummary_Isl == "Island Mean") { # Bar -----
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_col(data = FSF_FilterByIsl_Isl(), 
+                       aes(x = IslandDate, y = Island_Mean, fill = IslandName),
+                       position = input$FSF_BarOptions_Isl,
+                       width = 280) +
+              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_x_date(date_labels = "%Y", breaks = FSF_FilterByIsl_Isl()$IslandDate, 
+                           limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365, 
+                                      max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(FSF_FilterByIsl_Isl()$ScientificName)}"),
+                   subtitle = glue("{unique(FSF_FilterByIsl_Isl()$CommonName)}"),
+                   color = "Common Name",
+                   fill = "Common Name",
+                   x = "Year",
+                   y = FSF_yLabel_Isl()) +
+              
+              theme_classic() +
+              theme(legend.position = "right",
+                    legend.justification = c(0,0.5),
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$FSF_Graph_Isl == "Bar" && input$FSF_DataSummary_Isl == "Site Means (by Island)") {
+          return({
+            ggplot() +
+              geom_col(data = FSF_Filter_Isl() %>% group_by(SurveyYear) %>% mutate(Date = mean(Date)), 
+                       aes(x = Date-75, y = MeanSize, fill = SiteName),
+                       position = input$FSF_BarOptions_Isl,
+                       width = 280) +
+              scale_x_date(date_labels = "%Y", date_breaks = "1 year",
+                           limits = c(min(as.Date(FSF_Filter_Isl()$Date))-365,
+                                      max(as.Date(FSF_Filter_Isl()$Date))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = FSF_Filter_Isl()$IslandName,
+                   color = "Site Name",
+                   fill = "Site Name",
+                   x = "Year",
+                   y = FSF_yLabel_Isl()) +
+              geom_vline(size = 1, xintercept = as.Date("2005-01-01", format = "%Y-%m-%d")) +
+              geom_text(x = as.Date("2005-01-01", format = "%Y-%m-%d"), 
+                        y= Inf, aes(label = "16 New Sites Added"),
+                        hjust = 0,
+                        vjust = 1,
+                        inherit.aes = FALSE) +
+              geom_vline(size = 1, xintercept = as.Date("2001-01-01", format = "%Y-%m-%d")) +
+              geom_text(x = as.Date("2001-01-01", format = "%Y-%m-%d"), 
+                        y= Inf, aes(label = "Miracle Mile Added"),
+                        hjust = 1,
+                        vjust = 1,
+                        inherit.aes = FALSE) +
+              scale_fill_manual(values = SiteColor2, guide = guide_legend(ncol = 10)) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.justification = c(0,0.5),
+                    legend.background = element_rect(),
+                    legend.key.width = unit(1, "cm"),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 12, colour = "black"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        } 
+        else if(input$FSF_Graph_Isl == "Smooth Line" && input$FSF_DataSummary_Isl == "Island Mean") { # Smooth   ----
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_point(data = FSF_FilterByIsl_Isl(), aes(x = IslandDate, y = Island_Mean, color = IslandName), 
+                         size = 2, alpha = as.numeric(input$FSF_SmoothPoint_Isl)) +
+              geom_smooth(data = FSF_FilterByIsl_Isl(), aes(x= IslandDate, y = Island_Mean, color = IslandName),
+                          se = as.logical(input$FSF_SmoothSE_Isl), span = input$FSF_SmoothSlide_Isl) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365, 
+                                      max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(FSF_FilterByIsl_Isl()$ScientificName)}"), 
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Mean Size (cm)") +
+              scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
+              theme_classic() +
+              theme(legend.position = "right",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$FSF_Graph_Isl == "Smooth Line" && input$FSF_DataSummary_Isl == "Site Means (by Island)") {
+          return({   
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_Isl()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Isl()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_point(data = FSF_Filter_Isl(), aes(x = Date, y = MeanSize, color = CommonName), 
+                         size = 2, alpha = as.numeric(input$FSF_SmoothPoint_Isl)) +
+              geom_smooth(data = FSF_Filter_Isl(), aes(x= Date, y = MeanSize, color = SiteName),
+                          se = as.logical(input$FSF_SmoothSE_Isl), span = input$FSF_SmoothSlide_Isl) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(FSF_Filter_Isl()$Date))-365, 
+                                      max(as.Date(FSF_Filter_Isl()$Date))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(FSF_Filter_Isl()$ScientificName)}"), 
+                   color = "Common Name",
+                   x = "Year",
+                   y = "Mean Size (cm)") +
+              scale_color_manual(values = SiteColor2, guide = guide_legend(nrow = 5)) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.background = element_rect(),
+                    legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+          })
+        }
+      })
+      
+    }
+    
+    { # FSF_MS__byMPA ----
+      
+      FSF_Filter_MPA <- reactive({
+        FSF_DFMPA %>%
+          filter(CommonName == input$FSF_SpeciesName_MPA) %>%
+          group_by(IslandCode, SurveyYear) %>%
+          mutate(Date = mean(Date),
+                 MaxSumBar = max(sum(MeanSize))) %>%
+          ungroup() %>%
+          group_by(SiteName, SurveyYear) %>%
+          mutate(MaxSum = max(sum(MeanSize))) %>%
+          arrange(SiteName)
+      })
+      
+      FSF_FilterBarSite_MPA <-reactive({
+        FSF_DFMPA %>%
+          filter(CommonName == input$FSF_SpeciesName_MPA,
+                 SiteName != "Keyhole") %>%
+          group_by(IslandCode, SurveyYear) %>%
+          mutate(Date = mean(Date),
+                 MaxSumBar = max(sum(MeanSize))) %>%
+          ungroup() %>%
+          group_by(SiteName, SurveyYear) %>%
+          mutate(MaxSum = max(sum(MeanSize)))
+      })
+      
+      FSF_Inside_MPA <- reactive({
+        FSF_DFMPA %>% 
+          filter(CommonName == input$FSF_SpeciesName_MPA,
+                 ReserveStatus == "Inside",
+                 SiteName != "Keyhole") %>%
+          group_by(MPA_Date, IslandCode, IslandName, ScientificName, CommonName, SurveyYear) %>%
+          distinct(MPA_Date, IslandCode, IslandName, ScientificName, CommonName, SurveyYear,
+                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, .keep_all = TRUE)
+      })
+      
+      FSF_Outside_MPA <- reactive({
+        FSF_DFMPA %>%
+          filter(CommonName == input$FSF_SpeciesName_MPA,
+                 ReserveStatus == "Outside",
+                 SiteName != "Keyhole") %>%
+          group_by(MPA_Date, IslandCode, IslandName, ScientificName, CommonName, SurveyYear) %>%
+          distinct(MPA_Date, IslandCode, IslandName, ScientificName, CommonName, SurveyYear,
+                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, .keep_all = TRUE)
+      })
+      
+      FSF_alphaONI_MPA <- reactive({
+        if(input$FSF_GraphOptions_MPA == "With No Index"){
+          return(0)
+        }
+        else if(input$FSF_GraphOptions_MPA == "With ONI"){
+          return(1)
+        }
+        else if(input$FSF_GraphOptions_MPA == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$FSF_GraphOptions_MPA == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      FSF_alphaPDO_NOAA_MPA <- reactive({
+        if(input$FSF_GraphOptions_MPA == "With No Index"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_MPA == "With ONI"){
+          return(0)
+          
+        }
+        if(input$FSF_GraphOptions_MPA == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$FSF_GraphOptions_MPA == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      FSF_alphaPDO_UW_MPA <- reactive({
+        if(input$FSF_GraphOptions_MPA == "With No Index"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_MPA == "With ONI"){
+          return(0)
+          
+        }
+        if(input$FSF_GraphOptions_MPA == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_MPA == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$FSF_ONIpdoPIC_MPA <- renderImage({
+        if(input$FSF_GraphOptions_MPA == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$FSF_GraphOptions_MPA == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$FSF_GraphOptions_MPA == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
+      FSF_AxisScale_MPA <- reactive({
+        if(input$FSF_FreeOrLock_MPA == "Locked Scales"){
+          return("fixed")
+        }
+        if(input$FSF_FreeOrLock_MPA == "Free Scales"){
+          return("free")
+        }
+      }) # Facet Plot Axis Scale free or fixed 
+      
+      output$FSF_Plot_MPA <- renderPlot({
+        if (is.null(input$FSF_Graph_MPA))
+          return(NULL)
+        
+        else if(input$FSF_Graph_MPA == "Line" && input$FSF_DataSummary_MPA == "MPA Mean") {  # Line    ----
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_MPA()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_line(data = FSF_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+                        aes(x = MPA_Date, y = MPA_Mean, group = ReserveStatus, color = ReserveStatus, linetype = ReserveStatus),
+                        size = 1) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(FSF_Filter_MPA()$MPA_Date)), 
+                                      max(as.Date(FSF_Filter_MPA()$MPA_Date))),
+                           expand = c(0.01, 0)) +
+              geom_errorbar(data = FSF_Filter_MPA(), 
+                            aes(x = MPA_Date, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
+                            width = 0, color = "black", alpha = as.numeric(input$FSF_EB_MPA)) +
+              labs(title = glue("{unique(FSF_Filter_MPA()$ScientificName)}"),
+                   subtitle = FSF_Filter_MPA()$CommonName,
+                   color = "Reserve Status",
+                   linetype = "Reserve Status",
+                   x = "Year",
+                   y = "Mean Size (cm)") +
+              scale_color_manual(values=c(Inside = "green3", Outside = "red3")) +
+              scale_linetype_manual(values = c(Inside = "dashed", Outside = "solid")) +
+              facet_grid(rows = vars(IslandName), scales = FSF_AxisScale_MPA()) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                    legend.text = element_text(size = 14, vjust = .5),
+                    legend.key.width = unit(2, "cm"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
+                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$FSF_Graph_MPA == "Line" && input$FSF_DataSummary_MPA == "Site Means (by MPA)") {
+          return({
+            out <- by(data = FSF_Filter_MPA(), INDICES = FSF_Filter_MPA()$IslandName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() + 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                          position = "identity", alpha = as.numeric(FSF_alphaONI_MPA()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_MPA()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+                geom_line(data = m, 
+                          aes(x = Date, MeanSize, group = SiteName, color = SiteName, linetype = SiteName),
+                          size = 1) +
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
+                             limits = c(min(as.Date(m$Date)), max(as.Date(m$Date))),
+                             expand = c(0.01, 0)) +
+                scale_y_continuous(limits = c(0, ifelse(input$FSF_FreeOrLock_MPA == "Locked Scales", 
+                                                        max(FSF_Filter_MPA()$MaxSum), max(m$MeanSize))), 
+                                   expand = c(0.01, 0)) +
+                geom_errorbar(data = m, 
+                              aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
+                              width = 0, color = "black", alpha = as.numeric(input$FSF_EB_MPA)) +
+                labs(title = m$MPA_Name,
+                     color = "Site Name",
+                     linetype = "Site Name",
+                     caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
+                     x = "Year",
+                     y = "Mean Size (cm)") +
+                scale_color_manual(values = SiteColor, breaks = as.character(m$SiteName)) +
+                scale_linetype_manual(values = SiteLine, breaks = as.character(m$SiteName)) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.key.width = unit(1, "cm"),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 12, colour = "black"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+            })
+            
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
+                                          labels = glue("{unique(FSF_Filter_MPA()$ScientificName)}"),
+                                          label_size = 16,
+                                          label_fontface = "bold.italic"
+            ))
+          })
+        }
+        else if(input$FSF_Graph_MPA == "Bar" && input$FSF_DataSummary_MPA == "MPA Mean") { # Bar    -----
+          return({ 
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_MPA()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_col(data = FSF_Inside_MPA(), 
+                       aes(x = MPA_Date - 60, y = MPA_Mean, group = ReserveStatus, fill = ReserveStatus),
+                       width = 120) +
+              geom_text(data = FSF_Inside_MPA(),
+                        aes(x = MPA_Date - 60, y = MPA_Mean, label = round(MPA_Mean, digits = 2)),
+                        vjust = -.2, hjust = .5, angle = 0, alpha = as.numeric(input$FSF_Bar_Text_MPA)) +
+              geom_errorbar(data = FSF_Inside_MPA(), 
+                            aes(x = MPA_Date - 60, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
+                            width = 0, color = "black", alpha = as.numeric(input$FSF_EB_MPA)) +
+              geom_col(data = FSF_Outside_MPA(), 
+                       aes(x = MPA_Date + 60, y = MPA_Mean, group = ReserveStatus, fill = ReserveStatus),
+                       width = 120) +
+              geom_text(data = FSF_Outside_MPA(),
+                        aes(x = MPA_Date + 60, y = MPA_Mean, label = round(MPA_Mean, digits = 2)),
+                        vjust = -.2, hjust = .5, angle = 0, alpha = as.numeric(input$FSF_Bar_Text_MPA)) +
+              geom_errorbar(data = FSF_Outside_MPA(), 
+                            aes(x = MPA_Date + 60, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
+                            width = 0, color = "black", alpha = as.numeric(input$FSF_EB_MPA)) +
+              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(FSF_Filter_MPA()$MPA_Date)) - 150, 
+                                      max(as.Date(FSF_Filter_MPA()$MPA_Date)) + 360),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(FSF_Filter_MPA()$ScientificName)}"),
+                   subtitle = FSF_Filter_MPA()$CommonName,
+                   color = "Reserve Status",
+                   linetype = "Reserve Status",
+                   x = "Year",
+                   y = "Mean Size (cm)") +
+              scale_fill_manual(values = c(Inside = "green3", Outside = "red3")) +
+              facet_grid(rows = vars(IslandName), scales = FSF_AxisScale_MPA()) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                    legend.text = element_text(size = 14, vjust = .5),
+                    legend.key.width = unit(2, "cm"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
+                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$FSF_Graph_MPA == "Bar" &&  input$FSF_DataSummary_MPA == "Site Means (by MPA)") {
+          return({
+            out <- by(data = FSF_FilterBarSite_MPA(), INDICES = FSF_FilterBarSite_MPA()$IslandName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() +
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                          position = "identity", alpha = as.numeric(FSF_alphaONI_MPA()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_MPA()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+                new_scale_fill() +
+                geom_col(data = m %>% filter(ReserveStatus == "Inside"), 
+                         aes(x = Date - 70, y = MeanSize, fill = SiteName),
+                         position = "stack", width = 140) +
+                geom_text(data = m %>% filter(ReserveStatus == "Inside") %>% 
+                            group_by(IslandName, SurveyYear) %>% mutate(SumBar = sum(MeanSize)),
+                          aes(x = Date - 70, y = SumBar, label = "In"),
+                          vjust = -.2, hjust = .5, angle = 0) +
+                scale_fill_manual(values = SiteColor) +
+                labs(fill = "Inside") +
+                new_scale_fill() +
+                geom_col(data = m %>% filter(ReserveStatus == "Outside") , 
+                         aes(x = Date + 70, y = MeanSize, fill = SiteName),
+                         position = "stack", width = 140) +
+                geom_text(data = m %>% filter(ReserveStatus == "Outside") %>%
+                            group_by(IslandName, SurveyYear) %>%
+                            mutate(SumBar = sum(MeanSize)),
+                          aes(x = Date + 70, y = SumBar, label = "Out"),
+                          vjust = -.2, hjust = .5, angle = 0) +
+                scale_y_continuous(limits = c(0, ifelse(input$FSF_FreeOrLock_MPA == "Locked Scales", 
+                                                        max(FSF_Filter_MPA()$MaxSumBar), max(m$MeanSize))),
+                                   expand = c(0.01, 0)) +
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
+                             limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
+                             expand = c(0.01, 0)) +
+                labs(title = m$MPA_Name,
+                     fill = "Outside",
+                     x = "Year",
+                     y = "Mean Size (cm)") +
+                scale_fill_manual(values = SiteColor) +
+                scale_color_manual(values = SiteColor) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.key.width = unit(1, "cm"),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 12, colour = "black"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+            })
+            
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
+                                          labels = glue("{unique(FSF_Filter_MPA()$ScientificName)}"),
+                                          label_size = 16,
+                                          label_fontface = "bold.italic"
+            ))
+          })
+        } 
+        else if(input$FSF_Graph_MPA == "Smooth Line" && input$FSF_DataSummary_MPA == "MPA Mean") {  # Smooth       ----
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_MPA()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_point(data = FSF_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+                         aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
+                         size = 1, alpha = as.numeric(input$FSF_SmoothPoint_MPA), show.legend = FALSE) +
+              geom_smooth(data = FSF_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+                          aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
+                          se = as.logical(input$FSF_SmoothSE_MPA),
+                          span = input$FSF_SmoothSlide_MPA) +
+              scale_x_date(date_labels = "%Y", date_breaks = '1 year',
+                           limits = c(min(as.Date(FSF_Filter_MPA()$MPA_Date)), 
+                                      max(as.Date(FSF_Filter_MPA()$MPA_Date))),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(FSF_Filter_MPA()$ScientificName)}"),
+                   subtitle = FSF_Filter_MPA()$CommonName,
+                   color = "Reserve Status",
+                   linetype = "Reserve Status",
+                   x = "Year",
+                   y = "Mean Size (cm)") +
+              scale_color_manual(values=c(Inside = "green3", Outside = "red3")) +
+              scale_linetype_manual(values = c(Inside = "dashed", Outside = "solid")) +
+              facet_grid(rows = vars(IslandName), scales = FSF_AxisScale_MPA()) +
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                    legend.text = element_text(size = 14, vjust = .5),
+                    legend.key.width = unit(2, "cm"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
+                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
+          })
+        }
+        else if(input$FSF_Graph_MPA == "Smooth Line" && input$FSF_DataSummary_MPA == "Site Means (by MPA)") {
+          return({
+            out <- by(data = FSF_Filter_MPA(), INDICES = FSF_Filter_MPA()$IslandName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() + 
+                geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                          position = "identity", alpha = as.numeric(FSF_alphaONI_MPA()), show.legend = FALSE) +
+                geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_MPA()), show.legend = FALSE) +
+                geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                          position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_MPA()), show.legend = FALSE) +
+                scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+                geom_point(data = m, aes(x = Date, MeanSize, color = SiteName),
+                           size = 1, alpha = as.numeric(input$FSF_SmoothPoint_MPA), show.legend = FALSE) +
+                geom_smooth(data = m, aes(x = Date, MeanSize, color = SiteName, linetype = SiteName),
+                            se = as.logical(input$FSF_SmoothSE_MPA),
+                            span = input$FSF_SmoothSlide_MPA) +
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
+                             limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
+                             expand = c(0.01, 0)) +
+                scale_y_continuous(limits = c(0, max(FSF_Filter_MPA()$MaxSum)), expand = c(0.01, 0)) +
+                labs(title = m$MPA_Name,
+                     color = "Site Name",
+                     linetype = "Site Name",
+                     caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
+                     x = "Year",
+                     y = "Mean Size (cm)") +
+                scale_color_manual(values = SiteColor) +
+                scale_linetype_manual(values = SiteLine) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.key.width = unit(1, "cm"),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 12, colour = "black"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+            })
+            
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
+                                          labels = glue("{unique(FSF_Filter_MPA()$ScientificName)}"),
+                                          label_size = 16,
+                                          label_fontface = "bold.italic"
+            ))
+          })
+        }
+      })
+      
+    }
+    
+    { # FSF_MS_Two_Species    ----
+      
+      FSF_Filter_Two_One <- reactive({
+        FSF_DF %>%
+          filter(SiteName == input$FSF_SiteName_Two,
+                 CommonName == input$FSF_SpeciesName_Two_One) %>%
+          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
+                 StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
+                 SiteNumber, IslandCode, SiteCode, Species) 
+      })
+      
+      FSF_Filter_Two_Two <- reactive({
+        FSF_DF %>%
+          filter(SiteName == input$FSF_SiteName_Two,
+                 CommonName == input$FSF_SpeciesName_Two_Two) %>%
+          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
+                 StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
+                 SiteNumber, IslandCode, SiteCode, Species) 
+      })
+      
+      output$FSF_LargeSpPhoto_Two_1 <- renderImage({
+        
+        if (is.null(input$FSF_SpeciesName_Two_One))
+          return(NULL) 
+        
+        if (input$FSF_SpeciesName_Two_One == unique(FSF_Filter_Two_One()$CommonName)) {
+          return(list(
+            src = glue("www/Indicator_Species/{unique(FSF_Filter_Two_One()$Species)}.jpg"),
+            contentType = "image/jpg",
+            alt = glue("{unique(FSF_Filter_Two_One()$CommonName)}"),
+            width = 450,
+            height = 450
+          ))
+        }
+      }, deleteFile = FALSE)
+      
+      output$FSF_LargeSpPhoto_Two_2 <- renderImage({
+        
+        if (input$FSF_SpeciesName_Two_Two == unique(FSF_Filter_Two_Two()$CommonName)) {
+          return(list(
+            src = glue("www/Indicator_Species/{unique(FSF_Filter_Two_Two()$Species)}.jpg"),
+            contentType = "image/jpg",
+            alt = glue("{unique(FSF_Filter_Two_Two()$CommonName)}"),
+            width = 450,
+            height = 450
+          ))
+        }
+      }, deleteFile = FALSE)
+      
+      output$FSF_TopSitePhoto_Two <- renderImage({
+        if (is.null(input$FSF_SpeciesName_Two_One))
+          return(NULL)
+        
+        if (input$FSF_SiteName_Two == unique(FSF_Filter_Two_One()$SiteName)) {
+          return(list(
+            src = glue("www/Sat_Imagery/{unique(FSF_Filter_Two_One()$SiteCode)}.png"),
+            contentType = "image/png",
+            alt = glue("{unique(FSF_Filter_Two_One()$SiteName)}"),
+            width = 430,
+            height = 210
+          ))
+        }
+      }, deleteFile = FALSE)
+      
+      output$FSF_LargeSitePhoto_Two <- renderImage({
+        if (is.null(input$FSF_SpeciesName_Two_One))
+          return(NULL)
+        
+        if (input$FSF_SiteName_Two == unique(FSF_Filter_Two_One()$SiteName)) {
+          return(list(
+            src = glue("www/Sat_Imagery/{unique(FSF_Filter_Two_One()$SiteCode)}.png"),
+            contentType = "image/png",
+            alt = glue("{unique(FSF_Filter_Two_One()$SiteName)}"),
+            width = 1250,
+            height = 625
+          ))
+        }
+      }, deleteFile = FALSE)
+      
+      FSF_alphaONI_Two <- reactive({
+        if(input$FSF_GraphOptions_Two == "With No Index"){
+          return(0)
+        }
+        else if(input$FSF_GraphOptions_Two == "With ONI"){
+          return(1)
+        }
+        else if(input$FSF_GraphOptions_Two == "With PDO (NOAA)"){
+          return(0)
+        }
+        else if(input$FSF_GraphOptions_Two == "With PDO (UW)"){
+          return(0)
+        }
+      }) # ONI layer toggle (changes alpha value)
+      
+      FSF_alphaPDO_NOAA_Two <- reactive({
+        if(input$FSF_GraphOptions_Two == "With No Index"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_Two == "With ONI"){
+          return(0)
+          
+        }
+        if(input$FSF_GraphOptions_Two == "With PDO (NOAA)"){
+          return(1)
+        }
+        if(input$FSF_GraphOptions_Two == "With PDO (UW)"){
+          return(0)
+        }
+      }) # PDO NOAA layer toggle (changes alpha value)
+      
+      FSF_alphaPDO_UW_Two <- reactive({
+        if(input$FSF_GraphOptions_Two == "With No Index"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_Two == "With ONI"){
+          return(0)
+          
+        }
+        if(input$FSF_GraphOptions_Two == "With PDO (NOAA)"){
+          return(0)
+        }
+        if(input$FSF_GraphOptions_Two == "With PDO (UW)"){
+          return(1)
+        }
+      }) # PDO UW layer toggle (changes alpha value)
+      
+      output$FSF_ONIpdoPIC_Two <- renderImage({
+        if(input$FSF_GraphOptions_Two == 'With ONI'){
+          return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$FSF_GraphOptions_Two == 'With PDO (NOAA)'){
+          return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
+        }
+        if(input$FSF_GraphOptions_Two == 'With PDO (UW)'){
+          return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
+        }
+      }, deleteFile = FALSE) # ONI/PDO scale photo
+      
+      output$FSF_Plot_Two <- renderPlot({
+        
+        if (is.null(input$FSF_Graph_Two))
+          return(NULL) 
+        
+        else if(input$FSF_Graph_Two == "Line"){
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Two()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_line(data = FSF_Filter_Two_One(), 
+                        aes(x = Date, y = MeanSize, group = ScientificName, color = CommonName),
+                        size = 1) +
+              geom_errorbar(data = FSF_Filter_Two_One(),
+                            aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
+                            width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Two)) + 
+              geom_line(data = FSF_Filter_Two_Two(), 
+                        aes(x = Date, y = MeanSize*input$FSF_Y_Slide_Two, group = ScientificName, color = CommonName),
+                        size = 1) +
+              geom_errorbar(data = FSF_Filter_Two_Two(),
+                            aes(x = Date, ymin = MeanSize*input$FSF_Y_Slide_Two - StandardError*input$FSF_Y_Slide_Two, 
+                                ymax = MeanSize*input$FSF_Y_Slide_Two + StandardError*input$FSF_Y_Slide_Two),
+                            width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Two)) + 
+              scale_y_continuous(sec.axis = sec_axis(~./input$FSF_Y_Slide_Two, 
+                                                     name = glue("{unique(FSF_Filter_Two_Two()$CommonName)} per square meter"))) +
+              scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_Two_One()$Date), 
+                           limits = c(min(as.Date(FSF_Filter_Two_One()$Date))-365, 
+                                      max(as.Date(FSF_Filter_Two_One()$Date))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(FSF_Filter_Two_One()$ScientificName)
+                              } and {unique(FSF_Filter_Two_Two()$ScientificName)}"), 
+                   subtitle = glue("{unique(FSF_Filter_Two_One()$IslandName)} {unique(FSF_Filter_Two_One()$SiteName)}"),
+                   color = "Common Name",
+                   caption = 
+                     glue(
+                       "{FSF_Filter_Two_One()$SiteName} is typically surveyed in {
+                     month(round(mean(month(FSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     } and has a mean depth of {round(mean(FSF_Filter_Two_One()$MeanDepth), 2)} ft"),
+                   x = "Year",
+                   y = glue('{unique(FSF_Filter_Two_One()$CommonName)} per square meter')) +
+               
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                    legend.text = element_text(size = 14, vjust = .5),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
+          })}
+        else if(input$FSF_Graph_Two == "Bar") {
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Two()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              new_scale_fill() +
+              geom_col(data = FSF_Filter_Two_One(), 
+                       aes(x = Date - 50, y = MeanSize, fill = CommonName),
+                       position = "dodge",
+                       width = 100) +
+              geom_col(data = FSF_Filter_Two_Two(), 
+                       aes(x = Date + 50, y = MeanSize*input$FSF_Y_Slide_Two, fill = CommonName),
+                       position = "dodge",
+                       width = 100) +
+              geom_errorbar(data = FSF_Filter_Two_One(),
+                            aes(x = Date - 50, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
+                            width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Two)) + 
+              geom_errorbar(data = FSF_Filter_Two_Two(),
+                            aes(x = Date + 50, ymin = MeanSize*input$FSF_Y_Slide_Two - StandardError*input$FSF_Y_Slide_Two, 
+                                ymax = MeanSize*input$FSF_Y_Slide_Two + StandardError*input$FSF_Y_Slide_Two),
+                            width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Two)) + 
+              scale_y_continuous(sec.axis = sec_axis(~./input$FSF_Y_Slide_Two, 
+                                                     name = glue("{unique(FSF_Filter_Two_Two()$CommonName)} per square meter"))) +
+              scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_Two_One()$Date),
+                           limits = c(min(as.Date(FSF_Filter_Two_One()$Date))-365,
+                                      max(as.Date(FSF_Filter_Two_One()$Date))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(FSF_Filter_Two_One()$ScientificName)
+                              } and {unique(FSF_Filter_Two_Two()$ScientificName)}"),
+                   subtitle = glue("{unique(FSF_Filter_Two_One()$IslandName)} {unique(FSF_Filter_Two_One()$SiteName)}"),
+                   color = "Common Name",
+                   caption =
+                     glue(
+                       "{FSF_Filter_Two_One()$SiteName} is typically surveyed in {
+                     month(round(mean(month(FSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     } and has a mean depth of {round(mean(FSF_Filter_Two_One()$MeanDepth), 2)} ft"),
+                   x = "Year",
+                   y = "Mean Size (cm)") +
+               
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                    legend.text = element_text(size = 14, vjust = .5),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold", color = "black"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
+          })}
+        else if(input$FSF_Graph_Two == "Smooth Line"){
+          return({
+            ggplot() +
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                        position = "identity", alpha = as.numeric(FSF_alphaONI_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_NOAA_Two()), show.legend = FALSE) +
+              geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                        position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Two()), show.legend = FALSE) +
+              scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+              geom_smooth(data = FSF_Filter_Two_One(), 
+                          aes(x = Date, y = MeanSize, group = ScientificName, color = CommonName),
+                          size = 1,  span = input$FSF_SmoothSlide_Two, se = as.logical(input$FSF_SmoothSE_Two)) +
+              geom_point(data = FSF_Filter_Two_One(),
+                         aes(x = Date, y = MeanSize, color = CommonName),
+                         size = 1, alpha = as.numeric(input$FSF_SmoothPoint_Two)) +
+              geom_smooth(data = FSF_Filter_Two_Two(), 
+                          aes(x = Date, y = MeanSize*input$FSF_Y_Slide_Two, group = ScientificName, color = CommonName),
+                          size = 1,  span = input$FSF_SmoothSlide_Two, se = as.logical(input$FSF_SmoothSE_Two)) +
+              geom_point(data = FSF_Filter_Two_Two(),
+                         aes(x = Date, y = MeanSize*input$FSF_Y_Slide_Two, color = CommonName),
+                         size = 1, alpha = as.numeric(input$FSF_SmoothPoint_Two)) +
+              scale_y_continuous(sec.axis = sec_axis(~./input$FSF_Y_Slide_Two, 
+                                                     name = glue("{unique(FSF_Filter_Two_Two()$CommonName)} per square meter"))) +
+              scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_Two_One()$Date), 
+                           limits = c(min(as.Date(FSF_Filter_Two_One()$Date))-365, 
+                                      max(as.Date(FSF_Filter_Two_One()$Date))+365),
+                           expand = c(0.01, 0)) +
+              labs(title = glue("{unique(FSF_Filter_Two_One()$ScientificName)
+                              } and {unique(FSF_Filter_Two_Two()$ScientificName)}"), 
+                   subtitle = glue("{unique(FSF_Filter_Two_One()$IslandName)} {unique(FSF_Filter_Two_One()$SiteName)}"),
+                   color = "Common Name",
+                   caption = 
+                     glue(
+                       "{FSF_Filter_Two_One()$SiteName} is typically surveyed in {
+                     month(round(mean(month(FSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     } and has a mean depth of {round(mean(FSF_Filter_Two_One()$MeanDepth), 2)} ft"),
+                   x = "Year",
+                   y = glue('{unique(FSF_Filter_Two_One()$CommonName)} per square meter')) +
+               
+              theme_classic() +
+              theme(legend.position = "bottom",
+                    legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                    legend.text = element_text(size = 14, vjust = .5),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
+          })}
+      })
+      
+      output$FSF_DToutData_Two_1 <- renderDT({
+        datatable(FSF_Filter_Two_One(),
+                  extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    scrollY = "500px",
+                    paging = FALSE,
+                    ordering = TRUE,
+                    info = FALSE,
+                    dom = 'Bfrtip',
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    columnDefs = c(list(list(visible = FALSE, targets = c(1, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15))), 
+                                   list(list(className = 'dt-center', targets = 0:6))),
+                    colReorder = TRUE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(FSF_Filter_Two_One()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      })
+      
+      output$FSF_DToutData_Two_2 <- renderDT({
+        datatable(FSF_Filter_Two_Two(),
+                  extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    scrollY = "500px",
+                    paging = FALSE,
+                    ordering = TRUE,
+                    info = FALSE,
+                    dom = 'Bfrtip',
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    columnDefs = c(list(list(visible = FALSE, targets = c(1, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15))), 
+                                   list(list(className = 'dt-center', targets = 0:6))),
+                    colReorder = TRUE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(FSF_Filter_Two_Two()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      })
+      
+    }
+    
+    { # FSF_MS_all   ----
+      
+      FSF_Filter_All <- reactive({
+        FSF_DF %>%
+          filter(SiteName == input$FSF_SiteNameAll) %>%
+          drop_na()
+      })
+      
+      output$FSF_Plot_All <- renderPlot({
+        if (is.null(input$FSF_GraphAll))
+          return(NULL)
+        
+        if (input$FSF_GraphAll == "Line") {
+          return({
+            out <- by(data = FSF_Filter_All(), INDICES = FSF_Filter_All()$Species, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() + 
+                geom_line(data = m, 
+                          aes(Date, MeanSize, group = CommonName, color = CommonName, linetype = SiteName),
+                          size = 1) +
+                scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
+                             expand = c(0.01, 0)) +
+                geom_errorbar(data = m, 
+                              aes(x = Date, ymin = MeanSize - StandardError,
+                                  ymax = MeanSize + StandardError),
+                              width = 0.25,
+                              color = "black") +
+                labs(title = m$ScientificName, 
+                     subtitle = glue("{m$IslandName} {m$SiteName}"),
+                     color = "Common Name",
+                     x = "Year",
+                     y = "Mean Size (cm)") +
+                 
+                scale_linetype_manual(values = SiteLine, guide = FALSE) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+              
+            })
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v'))
+          })
+        } 
+        else if (input$FSF_GraphAll == "Bar") {
+          return({
+            out <- by(data = FSF_Filter_All(), INDICES = FSF_Filter_All()$CommonName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() + 
+                geom_col(data = m, 
+                         aes(x = Date, y = MeanSize, group = CommonName, fill = CommonName, linetype = SiteName),
+                         width = 250) +
+                geom_text(data = m, 
+                          aes(x = Date, y = MeanSize, label = round(MeanSize, digits = 2)),
+                          position = position_dodge(1),
+                          vjust = -.2,
+                          hjust = .5,
+                          angle = 0) +
+                scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
+                             expand = c(0.01, 0)) +
+                scale_y_continuous(expand = c(0.1, 0)) +
+                labs(title = m$ScientificName, 
+                     subtitle = glue("{m$IslandName} {m$SiteName}"),
+                     color = "Common Name",
+                     x = "Year",
+                     y = "Mean Size (cm)") +
+                 
+                scale_linetype_manual(values = SiteLine, guide = FALSE) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+              
+            })
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v'))
+          })
+        } 
+      })
+      
+    }
+    
+  }
+  
+  
   output$outTemp <- renderUI({ # Temp_UI ----
     if (is.null(input$temp_allORone))
       return(NULL)
@@ -13392,7 +16382,7 @@ server <- function(input, output, session) {
         
         if (!is.null(input$temp_Brush_One)) {
           ggplot() +
-            geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = -Inf, ymax = Inf, fill = Anom), 
+            geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = -Inf, ymax = Inf, fill = ANOM), 
                       position = "identity", alpha = as.numeric(temp_alphaONI_one())) +
             geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
                                            ymin = -Inf, ymax = Inf, fill = pdoAnom),
@@ -13429,7 +16419,7 @@ server <- function(input, output, session) {
         else if (is.null(input$temp_Brush_One)){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin = DateStart, xmax = DateEnd, ymin = -Inf, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin = DateStart, xmax = DateEnd, ymin = -Inf, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(temp_alphaONI_one()))+
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
                                              ymin = -Inf, ymax = Inf, fill = pdoAnom),
@@ -13468,7 +16458,7 @@ server <- function(input, output, session) {
       
       output$temp_Overall_One <- renderPlot({
         ggplot() +
-          geom_rect(data = oni, aes(xmin = DateStart, xmax = DateEnd, ymin = -Inf, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin = DateStart, xmax = DateEnd, ymin = -Inf, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(temp_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
                                          ymin = -Inf, ymax = Inf, fill = pdoAnom),
@@ -13570,7 +16560,7 @@ server <- function(input, output, session) {
         
         if (!is.null(input$temp_Brush_Isl)) {
           ggplot() +
-            geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = -Inf, ymax = Inf, fill = Anom), 
+            geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = -Inf, ymax = Inf, fill = ANOM), 
                       position = "identity", alpha = as.numeric(temp_alphaONI_Isl())) +
             geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
                                            ymin = -Inf, ymax = Inf, fill = pdoAnom),
@@ -13608,7 +16598,7 @@ server <- function(input, output, session) {
         else if (is.null(input$temp_Brush_Isl)){
           return({
             ggplot() +
-              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = -Inf, ymax = Inf, fill = Anom), 
+              geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = -Inf, ymax = Inf, fill = ANOM), 
                         position = "identity", alpha = as.numeric(temp_alphaONI_Isl())) +
               geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
                                              ymin = -Inf, ymax = Inf, fill = pdoAnom),
@@ -13647,7 +16637,7 @@ server <- function(input, output, session) {
       
       output$temp_Overall_Isl <- renderPlot({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = -Inf, ymax = Inf, fill = Anom), 
+          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = -Inf, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(temp_alphaONI_Isl())) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd,
                                          ymin = -Inf, ymax = Inf, fill = pdoAnom),
@@ -13686,7 +16676,7 @@ server <- function(input, output, session) {
     
     { # Temp_ONI_Server ----
       
-      onibar <- ggplot(oni, aes(x= Date, y= Anom, fill = Anom)) +
+      onibar <- ggplot(oni, aes(x= Date, y= ANOM, fill = ANOM)) +
         geom_bar(stat = "identity") +
         geom_smooth(se = FALSE, span = 0.75, color = "deeppink") +
         scale_x_date(date_labels = "%Y", date_breaks = "2 year",
@@ -13726,7 +16716,7 @@ server <- function(input, output, session) {
       
       onigrad <- ggplot(data = oni) +
         geom_rect(aes(xmin= DateStart, xmax = DateEnd, 
-                      ymin = 0, ymax = 1, fill = Anom), 
+                      ymin = 0, ymax = 1, fill = ANOM), 
                   position = "identity", alpha = 1) +
         scale_fill_gradient2(high = "red3", 
                              mid = "white",
@@ -13783,7 +16773,7 @@ server <- function(input, output, session) {
       })
       
       output$oniOverall <- renderPlot({
-        ggplot(oni, aes(x= Date, y= Anom, fill = Anom)) +
+        ggplot(oni, aes(x= Date, y= ANOM, fill = ANOM)) +
           geom_bar(stat = "identity") +
           scale_x_date(date_labels = "%Y", date_breaks = "2 year",
                        expand = c(0.01,0)) +
