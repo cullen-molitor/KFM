@@ -12,25 +12,23 @@ server <- function(input, output, session) {
                          tags$hr(),
                          plotOutput(outputId = "oneM_Plot_One",
                                     height = 500),
-                         conditionalPanel("input.oneM_Graph_One == 'Line' 
-                                          || input.oneM_Graph_One == 'Bar' 
-                                          || input.oneM_Graph_One == 'Smooth Line'",
-                                          tags$hr()),
+                         tags$hr(),
                          fluidRow(
-                           conditionalPanel("input.oneM_Graph_One == 'Line' || input.oneM_Graph_One == 'Bar'",
-                                                      column(3, radioButtons(inputId = "oneM_EB_one",
+                           conditionalPanel("input.oneM_Graph_One == 'Line' || 
+                                            input.oneM_Graph_One == 'Bar'",
+                                            column(3, radioButtons(inputId = "oneM_EB_one",
                                                                    label = "Show error bars?",
                                                                    choices = c("Yes" = 1, "No" = 0),
                                                                    inline = TRUE))),
                            conditionalPanel("input.oneM_Graph_One == 'Bar'",
-                                                      column(3, radioButtons(inputId = "oneM_Bar_Text_One",
+                                            column(3, radioButtons(inputId = "oneM_Bar_Text_One",
                                                                    label = "Show density value?",
                                                                    choices = c("Yes" = 1, "No" = 0), selected = 0,
                                                                    inline = TRUE))),
                            conditionalPanel("input.oneM_GraphOptions_One == 'With ONI' ||
-                                                      input.oneM_GraphOptions_One == 'With PDO (NOAA)' ||
-                                                      input.oneM_GraphOptions_One == 'With PDO (UW)'",
-                                                      column(6, imageOutput(outputId = "oneM_ONIpdoPIC_One",
+                                             input.oneM_GraphOptions_One == 'With PDO (NOAA)' ||
+                                             input.oneM_GraphOptions_One == 'With PDO (UW)'",
+                                            column(6, imageOutput(outputId = "oneM_ONIpdoPIC_One",
                                                                   height = 75)))),
                          conditionalPanel("input.oneM_Graph_One == 'Smooth Line'",
                                           sliderInput(inputId = "oneM_SmoothSlide_One",
@@ -16181,6 +16179,130 @@ server <- function(input, output, session) {
     
   }
   
+  
+  { # ........ RDFC_Mean_Counts ........
+    
+    RDFC_Filter_One <- reactive({ 
+      RDFC_DF %>%
+        filter(SiteName == input$RDFC_SiteName_One,
+               CommonName == input$RDFC_SpeciesName_One,
+               ExperienceLevel == "E") %>% 
+        group_by(SurveyYear, IslandName, SiteName, ScientificName, CommonName) %>%
+        mutate(Low_Count = min(Count),
+               High_Count = max(Count),
+               Mean_Count = mean(Count),
+               StandardError = std.error(Count),
+               StandardDeviation = sd(Count),
+               Date = mean(as.Date(Date)))
+    }) # filtered one meter summary table
+    
+    RDFC_SideBar_Filter <- reactive({ 
+      RDFC_DF %>%
+        filter(SiteName == input$RDFC_SiteName_One,
+               ExperienceLevel == "E") 
+    }) # filtered one meter summary table
+    
+    output$RDFC_SideBar_One <- renderUI({
+      selectInput(inputId = "RDFC_SpeciesName_One",
+                  label = "Choose a Species:",
+                  choices = levels(factor(RDFC_SideBar_Filter()$CommonName)),
+                  selected = "California sheephead, male")
+    })
+    
+    RDFC_alphaONI_one <- reactive({
+      if(input$RDFC_GraphOptions_One == "With No Index"){
+        return(0)
+      }
+      else if(input$RDFC_GraphOptions_One == "With ONI"){
+        return(1)
+      }
+      else if(input$RDFC_GraphOptions_One == "With PDO (NOAA)"){
+        return(0)
+      }
+      else if(input$RDFC_GraphOptions_One == "With PDO (UW)"){
+        return(0)
+      }
+    }) # ONI layer toggle (changes alpha value)
+    
+    RDFC_alphaPDO_NOAA_one <- reactive({
+      if(input$RDFC_GraphOptions_One == "With No Index"){
+        return(0)
+      }
+      if(input$RDFC_GraphOptions_One == "With ONI"){
+        return(0)
+        
+      }
+      if(input$RDFC_GraphOptions_One == "With PDO (NOAA)"){
+        return(1)
+      }
+      if(input$RDFC_GraphOptions_One == "With PDO (UW)"){
+        return(0)
+      }
+    }) # PDO NOAA layer toggle (changes alpha value)
+    
+    RDFC_alphaPDO_UW_one <- reactive({
+      if(input$RDFC_GraphOptions_One == "With No Index"){
+        return(0)
+      }
+      if(input$RDFC_GraphOptions_One == "With ONI"){
+        return(0)
+        
+      }
+      if(input$RDFC_GraphOptions_One == "With PDO (NOAA)"){
+        return(0)
+      }
+      if(input$RDFC_GraphOptions_One == "With PDO (UW)"){
+        return(1)
+      }
+    }) # PDO UW layer toggle (changes alpha value)
+    
+    output$RDFC_Plot <- renderPlot({
+      ggplot() +
+        geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
+                  position = "identity", alpha = as.numeric(RDFC_alphaONI_one()), show.legend = FALSE) +
+        geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                  position = "identity", alpha = as.numeric(RDFC_alphaPDO_NOAA_one()), show.legend = FALSE) +
+        geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+                  position = "identity", alpha = as.numeric(RDFC_alphaPDO_UW_one()), show.legend = FALSE) +
+        scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+        geom_ribbon(data = RDFC_Filter_One(), fill = "deepskyblue",
+                    aes(x = Date, ymin = Low_Count, ymax = High_Count, group = ScientificName)) +
+        # geom_line(data = RDFC_Filter_One(),
+        #           aes(x = Date, y = Mean_Count, group = ScientificName, color = CommonName), 
+        #           size = 1) +
+        geom_point(data = RDFC_Filter_One(),
+                  aes(x = Date, y = Mean_Count, group = ScientificName, color = CommonName),
+                  size = 3) +
+        # geom_line(data = RDFC_Filter_One(),
+        #           aes(x = Date, y = Low_Count, group = ScientificName), color = "green", 
+        #           size = 1) +
+        geom_errorbar(data = RDFC_Filter_One(),
+                      aes(x = Date, ymin = Mean_Count - StandardError, ymax = Mean_Count + StandardError),
+                      width = 0, color = "black") + #, alpha = as.numeric(input$FSF_EB_one)) +
+        scale_x_date(date_labels = "%b %Y", breaks = unique(RDFC_Filter_One()$Date),
+                     limits = c(min(as.Date(RDFC_Filter_One()$Date))-365, max(as.Date(RDFC_Filter_One()$Date))+365),
+                     expand = c(0.01, 0)) +
+        labs(title = glue("{unique(RDFC_Filter_One()$ScientificName)}"),
+             subtitle = glue("{unique(RDFC_Filter_One()$IslandName)} {unique(RDFC_Filter_One()$SiteName)}"),
+             color = "Common Name",
+             fill = "Oceanic Nino \nIndex Gradient",
+             caption = glue("{RDFC_Filter_One()$SiteName} is typically surveyed in {
+                       month(round(mean(month(RDFC_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       } and has a mean depth of {round(mean(RDFC_Filter_One()$MeanDepth), 2)} ft"),
+             x = "Year",
+             y = "Mean Count") +
+        theme_classic() +
+        theme(legend.position = "bottom",
+              legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+              legend.text = element_text(size = 14, vjust = .5),
+              plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+              plot.subtitle = element_text(hjust = 0.5, size = 18),
+              plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+              axis.title = element_text(size = 16, face = "bold"),
+              axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+              axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
+    })
+  }
   
   output$outTemp <- renderUI({ # Temp_UI ----
     if (is.null(input$temp_allORone))

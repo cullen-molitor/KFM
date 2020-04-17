@@ -859,6 +859,28 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                     choices = c("Line", "Bar")),
                        tags$hr()
       ),
+      # ~ RDFC_Conditional  ----
+      # ...... One Species ----
+      conditionalPanel(condition = "input.tabselected=='RDFC_TP'", 
+      # && input.RDFC_allORone=='One Species by Site'",
+                       selectInput(inputId = "RDFC_SiteName_One",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       uiOutput(outputId = "RDFC_SideBar_One"),
+                       
+                       radioButtons(inputId = "RDFC_Graph_One",
+                                    label = "Choose a graph:",
+                                    choices = c("Line", "Bar", "Smooth Line")),
+                       radioButtons(inputId = "RDFC_DataSummary_One",
+                                    label = "Choose a data Summary:",
+                                    choices = c("One species at one site" , "One species with island average")),
+                       radioButtons(inputId = "RDFC_GraphOptions_One",
+                                    label =  "Graph Options:",
+                                    choices = c("With No Index",
+                                                "With ONI",
+                                                "With PDO (NOAA)",
+                                                "With PDO (UW)"))
+      ),
       # ~ Temperature_Conditional   ----
       # ...... One Site    ----
       conditionalPanel(condition = "input.tabselected=='temps' && input.temp_allORone=='Benthic Temperature by Site'",
@@ -1379,6 +1401,9 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                  imageOutput(outputId = "FSF_LargeSitePhoto_SD_One",
                                              height = 625),
                                  tags$hr())),
+       tabPanel("Roving Diver Fish Count", value = "RDFC_TP", # ** RDFC_TP     ----
+                tags$hr(),
+                plotOutput(outputId = "RDFC_Plot")), 
        tabPanel("Temperature", value = "temps", #** Temp_TP    ----
                 fluidRow(column(6, offset = 3,tags$h1(tags$strong("Water Temperatures")))),
                 fluidRow(column(3, radioButtons(inputId = "temp_allORone",

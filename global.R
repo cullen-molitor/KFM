@@ -28,6 +28,7 @@
   library(DT)
   library(ggnewscale)
   library(cowplot)
+  library(data.table)
 
 }
 
@@ -200,7 +201,7 @@
   
 }
 
-{ # .. Fish Size Frequency   ----
+{ # .. FSF_DF   ----
   
   FSF_DF <- read_csv("FSF_Summary.csv")
   FSF_DF$IslandName <- factor(FSF_DF$IslandName, levels = IslandLevels)
@@ -214,6 +215,13 @@
   
   FSF_DFRawMPA <- read_csv("FSF_MPA_Raw.csv")
   FSF_DFRawMPA$IslandName <- factor(FSF_DFRawMPA$IslandName, levels = MPA_Levels)
+}
+
+{ # .. RDFC_DF
+
+  RDFC_DF <- read_csv("RDFC_Summary.csv")
+  RDFC_DF$IslandName <- factor(RDFC_DF$IslandName, levels = IslandLevels)
+
 }
 
 { # .. Temperature_DF   ----
