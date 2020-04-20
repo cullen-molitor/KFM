@@ -460,7 +460,7 @@ server <- function(input, output, session) {
                color = "Common Name",
                fill = "Oceanic Nino \nIndex Gradient",
                caption = glue("{oneM_Filter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(oneM_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = expression("Mean Density (#/m"^"2"~")")) +
@@ -506,7 +506,7 @@ server <- function(input, output, session) {
                color = "Common Name",
                fill = "Common Name",
                caption = glue("{oneM_Filter_One()$SiteName} is typically surveyed in {
-                 month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                 lubridate::lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                  } and has a mean depth of {round(mean(oneM_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = expression("Mean Density (#/m"^"2"~")")) +
@@ -546,7 +546,7 @@ server <- function(input, output, session) {
                subtitle = glue("{unique(oneM_Filter_One()$IslandName)} {unique(oneM_Filter_One()$SiteName)}"),
                color = "Common Name",
                caption = glue("{oneM_Filter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(oneM_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year", y = "Smoothed Conditional Mean Values") +
           theme_classic() +
@@ -581,7 +581,7 @@ server <- function(input, output, session) {
                subtitle = glue("{unique(oneM_RawFilter_One()$IslandName)} {unique(oneM_RawFilter_One()$SiteName)}"),
                color = "Common Name",
                caption = glue("{oneM_RawFilter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(oneM_RawFilter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(oneM_RawFilter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(oneM_RawFilter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = "Count per Quadrat") +
@@ -1995,7 +1995,7 @@ server <- function(input, output, session) {
                    caption = 
                      glue(
                        "{oneM_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(oneM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(oneM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(oneM_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = glue('{unique(oneM_Filter_Two_One()$CommonName)} per square meter')) +
@@ -2050,7 +2050,7 @@ server <- function(input, output, session) {
                    caption =
                      glue(
                        "{oneM_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(oneM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(oneM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(oneM_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
@@ -2101,7 +2101,7 @@ server <- function(input, output, session) {
                    caption = 
                      glue(
                        "{oneM_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(oneM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(oneM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(oneM_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = glue('{unique(oneM_Filter_Two_One()$CommonName)} per square meter')) +
@@ -2727,7 +2727,7 @@ server <- function(input, output, session) {
                color = "Common Name",
                fill = "Oceanic Nino \nIndex Gradient",
                caption = glue("{fiveM_Filter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(fiveM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(fiveM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(fiveM_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = expression("Mean Density (#/m"^"2"~")")) +
@@ -2773,7 +2773,7 @@ server <- function(input, output, session) {
                color = "Common Name",
                fill = "Common Name",
                caption = glue("{fiveM_Filter_One()$SiteName} is typically surveyed in {
-                 month(round(mean(month(fiveM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                 lubridate::month(round(mean(month(fiveM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                  } and has a mean depth of {round(mean(fiveM_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = expression("Mean Density (#/m"^"2"~")")) +
@@ -2813,7 +2813,7 @@ server <- function(input, output, session) {
                subtitle = glue("{unique(fiveM_Filter_One()$IslandName)} {unique(fiveM_Filter_One()$SiteName)}"),
                color = "Common Name",
                caption = glue("{fiveM_Filter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(fiveM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(fiveM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(fiveM_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year", y = "Smoothed Conditional Mean Values") +
           theme_classic() +
@@ -2848,7 +2848,7 @@ server <- function(input, output, session) {
                subtitle = glue("{unique(fiveM_RawFilter_One()$IslandName)} {unique(fiveM_RawFilter_One()$SiteName)}"),
                color = "Common Name",
                caption = glue("{fiveM_RawFilter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(fiveM_RawFilter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(fiveM_RawFilter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(fiveM_RawFilter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = "Count per Quadrat") +
@@ -4262,7 +4262,7 @@ server <- function(input, output, session) {
                    caption = 
                      glue(
                        "{fiveM_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(fiveM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(fiveM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(fiveM_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = glue('{unique(fiveM_Filter_Two_One()$CommonName)} per square meter')) +
@@ -4317,7 +4317,7 @@ server <- function(input, output, session) {
                    caption =
                      glue(
                        "{fiveM_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(fiveM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(fiveM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(fiveM_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
@@ -4368,7 +4368,7 @@ server <- function(input, output, session) {
                    caption = 
                      glue(
                        "{fiveM_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(fiveM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(fiveM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(fiveM_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = glue('{unique(fiveM_Filter_Two_One()$CommonName)} per square meter')) +
@@ -5018,7 +5018,7 @@ server <- function(input, output, session) {
                color = "Common Name",
                fill = "Oceanic Nino \nIndex Gradient",
                caption = glue("{bands_Filter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(bands_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(bands_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(bands_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = expression("Mean Density (#/m"^"2"~")")) +
@@ -5064,7 +5064,7 @@ server <- function(input, output, session) {
                color = "Common Name",
                fill = "Common Name",
                caption = glue("{bands_Filter_One()$SiteName} is typically surveyed in {
-                 month(round(mean(month(bands_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                 lubridate::month(round(mean(month(bands_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                  } and has a mean depth of {round(mean(bands_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = expression("Mean Density (#/m"^"2"~")")) +
@@ -5104,7 +5104,7 @@ server <- function(input, output, session) {
                subtitle = glue("{unique(bands_Filter_One()$IslandName)} {unique(bands_Filter_One()$SiteName)}"),
                color = "Common Name",
                caption = glue("{bands_Filter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(bands_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(bands_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(bands_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year", y = "Smoothed Conditional Mean Values") +
           theme_classic() +
@@ -5140,7 +5140,7 @@ server <- function(input, output, session) {
                subtitle = glue("{unique(bands_RawFilter_One()$IslandName)} {unique(bands_RawFilter_One()$SiteName)}"),
                color = "Common Name",
                caption = glue("{bands_RawFilter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(bands_RawFilter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(bands_RawFilter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(bands_RawFilter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = "Count per Quadrat") +
@@ -6081,7 +6081,7 @@ server <- function(input, output, session) {
                    linetype = "Reserve Status",
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
-              scale_color_manual(values=c(Inside = "green3", Outside = "red3")) +
+              scale_color_manual(values = c(Inside = "green3", Outside = "red3")) +
               scale_linetype_manual(values = c(Inside = "dashed", Outside = "solid")) +
               facet_grid(rows = vars(IslandName), scales = bands_AxisScale_MPA()) +
               theme_classic() +
@@ -6554,7 +6554,7 @@ server <- function(input, output, session) {
                    caption = 
                      glue(
                        "{bands_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(bands_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(bands_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(bands_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = glue('{unique(bands_Filter_Two_One()$CommonName)} per square meter')) +
@@ -6609,7 +6609,7 @@ server <- function(input, output, session) {
                    caption =
                      glue(
                        "{bands_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(bands_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(bands_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(bands_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
@@ -6660,7 +6660,7 @@ server <- function(input, output, session) {
                    caption = 
                      glue(
                        "{bands_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(bands_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(bands_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(bands_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = glue('{unique(bands_Filter_Two_One()$CommonName)} per square meter')) +
@@ -7235,7 +7235,7 @@ server <- function(input, output, session) {
                    caption = 
                      glue(
                        "{core_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(core_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(core_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(core_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = glue('{unique(core_Filter_Two_One()$CommonName)} per square meter')) +
@@ -7290,7 +7290,7 @@ server <- function(input, output, session) {
                    caption =
                      glue(
                        "{core_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(core_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(core_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(core_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
@@ -7341,7 +7341,7 @@ server <- function(input, output, session) {
                    subtitle = glue("{unique(core_Filter_Two_One()$IslandName)} {unique(core_Filter_Two_One()$SiteName)}"),
                    color = "Common Name",
                    caption = glue("{core_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(core_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(core_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(core_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = glue('{unique(core_Filter_Two_One()$CommonName)} per square meter')) +
@@ -7729,15 +7729,6 @@ server <- function(input, output, session) {
           return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
         }
       }, deleteFile = FALSE) # ONI/PDO scale photo
-      
-      core_AxisScale_MPA <- reactive({
-        if(input$core_FreeOrLock_MPA == "Locked Scales"){
-          return("fixed")
-        }
-        if(input$core_FreeOrLock_MPA == "Free Scales"){
-          return("free")
-        }
-      }) # Facet Plot Axis Scale free or fixed 
       
       output$core_Plot_MPA <- renderPlot({  # Single plot    ----
         
@@ -8389,7 +8380,7 @@ server <- function(input, output, session) {
                color = "Common Name",
                fill = "Oceanic Nino \nIndex Gradient",
                caption = glue("{rpcs_Filter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(rpcs_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(rpcs_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(rpcs_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = "Percent Cover") +
@@ -8435,7 +8426,7 @@ server <- function(input, output, session) {
                color = "Common Name",
                fill = "Common Name",
                caption = glue("{rpcs_Filter_One()$SiteName} is typically surveyed in {
-                 month(round(mean(month(rpcs_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                 lubridate::month(round(mean(month(rpcs_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                  } and has a mean depth of {round(mean(rpcs_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = "Percent Cover") +
@@ -8475,7 +8466,7 @@ server <- function(input, output, session) {
                subtitle = glue("{unique(rpcs_Filter_One()$IslandName)} {unique(rpcs_Filter_One()$SiteName)}"),
                color = "Common Name",
                caption = glue("{rpcs_Filter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(rpcs_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(rpcs_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(rpcs_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year", y = "Smoothed Conditional Mean Values") +
           theme_classic() +
@@ -8511,7 +8502,7 @@ server <- function(input, output, session) {
                subtitle = glue("{unique(rpcs_RawFilter_One()$IslandName)} {unique(rpcs_RawFilter_One()$SiteName)}"),
                color = "Common Name",
                caption = glue("{rpcs_RawFilter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(rpcs_RawFilter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(rpcs_RawFilter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(rpcs_RawFilter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = "Count per Quadrat") +
@@ -9925,7 +9916,7 @@ server <- function(input, output, session) {
                    caption = 
                      glue(
                        "{rpcs_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(rpcs_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(rpcs_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(rpcs_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = glue('{unique(rpcs_Filter_Two_One()$CommonName)} per square meter')) +
@@ -9980,7 +9971,7 @@ server <- function(input, output, session) {
                    caption =
                      glue(
                        "{rpcs_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(rpcs_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(rpcs_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(rpcs_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = "Percent Cover") +
@@ -10031,7 +10022,7 @@ server <- function(input, output, session) {
                    caption = 
                      glue(
                        "{rpcs_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(rpcs_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(rpcs_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(rpcs_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = glue('{unique(rpcs_Filter_Two_One()$CommonName)} per square meter')) +
@@ -11431,7 +11422,7 @@ server <- function(input, output, session) {
                color = "Common Name",
                fill = "Oceanic Nino \nIndex Gradient",
                caption = glue("{NHSF_Filter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(NHSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(NHSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(NHSF_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = "Mean Size (mm)") +
@@ -11477,7 +11468,7 @@ server <- function(input, output, session) {
                color = "Common Name",
                fill = "Common Name",
                caption = glue("{NHSF_Filter_One()$SiteName} is typically surveyed in {
-                 month(round(mean(month(NHSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                 lubridate::month(round(mean(month(NHSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                  } and has a mean depth of {round(mean(NHSF_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = "Mean Size (mm)") +
@@ -11517,7 +11508,7 @@ server <- function(input, output, session) {
                subtitle = glue("{unique(NHSF_Filter_One()$IslandName)} {unique(NHSF_Filter_One()$SiteName)}"),
                color = "Common Name",
                caption = glue("{NHSF_Filter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(NHSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(NHSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(NHSF_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year", y = "Smoothed Conditional Mean Values") +
           theme_classic() +
@@ -12917,7 +12908,7 @@ server <- function(input, output, session) {
                    caption = 
                      glue(
                        "{NHSF_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(NHSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(NHSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(NHSF_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = glue('{unique(NHSF_Filter_Two_One()$CommonName)} per square meter')) +
@@ -12972,7 +12963,7 @@ server <- function(input, output, session) {
                    caption =
                      glue(
                        "{NHSF_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(NHSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(NHSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(NHSF_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = "Mean Size (mm)") +
@@ -13023,7 +13014,7 @@ server <- function(input, output, session) {
                    caption = 
                      glue(
                        "{NHSF_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(NHSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(NHSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(NHSF_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = glue('{unique(NHSF_Filter_Two_One()$CommonName)} per square meter')) +
@@ -13549,10 +13540,12 @@ server <- function(input, output, session) {
         FSF_DFRaw %>%
           filter(SiteName == input$FSF_SiteName_SD_One,
                  CommonName == input$FSF_SpeciesName_SD_One) %>% 
+          expandRows(count = "Count") %>% 
           group_by(SurveyYear) %>%
-          mutate(TotalCount = length(Size_cm)) %>%
+          mutate(TotalCount = length(Size_cm),
+                 MeanSize = mean(Size_cm)) %>%
           select(SiteNumber, SurveyYear, Date, IslandName, SiteName, ScientificName, CommonName, 
-                 Size_cm, TotalCount, IslandCode, SiteCode, ReserveStatus, MeanDepth, Species)
+                 Size_cm, TotalCount, MeanSize, IslandCode, SiteCode, ReserveStatus, MeanDepth, Species)
       }) # filtered  FSF_ raw table
       
       FSF_RawFilterSummary_One <- reactive({ 
@@ -13752,7 +13745,7 @@ server <- function(input, output, session) {
               geom_boxplot(data = FSF_RawFilter_One(), width = 150,
                            aes(x = Date, y = Size_cm, group = SurveyYear, color = CommonName)) +
               geom_point(data = FSF_RawFilter_One(), size = 1, color = "black",
-                         aes(x = Date, y = mean(Size_cm), group = SurveyYear)) +
+                         aes(x = Date, y = MeanSize, group = SurveyYear)) +
               geom_text(data = FSF_RawFilter_One(), size = 4, fontface = "plain",
                         aes(x = Date, y = -1, group = Date, label = paste(' n = \n', FSF_RawFilter_One()$TotalCount))) +
               scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_One()$Date), expand = c(0.01, 0),
@@ -13761,8 +13754,8 @@ server <- function(input, output, session) {
                    subtitle= glue("{unique(FSF_RawFilter_One()$IslandName)} {unique(FSF_RawFilter_One()$SiteName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = "Size Distribution (mm)") +
-               
+                   y = "Size Distribution (cm)") +
+              scale_color_manual(values = FishColor) +
               theme_classic() +
               theme(legend.position = "bottom",
                     legend.background = element_rect(),
@@ -13791,7 +13784,7 @@ server <- function(input, output, session) {
               geom_violin(data = FSF_RawFilter_One(), width = 150,
                           aes(x = Date, y = Size_cm, group = SurveyYear, color = CommonName, fill = CommonName)) +
               geom_point(data = FSF_RawFilter_One(), size = 1, color = "black",
-                         aes(x = Date, y = mean(Size_cm), group = SurveyYear)) +
+                         aes(x = Date, y = MeanSize, group = SurveyYear)) +
               geom_text(data = FSF_RawFilter_One(), aes(x = Date, y = -1, group = Date, 
                                                         label = paste(' n = \n', FSF_RawFilter_One()$TotalCount)), size = 4) +
               scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_One()$Date), expand = c(0.01, 0),
@@ -13801,9 +13794,8 @@ server <- function(input, output, session) {
                    color = "Common Name",
                    fill = "Common Name",
                    x = "Year",
-                   y = "Size Distribution (mm)") +
-               
-               
+                   y = "Size Distribution (cm)") +
+              scale_fill_manual(values = FishColor) +
               theme_classic() +
               theme(legend.position = "bottom",
                     legend.background = element_rect(),
@@ -13838,9 +13830,9 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(FSF_RawFilter_One()$ScientificName)}"),
                    subtitle= glue("{unique(FSF_RawFilter_One()$IslandName)} {unique(FSF_RawFilter_One()$SiteCode)}"),
                    fill = "Common Name",
-                   x = "Size Distribution (mm)",
+                   x = "Size Distribution (cm)",
                    y = "Year") +
-               
+              scale_fill_manual(values = FishColor) +
               theme_minimal() +
               theme(legend.position = "bottom",
                     legend.title = element_text(size = 14, vjust = .5, face = "bold"),
@@ -13992,9 +13984,9 @@ server <- function(input, output, session) {
                    subtitle = glue("{unique(FSF_RawFilter_Isl()$CommonName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = "Size Distribution (mm)") +
+                   y = "Size Distribution (cm)") +
               facet_grid(rows = vars(IslandName), scales = FSF_AxisScale_SD_Isl()) +
-               
+              scale_color_manual(values = FishColor) +
               theme_classic() +
               theme(legend.position = "none",
                     legend.justification = c(0,0.5),
@@ -14031,9 +14023,9 @@ server <- function(input, output, session) {
                    subtitle = glue("{unique(FSF_RawFilter_Isl()$CommonName)}"),
                    color = "Common Name",
                    x = "Year",
-                   y = "Size Distribution (mm)") +
+                   y = "Size Distribution (cm)") +
               facet_grid(rows = vars(IslandName), scales = FSF_AxisScale_SD_Isl()) +
-               
+              scale_fill_manual(values = FishColor) +
               theme_classic() +
               theme(legend.position = "none",
                     legend.justification = c(0,0.5),
@@ -14053,12 +14045,13 @@ server <- function(input, output, session) {
       
     }
     
-    { # FSF_MS_Server_byMPA ----
+    { # FSF_SD_Server_byMPA ----
       
       FSF_RawFilter_MPA <- reactive({
         FSF_DFRawMPA %>%
           filter(IslandName == input$FSF_IslandName_MPA,
                  CommonName == input$FSF_SpeciesName_SD_MPA) %>%
+          expandRows(count = "Count") %>% 
           group_by(SurveyYear, ReserveStatus) %>%
           mutate(TotalCount = length(Size_cm),
                  MeanSize = mean(Size_cm)) %>% 
@@ -14150,19 +14143,20 @@ server <- function(input, output, session) {
                         position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_SD_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
               new_scale_fill() +
-              geom_boxplot(data = FSF_RawFilter_MPA(), width = 150,
-                           aes(x = Date, y = Size_cm, group = SurveyYear, color = CommonName)) +
-              geom_point(data = FSF_RawFilter_MPA(), size = 1, color = "black",
-                         aes(x = Date, y = MeanSize, group = SurveyYear, color = CommonName)) +
+              geom_boxplot(data = FSF_RawFilter_MPA(), position = "dodge2", width = 175,
+                           aes(x = Date, y = Size_cm, group = interaction(SurveyYear, ReserveStatus),
+                               fill = ReserveStatus)) +
               scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_MPA()$Date), expand = c(0.01, 0),
                            limits = c(min(FSF_RawFilter_MPA()$Date) - 150, max(FSF_RawFilter_MPA()$Date) + 150)) +
-              labs(title = glue("{unique(FSF_RawFilter_MPA()$ScientificName)}"),
-                   subtitle = FSF_RawFilter_MPA()$MPA_Name, 
-                   colour = "Common Name",
+              labs(title = FSF_RawFilter_MPA()$ScientificName,
+                   subtitle = FSF_RawFilter_MPA()$MPA_Name,
+                   fill = "Reserve Status",
                    x = "Year",
-                   y = "Size Distribution (mm)") +
-              facet_grid(rows = vars(ReserveStatus), scales = FSF_AxisScale_SD_MPA()) +
-               
+                   y = "Size Distribution (cm)") +
+              facet_grid(rows = ifelse(input$FSF_FreeOrLock_SD_MPA == "Locked Scales", vars(ReserveStatus), 
+                                            ifelse(input$FSF_FreeOrLock_SD_MPA == "Free Scales", vars(ReserveStatus), 
+                                                   vars(CommonName))), scales = FSF_AxisScale_SD_MPA()) +
+              scale_fill_manual(values = c(Inside = "green3", Outside = "red3")) +
               theme_classic() +
               theme(legend.position = "bottom",
                     legend.background = element_rect(),
@@ -14188,19 +14182,19 @@ server <- function(input, output, session) {
                         position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_SD_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
               new_scale_fill() +
-              geom_violin(data = FSF_RawFilter_MPA(), width = 150,
-                          aes(x = Date, y = Size_cm, group = SurveyYear, fill = CommonName)) +
-              geom_point(data = FSF_RawFilter_MPA(), size = 1, color = "black",
-                         aes(x = Date, y = MeanSize, group = SurveyYear)) +
+              geom_violin(data = FSF_RawFilter_MPA(),
+                          aes(x = Date, y = Size_cm, group = interaction(SurveyYear, ReserveStatus),
+                              fill = ReserveStatus)) +
               scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_MPA()$Date), expand = c(0.01, 0),
                            limits = c(min(FSF_RawFilter_MPA()$Date) - 150, max(FSF_RawFilter_MPA()$Date) + 150)) +
               labs(title = glue("{unique(FSF_RawFilter_MPA()$ScientificName)}"),
                    subtitle = FSF_RawFilter_MPA()$MPA_Name,
-                   color = "Common Name",
                    x = "Year",
-                   y = "Size Distribution (mm)") +
-              facet_grid(rows = vars(ReserveStatus), scales = FSF_AxisScale_SD_MPA()) +
-               
+                   y = "Size Distribution (cm)") +
+              facet_grid(rows = ifelse(input$FSF_FreeOrLock_SD_MPA == "Locked Scales", vars(ReserveStatus), 
+                                       ifelse(input$FSF_FreeOrLock_SD_MPA == "Free Scales", vars(ReserveStatus), 
+                                              vars(CommonName))), scales = FSF_AxisScale_SD_MPA()) +
+              scale_fill_manual(values = c(Inside = "green3", Outside = "red3")) +
               theme_classic() +
               theme(legend.position = "bottom",
                     legend.background = element_rect(),
@@ -14232,7 +14226,7 @@ server <- function(input, output, session) {
           select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
                  StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
                  SiteNumber, IslandCode, SiteCode, IslandSE, Species) 
-      }) # filtered one meter summary table
+      }) # filtered summary table
       
       FSF_SpeciesClass_One <- reactive({ 
         SpeciesFish %>%
@@ -14421,11 +14415,11 @@ server <- function(input, output, session) {
                color = "Common Name",
                fill = "Oceanic Nino \nIndex Gradient",
                caption = glue("{FSF_Filter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(FSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(FSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(FSF_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = "Mean Size (cm)") +
-           
+          scale_color_manual(values = FishColor) +
           theme_classic() +
           theme(legend.position = "bottom",
                 legend.title = element_text(size = 14, vjust = .5, face = "bold"),
@@ -14467,11 +14461,11 @@ server <- function(input, output, session) {
                color = "Common Name",
                fill = "Common Name",
                caption = glue("{FSF_Filter_One()$SiteName} is typically surveyed in {
-                 month(round(mean(month(FSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                 lubridate::month(round(mean(month(FSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                  } and has a mean depth of {round(mean(FSF_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = "Mean Size (cm)") +
-           
+          scale_fill_manual(values = FishColor) +
           theme_classic() +
           theme(legend.position = "bottom",
                 legend.title = element_text(size = 14, vjust = .5, face = "bold"),
@@ -14496,7 +14490,7 @@ server <- function(input, output, session) {
           stat_smooth(data = FSF_Filter_One(), 
                       aes(x = Date, y = MeanSize, group = ScientificName, color = CommonName), 
                       size = 1, span = input$FSF_SmoothSlide_One, se = as.logical(input$FSF_SmoothSE_One)) +
-          scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 1)) +
+          scale_color_manual(values = FishColor, guide = guide_legend(order = 1)) +
           geom_point(data = FSF_Filter_One(), aes(x = Date, y = MeanSize, color = CommonName), 
                      size = 2, alpha = as.numeric(input$FSF_SmoothPoint_One)) +
           scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_One()$Date), 
@@ -14507,7 +14501,7 @@ server <- function(input, output, session) {
                subtitle = glue("{unique(FSF_Filter_One()$IslandName)} {unique(FSF_Filter_One()$SiteName)}"),
                color = "Common Name",
                caption = glue("{FSF_Filter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(FSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(FSF_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(FSF_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year", y = "Smoothed Conditional Mean Values") +
           theme_classic() +
@@ -14765,6 +14759,7 @@ server <- function(input, output, session) {
                    x = "Year",
                    y = "Mean Size (cm)") +
               facet_grid(rows = vars(IslandName), scales = FSF_AxisScale_Isl()) +
+              scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "none",
                     legend.justification = c(0,0.5),
@@ -14845,10 +14840,8 @@ server <- function(input, output, session) {
                         position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_Isl()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
               new_scale_fill() +
-              geom_col(data = FSF_FilterByIsl_Isl(), 
-                       aes(x = IslandDate, y = Island_Mean, fill = IslandName),
-                       position = "dodge",
-                       width = 280) +
+              geom_col(data = FSF_FilterByIsl_Isl(), position = "dodge", width = 280,
+                       aes(x = IslandDate, y = Island_Mean, fill = IslandName)) +
               facet_grid(rows = vars(IslandName), scales = FSF_AxisScale_Isl()) +
               geom_text(data = FSF_FilterByIsl_Isl(),
                         aes(x = IslandDate, y = Island_Mean, label = round(Island_Mean, digits = 2)),
@@ -14867,6 +14860,7 @@ server <- function(input, output, session) {
                    fill = "Common Name",
                    x = "Year",
                    y = "Mean Size (cm)") +
+              scale_fill_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "none",
                     legend.justification = c(0,0.5),
@@ -15903,11 +15897,11 @@ server <- function(input, output, session) {
                    caption = 
                      glue(
                        "{FSF_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(FSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(FSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(FSF_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = glue('{unique(FSF_Filter_Two_One()$CommonName)} per square meter')) +
-               
+              scale_color_manual(values = FishColor) +
               theme_classic() +
               theme(legend.position = "bottom",
                     legend.title = element_text(size = 14, vjust = .5, face = "bold"),
@@ -15954,15 +15948,13 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(FSF_Filter_Two_One()$ScientificName)
                               } and {unique(FSF_Filter_Two_Two()$ScientificName)}"),
                    subtitle = glue("{unique(FSF_Filter_Two_One()$IslandName)} {unique(FSF_Filter_Two_One()$SiteName)}"),
-                   color = "Common Name",
-                   caption =
-                     glue(
-                       "{FSF_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(FSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                   fill = "Common Name",
+                   caption = glue( "{FSF_Filter_Two_One()$SiteName} is typically surveyed in {
+                     lubridate::month(round(mean(month(FSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(FSF_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = "Mean Size (cm)") +
-               
+              scale_fill_manual(values = FishColor) +
               theme_classic() +
               theme(legend.position = "bottom",
                     legend.title = element_text(size = 14, vjust = .5, face = "bold"),
@@ -16009,11 +16001,11 @@ server <- function(input, output, session) {
                    caption = 
                      glue(
                        "{FSF_Filter_Two_One()$SiteName} is typically surveyed in {
-                     month(round(mean(month(FSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                     lubridate::month(round(mean(month(FSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(FSF_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
                    y = glue('{unique(FSF_Filter_Two_One()$CommonName)} per square meter')) +
-               
+              scale_color_manual(values = FishColor) +
               theme_classic() +
               theme(legend.position = "bottom",
                     legend.title = element_text(size = 14, vjust = .5, face = "bold"),
@@ -16096,22 +16088,18 @@ server <- function(input, output, session) {
             out <- by(data = FSF_Filter_All(), INDICES = FSF_Filter_All()$Species, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_line(data = m, 
-                          aes(Date, MeanSize, group = CommonName, color = CommonName, linetype = SiteName),
-                          size = 1) +
+                geom_line(data = m, size = 1,
+                          aes(Date, MeanSize, group = CommonName, color = CommonName, linetype = SiteName)) +
                 scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
                              expand = c(0.01, 0)) +
-                geom_errorbar(data = m, 
-                              aes(x = Date, ymin = MeanSize - StandardError,
-                                  ymax = MeanSize + StandardError),
-                              width = 0.25,
-                              color = "black") +
+                geom_errorbar(data = m, width = 0.25,color = "black",
+                              aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError)) +
                 labs(title = m$ScientificName, 
                      subtitle = glue("{m$IslandName} {m$SiteName}"),
                      color = "Common Name",
                      x = "Year",
                      y = "Mean Size (cm)") +
-                 
+                scale_color_manual(values = FishColor) +
                 scale_linetype_manual(values = SiteLine, guide = FALSE) +
                 theme_classic() +
                 theme(legend.position = "right",
@@ -16136,15 +16124,11 @@ server <- function(input, output, session) {
             out <- by(data = FSF_Filter_All(), INDICES = FSF_Filter_All()$CommonName, FUN = function(m) {
               m <- droplevels(m)
               m <- ggplot() + 
-                geom_col(data = m, 
-                         aes(x = Date, y = MeanSize, group = CommonName, fill = CommonName, linetype = SiteName),
-                         width = 250) +
+                geom_col(data = m, width = 250,
+                         aes(x = Date, y = MeanSize, group = CommonName, fill = CommonName, linetype = SiteName)) +
                 geom_text(data = m, 
                           aes(x = Date, y = MeanSize, label = round(MeanSize, digits = 2)),
-                          position = position_dodge(1),
-                          vjust = -.2,
-                          hjust = .5,
-                          angle = 0) +
+                          vjust = -.2, hjust = .5, angle = 0) +
                 scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
                              expand = c(0.01, 0)) +
                 scale_y_continuous(expand = c(0.1, 0)) +
@@ -16153,7 +16137,7 @@ server <- function(input, output, session) {
                      color = "Common Name",
                      x = "Year",
                      y = "Mean Size (cm)") +
-                 
+                scale_color_manual(values = FishColor) +
                 scale_linetype_manual(values = SiteLine, guide = FALSE) +
                 theme_classic() +
                 theme(legend.position = "right",
@@ -16180,7 +16164,7 @@ server <- function(input, output, session) {
   }
   
   
-  { # ........ RDFC_Mean_Counts ........
+  { # ........ RDFC_Mean_Counts ........   ----
     
     RDFC_Filter_One <- reactive({ 
       RDFC_DF %>%
@@ -16193,7 +16177,8 @@ server <- function(input, output, session) {
                Mean_Count = mean(Count),
                StandardError = std.error(Count),
                StandardDeviation = sd(Count),
-               Date = mean(as.Date(Date)))
+               Date = mean(as.Date(Date)),
+               Observers = length(Count))
     }) # filtered one meter summary table
     
     RDFC_SideBar_Filter <- reactive({ 
@@ -16265,32 +16250,30 @@ server <- function(input, output, session) {
         geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                   position = "identity", alpha = as.numeric(RDFC_alphaPDO_UW_one()), show.legend = FALSE) +
         scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-        geom_ribbon(data = RDFC_Filter_One(), fill = "deepskyblue",
-                    aes(x = Date, ymin = Low_Count, ymax = High_Count, group = ScientificName)) +
-        # geom_line(data = RDFC_Filter_One(),
-        #           aes(x = Date, y = Mean_Count, group = ScientificName, color = CommonName), 
-        #           size = 1) +
-        geom_point(data = RDFC_Filter_One(),
-                  aes(x = Date, y = Mean_Count, group = ScientificName, color = CommonName),
-                  size = 3) +
-        # geom_line(data = RDFC_Filter_One(),
-        #           aes(x = Date, y = Low_Count, group = ScientificName), color = "green", 
-        #           size = 1) +
+        geom_line(data = RDFC_Filter_One(), size = 1, linetype = "solid", 
+                  aes(x = Date, y = High_Count, group = ScientificName, color = CommonName)) +
+        geom_point(data = RDFC_Filter_One(), size = 2,
+                  aes(x = Date, y = Mean_Count, group = ScientificName, color = CommonName)) +
+        geom_line(data = RDFC_Filter_One(), size = 1, linetype = "dashed",
+                  aes(x = Date, y = Low_Count, group = ScientificName, color = CommonName)) +
         geom_errorbar(data = RDFC_Filter_One(),
                       aes(x = Date, ymin = Mean_Count - StandardError, ymax = Mean_Count + StandardError),
                       width = 0, color = "black") + #, alpha = as.numeric(input$FSF_EB_one)) +
+        geom_text(data = RDFC_Filter_One(), size = 4, fontface = "plain", position = position_dodge(1),
+                  aes(x = Date, y = max(RDFC_Filter_One()$High_Count)*1.1, 
+                      group = Date, label = paste(' N = \n', RDFC_Filter_One()$Observers))) +
         scale_x_date(date_labels = "%b %Y", breaks = unique(RDFC_Filter_One()$Date),
                      limits = c(min(as.Date(RDFC_Filter_One()$Date))-365, max(as.Date(RDFC_Filter_One()$Date))+365),
                      expand = c(0.01, 0)) +
         labs(title = glue("{unique(RDFC_Filter_One()$ScientificName)}"),
              subtitle = glue("{unique(RDFC_Filter_One()$IslandName)} {unique(RDFC_Filter_One()$SiteName)}"),
              color = "Common Name",
-             fill = "Oceanic Nino \nIndex Gradient",
              caption = glue("{RDFC_Filter_One()$SiteName} is typically surveyed in {
-                       month(round(mean(month(RDFC_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
-                       } and has a mean depth of {round(mean(RDFC_Filter_One()$MeanDepth), 2)} ft"),
+                       lubridate::month(round(mean(month(RDFC_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       } and has a mean depth of {round(mean(RDFC_Filter_One()$MeanDepth), 2)
+        } ft. N = the number of observers. Solid lines represent the high count, points are the mean, and dashed lines are the low count"),
              x = "Year",
-             y = "Mean Count") +
+             y = "Count") +
         theme_classic() +
         theme(legend.position = "bottom",
               legend.title = element_text(size = 14, vjust = .5, face = "bold"),
@@ -18276,7 +18259,7 @@ server <- function(input, output, session) {
       )
     }
     else if(input$maptype == "Satellite Site Maps") {
-      dyn_ui <- tabPanel("Site Maps", value = "maps", # Maps_TP_Leaflet      ----
+      dyn_ui <- tabPanel("Site Maps", value = "maps", # Maps_TP_Sat      ----
                          fluidRow(column(8, imageOutput(outputId = "statMap",
                                                         height = 600, width = 1000)
                          ))
@@ -18297,7 +18280,7 @@ server <- function(input, output, session) {
       )
     }
     else if (input$maptype == "Site Descriptions") {
-      dyn_ui <- tabPanel("Site Maps", value = "maps", # Maps_TP_Sat  ----
+      dyn_ui <- tabPanel("Site Maps", value = "maps", # Maps_TP_Descriptions  ----
                          htmlOutput(outputId = 'SitePDF'),
                          tags$hr()
       )
@@ -18422,7 +18405,244 @@ server <- function(input, output, session) {
                 src = glue("Annual_Reports/{input$Reports}.pdf"))
   })
   
+  
+  output$VD_UIout <- renderUI({ # Visit Dates UI   ----
+    if (is.null(input$VD_allORone))
+      return(NULL)
+    
+    else if(input$VD_allORone == "By Site"){
+      dyn_ui <- tabPanel("Visit Dates", value = "VD_TP",
+                         plotOutput(outputId = "VD_Plot_One", 
+                                    height = 600),
+                         tags$hr(),
+                         fluidRow(column(6, DTOutput(outputId = "VD_StatSummary_One_One",
+                                                     height = 350)),
+                                  column(6, DTOutput(outputId = "VD_StatSummary_One_Two",
+                                                     height = 350))),
+                         tags$hr(),
+                         DTOutput(outputId = "VD_Summary_One",
+                                  height = 500),
+                         tags$hr())
+    }
+    else if(input$VD_allORone == "By Island"){
+      dyn_ui <- tabPanel("Visit Dates", value = "VD_TP",
+                         plotOutput(outputId = "VD_Plot_Isl", 
+                                    height = 600))
+    }
+    return(dyn_ui)
+  })
+  
+  {  # ........ VD_Servers ........  ----
+    
+    { # By Site     ----
+      
+      VD_Filter_One <- reactive({
+        if (input$VD_SurveyType_One == "All"){
+          return(
+            visitDates %>%
+              filter(SiteName == input$VD_SiteName_One) 
+            )
+        }else if(input$VD_SurveyType_One == "Core Vs Fish"){
+          visitDates$SurveyType <- visitDates$CvsF
+          visitDates %>% 
+            filter(SiteName == input$VD_SiteName_One) 
+        }else{
+          visitDates %>% 
+            filter(SiteName == input$VD_SiteName_One, 
+                   SurveyType == input$VD_SurveyType_One)
+        }
+      })
+      
+      output$VD_Plot_One <- renderPlot({
+        ggplot() +
+          geom_point(data = VD_Filter_One(), position = position_jitterdodge(jitter.height = .2), size = 2,
+                     aes(x = lubridate::year(Date), y = lubridate::month(Date),
+                         group = SurveyYear, color = SurveyType)) +
+          geom_line(data = VD_Filter_One(), show.legend = FALSE, alpha = as.numeric(input$VD_MeanDate_One),
+                    aes(x = lubridate::year(MeanDate), y = lubridate::month(MeanDate),
+                        group = SiteName, color = SiteName)) +
+          scale_y_continuous(expand = c(0.1, 0), breaks = 4:11, 
+                                    labels =  c("Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov")) +
+          scale_x_continuous(breaks = unique(lubridate::year(VD_Filter_One()$Date))) +
+          labs(title = glue("{unique(VD_Filter_One()$IslandName)} {unique(VD_Filter_One()$SiteName)}"),
+               color = "Survey Type",
+               x = "Year",
+               y = "Month") +
+          theme_minimal() +
+          theme(legend.position = "bottom",
+                legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                legend.text = element_text(size = 14, vjust = .5),
+                plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                plot.subtitle = element_text(hjust = 0.5, size = 18),
+                plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                axis.title = element_text(size = 16, face = "bold"),
+                axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+                axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
+      })
+      
+      VD_FilterDT_One_One <- reactive({
+        visitDates2 <- visitDates %>% 
+          mutate(Day_of_Week = lubridate::wday(Date, label = TRUE, abbr = FALSE)) %>% 
+          filter(SiteName == input$VD_SiteName_One) %>% 
+          distinct(Day_of_Week, Date) %>%
+          group_by(Day_of_Week) %>% 
+          mutate(Count = length(Day_of_Week)) %>% 
+          distinct(Day_of_Week, Count) %>% 
+          arrange(Day_of_Week) 
+      })
+      
+      VD_FilterDT_One_Two <- reactive({
+        visitDates %>% 
+          mutate(Month = lubridate::month(Date, label = TRUE, abbr = FALSE)) %>% 
+          filter(SiteName == input$VD_SiteName_One) %>% 
+          distinct(Month, Date) %>%
+          group_by(Month) %>% 
+          mutate(Count = length(Month)) %>% 
+          distinct(Month, Count) %>% 
+          arrange(Month) 
+      })
+      
+      output$VD_StatSummary_One_One <- renderDT({
+        datatable(VD_FilterDT_One_One(),
+                  extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    scrollY = "300px",
+                    paging = FALSE,
+                    ordering = TRUE,
+                    info = FALSE,
+                    dom = 'Bfrtip',
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    columnDefs = list(list(className = 'dt-center', targets = 0:1)),
+                    colReorder = TRUE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(VD_FilterDT_One_One()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      })
+      
+      output$VD_StatSummary_One_Two <- renderDT({
+        datatable(VD_FilterDT_One_Two(),
+                  extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    scrollY = "300px",
+                    paging = FALSE,
+                    ordering = TRUE,
+                    info = FALSE,
+                    dom = 'Bfrtip',
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    columnDefs = list(list(className = 'dt-center', targets = 0:1)),
+                    colReorder = TRUE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(VD_FilterDT_One_Two()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      })
+      
+      VD_FilterDT_One <- reactive({
+        visitDates %>% 
+          mutate(Day_of_Week = lubridate::wday(Date, label = TRUE, abbr = FALSE),
+                 Month = lubridate::month(Date, label = TRUE, abbr = FALSE))%>% 
+          filter(SiteName == input$VD_SiteName_One) %>% 
+          distinct(Date, SurveyYear, SiteCode, .keep_all = TRUE) %>% 
+          select(SurveyYear, SiteNumber, IslandName, SiteName, Date, MeanDate, Day_of_Week, Month) %>% 
+          arrange(as.factor(SurveyYear)) 
+      })
+      
+      output$VD_Summary_One <- renderDT({
+        datatable(VD_FilterDT_One(),
+                  extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    scrollY = "425px",
+                    paging = FALSE,
+                    ordering = TRUE,
+                    info = FALSE,
+                    dom = 'Bfrtip',
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    columnDefs = list(list(className = 'dt-center', targets = 0:6)),
+                    colReorder = TRUE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(VD_FilterDT_One()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      })
+      
+    }
+    
+    # { # By Island     ----
+    #   
+    #   VD_Filter_Isl <- reactive({
+    #     if (input$VD_SurveyType_One == "All"){
+    #       return(visitDates )
+    #     }else if(input$VD_SurveyType_One == "Core Vs Fish"){
+    #       visitDates$SurveyType <- visitDates$CvsF
+    #     }else{
+    #       visitDates %>% 
+    #         filter(SiteName == input$VD_SiteName_One, 
+    #                SurveyType == input$VD_SurveyType_One)
+    #     }
+    #   })
+    #   
+    #   output$VD_Plot_One <- renderPlot({
+    #     ggplot() +
+    #       geom_point(data = VD_Filter_Isl(), position = position_jitterdodge(jitter.height = .25), size = 2,
+    #                  aes(x = lubridate::year(Date), y = lubridate::month(Date, label = T),
+    #                      group = SurveyYear, color = SurveyType)) +
+    #       scale_x_continuous(breaks = unique(lubridate::year(VD_Filter_Isl()$Date))) +
+    #       # scale_y_continuous(limits = c(0, 12), expand = c(0.01, 0), breaks = 1:12, # unique(lubridate::wday(VD_Filter_Isl()$Date)), 
+    #       #                    labels =  c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) + 
+    #       
+    #       # geom_point(data = VD_Filter_Isl(), position = position_jitterdodge(jitter.height = .25),
+    #       #           aes(x = lubridate::month(Date), y = lubridate::wday(Date), group = SurveyType, color = SurveyType)) +
+    #       # scale_y_continuous(limits = c(0, 7), expand = c(0.01, 0), breaks = 1:7,  
+    #       #                    labels =  c("Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat")) + 
+    #       labs(title = glue("{unique(VD_Filter_Isl()$IslandName)} {unique(VD_Filter_Isl()$SiteName)}"),
+    #            color = "SurveyType",
+    #            x = "Year",
+    #            y = "Month") +
+    #       theme_minimal() +
+    #       theme(legend.position = "bottom",
+    #             legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+    #             legend.text = element_text(size = 14, vjust = .5),
+    #             plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+    #             plot.subtitle = element_text(hjust = 0.5, size = 18),
+    #             plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+    #             axis.title = element_text(size = 16, face = "bold"),
+    #             axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+    #             axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
+    #   })
+    # }
+    
+  }
+  
 } # End of Server function  ----
+
+
+
+
+
+
+
+
+
+
 
 
 

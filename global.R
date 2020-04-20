@@ -5,6 +5,7 @@
 { # Library    ----
   
   library(shiny) 
+  library(data.table)
   library(lubridate)
   library(glue)
   library(plyr)
@@ -28,8 +29,6 @@
   library(DT)
   library(ggnewscale)
   library(cowplot)
-  library(data.table)
-
 }
 
 { # .. SiteInfo_DF   ----
@@ -41,6 +40,7 @@
   MPA_Site_levels <- siteInfo2 %>%
     filter(Reference == TRUE) %>%
     arrange(ReserveStatus, IslandName)
+  Survey_Levels <- c("One_Meter", "Five_Meter", "Bands", "NHSF", "RPC", "FSF", "RDFC")
   
   ARMlist <- siteInfo2 %>%
     filter(ARMs == TRUE)
@@ -59,6 +59,8 @@
   SiteLine <- c(as.character(siteInfo1$LineType), "dashed", "dashed", "dashed", "dashed", "dashed")
   names(SiteLine) <- c(siteInfo1$SiteName, IslandLevels)
   
+  visitDates <- read_csv("VisitDates.csv")
+  visitDates$SurveyType <- factor(visitDates$SurveyType, levels = Survey_Levels)
 }
 
 { # .. Species_Info    ----
@@ -131,7 +133,7 @@
   
 }
 
-{ # .. Band_DF   ----
+{ # .. Bands_DF   ----
   
   bands_DF <- read_csv("bands_Summary.csv")
   bands_Levels <- unique(bands_species$CommonName)
@@ -170,7 +172,7 @@
   NHSF_DF <- read_csv("NHSF_Summary.csv")
   NHSF_DF$IslandName <- factor(NHSF_DF$IslandName, levels = IslandLevels)
   
-  NHSF_DFRaw<- read_csv("NHSF_Raw.csv")
+  NHSF_DFRaw<- read_csv("NHSF_Raw.csv") 
   NHSF_DFRaw$IslandName <- factor(NHSF_DFRaw$IslandName, levels = IslandLevels)
   
   NHSF_DFMPA <- read_csv("NHSF_MPA.csv")
@@ -203,21 +205,20 @@
 
 { # .. FSF_DF   ----
   
-  FSF_DF <- read_csv("FSF_Summary.csv")
+  FSF_DF <- read_csv("FSF_Summary.csv") 
   FSF_DF$IslandName <- factor(FSF_DF$IslandName, levels = IslandLevels)
   
   FSF_DFMPA <- read_csv("FSF_MPA.csv")
   FSF_DFMPA$IslandName <- factor(FSF_DFMPA$IslandName, levels = MPA_Levels)
   
   FSF_DFRaw <- read_csv("FSF_Raw.csv")
-  # FSF_DFRaw <- filter(FSF_DFRaw, CommonName == "California sheephead, male")
   FSF_DFRaw$IslandName <- factor(FSF_DFRaw$IslandName, levels = IslandLevels)
   
   FSF_DFRawMPA <- read_csv("FSF_MPA_Raw.csv")
   FSF_DFRawMPA$IslandName <- factor(FSF_DFRawMPA$IslandName, levels = MPA_Levels)
 }
 
-{ # .. RDFC_DF
+{ # .. RDFC_DF   ----
 
   RDFC_DF <- read_csv("RDFC_Summary.csv")
   RDFC_DF$IslandName <- factor(RDFC_DF$IslandName, levels = IslandLevels)
@@ -499,6 +500,18 @@
     tags$hr())
   
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

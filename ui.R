@@ -736,10 +736,13 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                    selected = "California sheephead, male"),
                        radioButtons(inputId = "FSF_Graph_SD_MPA",
                                     label = "Choose a graph:",
-                                    choices = c("Boxplot", "Violin Plot")),
+                                    choices = c("Boxplot", 
+                                                "Violin Plot")),
                        radioButtons(inputId = "FSF_FreeOrLock_SD_MPA",
                                     label =  "Axis Options:",
-                                    choices = c("Locked Scales", "Free Scales")),
+                                    choices = c("Single Plot", 
+                                                "Locked Scales", 
+                                                "Free Scales")),
                        radioButtons(inputId = "FSF_GraphOptions_SD_MPA",
                                     label =  "Graph Options:",
                                     choices = c("With No Index", 
@@ -1101,10 +1104,32 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
       ),
       # ~ Report Archive  ----
       # ...... Year choice   ----
-      conditionalPanel(condition = "input.tabselected=='reports'", 
+      conditionalPanel(condition = "input.tabselected == 'reports'", 
                        selectInput(inputId = "Reports",
                                     label = "Choose a year to view an annual report",
                                     choices = c(2012:1990, "1982-1989"))
+      ),
+      # ~ VD_Conditional  ----
+      # ...... By Site ----
+      conditionalPanel(condition = "input.tabselected == 'VD_TP' && input.VD_allORone =='By Site'",
+                       selectInput(inputId = "VD_SiteName_One",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       radioButtons(inputId = "VD_MeanDate_One",
+                                    label = "Show the mean survey month?",
+                                    choices = c("Yes" = 1, "No" = 0)),
+                       radioButtons(inputId = "VD_SurveyType_One",
+                                    label = "Choose a Survey Protocol:",
+                                    choices = c("All", "Core Vs Fish", Survey_Levels))
+      ),
+      # ...... By Isl ----
+      conditionalPanel(condition = "input.tabselected == 'VD_TP' && input.VD_allORone =='By Island'",
+                       selectInput(inputId = "VD_SiteName_Isl",
+                                   label = "Choose a Site:",
+                                   choices = SiteNames),
+                       radioButtons(inputId = "VD_SurveyType_Isl",
+                                    label = "Choose a Survey Protocol:",
+                                    choices = c("All", Survey_Levels))
       )
       
     ), # End SidebarMenu   ----
@@ -1467,8 +1492,16 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                 tags$hr(),
                 htmlOutput(outputId = "viewReport", height = 600),
                 tags$hr(),
-                NPSreports_tagList) 
-       
+                NPSreports_tagList),
+       tabPanel("Visit Dates", value = "VD_TP", # ** VD_TP     ----
+                fluidRow(column(6, offset = 3,tags$h1(tags$strong("Monitoring Dates")))),
+                fluidRow(column(3, radioButtons(inputId = "VD_allORone",
+                                                label = "What would you like to view?",
+                                                choices = c("By Site",
+                                                            "By Island"),
+                                                inline = FALSE))),
+                tags$hr(),
+                uiOutput(outputId = "VD_UIout"))
     )
   )
 ) #End of User Interface Section  ----
