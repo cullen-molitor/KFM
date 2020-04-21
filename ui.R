@@ -864,13 +864,11 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
       ),
       # ~ RDFC_Conditional  ----
       # ...... One Species ----
-      conditionalPanel(condition = "input.tabselected=='RDFC_TP'", 
-      # && input.RDFC_allORone=='One Species by Site'",
+      conditionalPanel(condition = "input.tabselected=='RDFC_TP' && input.RDFC_allORone=='One Species by Site'",
                        selectInput(inputId = "RDFC_SiteName_One",
                                    label = "Choose a Site:",
                                    choices = SiteNames),
                        uiOutput(outputId = "RDFC_SideBar_One"),
-                       
                        radioButtons(inputId = "RDFC_Graph_One",
                                     label = "Choose a graph:",
                                     choices = c("Line", "Bar", "Smooth Line")),
@@ -1124,12 +1122,15 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
       ),
       # ...... By Isl ----
       conditionalPanel(condition = "input.tabselected == 'VD_TP' && input.VD_allORone =='By Island'",
-                       selectInput(inputId = "VD_SiteName_Isl",
-                                   label = "Choose a Site:",
-                                   choices = SiteNames),
+                       selectInput(inputId = "VD_IslandName_Isl",
+                                   label = "Choose an Island:",
+                                   choices = IslandLevels),
+                       radioButtons(inputId = "VD_MeanDate_Isl",
+                                    label = "Show the mean survey month?",
+                                    choices = c("Yes" = 1, "No" = 0)),
                        radioButtons(inputId = "VD_SurveyType_Isl",
                                     label = "Choose a Survey Protocol:",
-                                    choices = c("All", Survey_Levels))
+                                    choices = c("All", "Core Vs Fish", Survey_Levels))
       )
       
     ), # End SidebarMenu   ----
@@ -1427,8 +1428,19 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                              height = 625),
                                  tags$hr())),
        tabPanel("Roving Diver Fish Count", value = "RDFC_TP", # ** RDFC_TP     ----
+                fluidRow(column(6, offset = 3,tags$h1(tags$strong("Roving Diver Fish Count")))),
+                fluidRow(column(3, radioButtons(inputId = "RDFC_allORone",
+                                                label = "What would you like to view?",
+                                                choices = c("One Species by Site",
+                                                            "One Species by Island"),
+                                                inline = FALSE)),
+                         column(3, imageOutput(outputId = "RDFC_TopSitePhoto_One",
+                                               height = 200))),
                 tags$hr(),
-                plotOutput(outputId = "RDFC_Plot")), 
+                uiOutput(outputId = "RDFC_UIout"),
+                imageOutput(outputId = "RDFC_LargeSitePhoto_One",
+                            height = 625),
+                tags$hr()),
        tabPanel("Temperature", value = "temps", #** Temp_TP    ----
                 fluidRow(column(6, offset = 3,tags$h1(tags$strong("Water Temperatures")))),
                 fluidRow(column(3, radioButtons(inputId = "temp_allORone",
@@ -1499,9 +1511,13 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                                 label = "What would you like to view?",
                                                 choices = c("By Site",
                                                             "By Island"),
-                                                inline = FALSE))),
+                                                inline = FALSE)),
+                         column(3, imageOutput(outputId = "VD_TopSitePhoto_One",
+                                               height = 200))),
                 tags$hr(),
-                uiOutput(outputId = "VD_UIout"))
+                uiOutput(outputId = "VD_UIout"),
+                imageOutput(outputId = "VD_LargeSitePhoto_One",
+                            height = 625))
     )
   )
 ) #End of User Interface Section  ----

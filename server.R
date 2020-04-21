@@ -16163,6 +16163,24 @@ server <- function(input, output, session) {
     
   }
   
+  output$RDFC_UIout <- renderUI({ # Visit Dates UI   ----
+    if (is.null(input$RDFC_allORone))
+      return(NULL)
+    
+    else if(input$RDFC_allORone == "One Species by Site"){ # By Site      ----
+      dyn_ui <- tabPanel("Roving Diver Fish Count", value = "RDFC_TP",
+                         plotOutput(outputId = "RDFC_Plot", 
+                                    height = 600),
+                         tags$hr())
+    }
+    else if(input$RDFC_allORone == "One Species by Island"){ # By Island  ----
+      dyn_ui <- tabPanel("Roving Diver Fish Count", value = "RDFC_TP",
+                         plotOutput(outputId = "RDFC_Plot_Isl", 
+                                    height = 600),
+                         tags$hr())
+    }
+    return(dyn_ui)
+  })
   
   { # ........ RDFC_Mean_Counts ........   ----
     
@@ -18410,24 +18428,42 @@ server <- function(input, output, session) {
     if (is.null(input$VD_allORone))
       return(NULL)
     
-    else if(input$VD_allORone == "By Site"){
+    else if(input$VD_allORone == "By Site"){ # By Site      ----
       dyn_ui <- tabPanel("Visit Dates", value = "VD_TP",
                          plotOutput(outputId = "VD_Plot_One", 
                                     height = 600),
                          tags$hr(),
-                         fluidRow(column(6, DTOutput(outputId = "VD_StatSummary_One_One",
-                                                     height = 350)),
-                                  column(6, DTOutput(outputId = "VD_StatSummary_One_Two",
-                                                     height = 350))),
+                         plotOutput(outputId = "VD_Plot_One_Two", 
+                                    height = 600),
                          tags$hr(),
+                         fluidRow(column(6, tags$h2(tags$strong("Monitoring Days Summary")),
+                                         DTOutput(outputId = "VD_StatSummary_One_One",
+                                                  height = 350)),
+                                  column(6, tags$h2(tags$strong("Monitoring Months Summary")),
+                                         DTOutput(outputId = "VD_StatSummary_One_Two",
+                                                  height = 350))),
+                         tags$hr(),
+                         tags$h2(tags$strong("Monitoring Dates Summary")),
                          DTOutput(outputId = "VD_Summary_One",
                                   height = 500),
                          tags$hr())
     }
-    else if(input$VD_allORone == "By Island"){
+    else if(input$VD_allORone == "By Island"){ # By Island  ----
       dyn_ui <- tabPanel("Visit Dates", value = "VD_TP",
                          plotOutput(outputId = "VD_Plot_Isl", 
-                                    height = 600))
+                                    height = 600),
+                         tags$hr(),
+                         fluidRow(column(6, tags$h2(tags$strong("Monitoring Days Summary")),
+                                         DTOutput(outputId = "VD_StatSummary_Isl_One",
+                                                  height = 350)),
+                                  column(6, tags$h2(tags$strong("Monitoring Months Summary")),
+                                         DTOutput(outputId = "VD_StatSummary_Isl_Two",
+                                                  height = 350))),
+                         tags$hr(),
+                         tags$h2(tags$strong("Monitoring Dates Summary")),
+                         DTOutput(outputId = "VD_Summary_Isl",
+                                  height = 500),
+                         tags$hr())
     }
     return(dyn_ui)
   })
@@ -18445,13 +18481,40 @@ server <- function(input, output, session) {
         }else if(input$VD_SurveyType_One == "Core Vs Fish"){
           visitDates$SurveyType <- visitDates$CvsF
           visitDates %>% 
-            filter(SiteName == input$VD_SiteName_One) 
+            filter(SiteName == input$VD_SiteName_One) %>% 
+            distinct(Date, SurveyType, .keep_all = TRUE)
         }else{
           visitDates %>% 
             filter(SiteName == input$VD_SiteName_One, 
                    SurveyType == input$VD_SurveyType_One)
         }
       })
+      
+      output$VD_TopSitePhoto_One <- renderImage({
+        if (input$VD_allORone =='By Site') {
+          return(
+            list(src = glue("www/Sat_Imagery/{unique(VD_Filter_One()$SiteCode)}.png"),
+                 contentType = "image/png", width = 430, height = 210))
+        }
+        else if (input$VD_allORone =='By Island') {
+          return(
+            list(src = glue("www/Sat_Imagery/{unique(VD_Filter_Isl()$IslandCode)}.png"),
+                 contentType = "image/png", width = 430, height = 210))
+        }
+      }, deleteFile = FALSE) # Small Site photo above plot
+      
+      output$VD_LargeSitePhoto_One <- renderImage({
+        if (input$VD_allORone =='By Site') {
+          return(
+            list(src = glue("www/Sat_Imagery/{unique(VD_Filter_One()$SiteCode)}.png"),
+                 contentType = "image/png", width = 1250, height = 625))
+        }
+        else if (input$VD_allORone =='By Island') {
+          return(
+            list(src = glue("www/Sat_Imagery/{unique(VD_Filter_Isl()$IslandCode)}.png"),
+                 contentType = "image/png", width = 1250, height = 625))
+        }
+      }, deleteFile = FALSE) # Large Site photo below plot
       
       output$VD_Plot_One <- renderPlot({
         ggplot() +
@@ -18460,7 +18523,7 @@ server <- function(input, output, session) {
                          group = SurveyYear, color = SurveyType)) +
           geom_line(data = VD_Filter_One(), show.legend = FALSE, alpha = as.numeric(input$VD_MeanDate_One),
                     aes(x = lubridate::year(MeanDate), y = lubridate::month(MeanDate),
-                        group = SiteName, color = SiteName)) +
+                        group = SiteName), color = "black") +
           scale_y_continuous(expand = c(0.1, 0), breaks = 4:11, 
                                     labels =  c("Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov")) +
           scale_x_continuous(breaks = unique(lubridate::year(VD_Filter_One()$Date))) +
@@ -18468,6 +18531,7 @@ server <- function(input, output, session) {
                color = "Survey Type",
                x = "Year",
                y = "Month") +
+          guides(color = guide_legend(nrow = 1)) +
           theme_minimal() +
           theme(legend.position = "bottom",
                 legend.title = element_text(size = 14, vjust = .5, face = "bold"),
@@ -18480,14 +18544,54 @@ server <- function(input, output, session) {
                 axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
       })
       
-      VD_FilterDT_One_One <- reactive({
-        visitDates2 <- visitDates %>% 
-          mutate(Day_of_Week = lubridate::wday(Date, label = TRUE, abbr = FALSE)) %>% 
+      output$VD_Plot_One_Two <- renderPlot({
+        ggplot() +
+          geom_point(data = VD_Filter_One(), 
+                     position = position_jitterdodge(jitter.height = .2, jitter.width = .75), size = 2,
+                     aes(x = lubridate::year(Date), y = lubridate::wday(Date),
+                         group = SurveyYear, color = SurveyType)) +
+          geom_line(data = VD_Filter_One(), show.legend = FALSE, alpha = as.numeric(input$VD_MeanDate_One),
+                    aes(x = lubridate::year(MeanDate), y = MeanWeekDay,
+                        group = SiteName), color = "black") +
+          scale_y_continuous(expand = c(0.1, 0), breaks = 1:7, 
+                             labels =  c("Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat")) +
+          scale_x_continuous(breaks = unique(lubridate::year(VD_Filter_One()$Date))) +
+          labs(title = glue("{unique(VD_Filter_One()$IslandName)} {unique(VD_Filter_One()$SiteName)}"),
+               color = "Survey Type",
+               x = "Month",
+               y = "Weekday") +
+          guides(color = guide_legend(nrow = 1)) +
+          theme_minimal() +
+          theme(legend.position = "bottom",
+                legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                legend.text = element_text(size = 14, vjust = .5),
+                plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                plot.subtitle = element_text(hjust = 0.5, size = 18),
+                plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                axis.title = element_text(size = 16, face = "bold"),
+                axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+                axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
+      })
+      
+      VD_FilterDT_One <- reactive({
+        visitDates %>% 
           filter(SiteName == input$VD_SiteName_One) %>% 
-          distinct(Day_of_Week, Date) %>%
+          distinct(Date, SurveyYear, SiteCode, .keep_all = TRUE) %>% 
+          select(SurveyYear, SiteNumber, IslandName, SiteName, Date, MeanDate, Day_of_Week, Month) %>% 
+          arrange(Date) 
+      })
+      
+      VD_FilterDT_One_One <- reactive({
+        visitDates %>% 
+          mutate(Day_of_Week = lubridate::wday(Date, label = TRUE, abbr = FALSE)) %>% 
+          filter(SiteName == input$VD_SiteName_One) %>%
+          distinct(Day_of_Week, Date, SurveyYear) %>%
+          mutate(Count_up_to_2004 = ifelse(SurveyYear < 2005, 1, 0),
+                 Count_after_2004 = ifelse(SurveyYear > 2004, 1, 0)) %>% 
           group_by(Day_of_Week) %>% 
-          mutate(Count = length(Day_of_Week)) %>% 
-          distinct(Day_of_Week, Count) %>% 
+          mutate(Count_up_to_2004 = sum(Count_up_to_2004),
+                 Count_after_2004 = sum(Count_after_2004)) %>% 
+          distinct(Day_of_Week, Count_up_to_2004, Count_after_2004) %>% 
           arrange(Day_of_Week) 
       })
       
@@ -18495,11 +18599,14 @@ server <- function(input, output, session) {
         visitDates %>% 
           mutate(Month = lubridate::month(Date, label = TRUE, abbr = FALSE)) %>% 
           filter(SiteName == input$VD_SiteName_One) %>% 
-          distinct(Month, Date) %>%
+          distinct(Month, Date, SurveyYear) %>%
+          mutate(Count_up_to_2004 = ifelse(SurveyYear < 2005, 1, 0),
+                 Count_after_2004 = ifelse(SurveyYear > 2004, 1, 0)) %>% 
           group_by(Month) %>% 
-          mutate(Count = length(Month)) %>% 
-          distinct(Month, Count) %>% 
-          arrange(Month) 
+          mutate(Count_up_to_2004 = sum(Count_up_to_2004),
+                 Count_after_2004 = sum(Count_after_2004)) %>% 
+          distinct(Month, Count_up_to_2004, Count_after_2004) %>% 
+          arrange(Month)
       })
       
       output$VD_StatSummary_One_One <- renderDT({
@@ -18516,7 +18623,7 @@ server <- function(input, output, session) {
                     info = FALSE,
                     dom = 'Bfrtip',
                     buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
-                    columnDefs = list(list(className = 'dt-center', targets = 0:1)),
+                    columnDefs = list(list(className = 'dt-center', targets = 0:2)),
                     colReorder = TRUE),
                   rownames = FALSE) %>% 
           formatStyle(names(VD_FilterDT_One_One()),
@@ -18540,7 +18647,7 @@ server <- function(input, output, session) {
                     info = FALSE,
                     dom = 'Bfrtip',
                     buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
-                    columnDefs = list(list(className = 'dt-center', targets = 0:1)),
+                    columnDefs = list(list(className = 'dt-center', targets = 0:2)),
                     colReorder = TRUE),
                   rownames = FALSE) %>% 
           formatStyle(names(VD_FilterDT_One_Two()),
@@ -18548,16 +18655,6 @@ server <- function(input, output, session) {
                       backgroundColor = 'white',
                       backgroundPosition = 'center'
           )
-      })
-      
-      VD_FilterDT_One <- reactive({
-        visitDates %>% 
-          mutate(Day_of_Week = lubridate::wday(Date, label = TRUE, abbr = FALSE),
-                 Month = lubridate::month(Date, label = TRUE, abbr = FALSE))%>% 
-          filter(SiteName == input$VD_SiteName_One) %>% 
-          distinct(Date, SurveyYear, SiteCode, .keep_all = TRUE) %>% 
-          select(SurveyYear, SiteNumber, IslandName, SiteName, Date, MeanDate, Day_of_Week, Month) %>% 
-          arrange(as.factor(SurveyYear)) 
       })
       
       output$VD_Summary_One <- renderDT({
@@ -18586,49 +18683,166 @@ server <- function(input, output, session) {
       
     }
     
-    # { # By Island     ----
-    #   
-    #   VD_Filter_Isl <- reactive({
-    #     if (input$VD_SurveyType_One == "All"){
-    #       return(visitDates )
-    #     }else if(input$VD_SurveyType_One == "Core Vs Fish"){
-    #       visitDates$SurveyType <- visitDates$CvsF
-    #     }else{
-    #       visitDates %>% 
-    #         filter(SiteName == input$VD_SiteName_One, 
-    #                SurveyType == input$VD_SurveyType_One)
-    #     }
-    #   })
-    #   
-    #   output$VD_Plot_One <- renderPlot({
-    #     ggplot() +
-    #       geom_point(data = VD_Filter_Isl(), position = position_jitterdodge(jitter.height = .25), size = 2,
-    #                  aes(x = lubridate::year(Date), y = lubridate::month(Date, label = T),
-    #                      group = SurveyYear, color = SurveyType)) +
-    #       scale_x_continuous(breaks = unique(lubridate::year(VD_Filter_Isl()$Date))) +
-    #       # scale_y_continuous(limits = c(0, 12), expand = c(0.01, 0), breaks = 1:12, # unique(lubridate::wday(VD_Filter_Isl()$Date)), 
-    #       #                    labels =  c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) + 
-    #       
-    #       # geom_point(data = VD_Filter_Isl(), position = position_jitterdodge(jitter.height = .25),
-    #       #           aes(x = lubridate::month(Date), y = lubridate::wday(Date), group = SurveyType, color = SurveyType)) +
-    #       # scale_y_continuous(limits = c(0, 7), expand = c(0.01, 0), breaks = 1:7,  
-    #       #                    labels =  c("Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat")) + 
-    #       labs(title = glue("{unique(VD_Filter_Isl()$IslandName)} {unique(VD_Filter_Isl()$SiteName)}"),
-    #            color = "SurveyType",
-    #            x = "Year",
-    #            y = "Month") +
-    #       theme_minimal() +
-    #       theme(legend.position = "bottom",
-    #             legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-    #             legend.text = element_text(size = 14, vjust = .5),
-    #             plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-    #             plot.subtitle = element_text(hjust = 0.5, size = 18),
-    #             plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-    #             axis.title = element_text(size = 16, face = "bold"),
-    #             axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
-    #             axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
-    #   })
-    # }
+    { # By Island     ----
+
+      VD_Filter_Isl <- reactive({
+        if (input$VD_SurveyType_Isl == "All"){
+          return(
+            visitDates %>%
+              filter(IslandName == input$VD_IslandName_Isl)
+          )
+        }else if(input$VD_SurveyType_Isl == "Core Vs Fish"){
+          visitDates$SurveyType <- visitDates$CvsF
+          visitDates %>% 
+            filter(IslandName == input$VD_IslandName_Isl) 
+        }else{
+          visitDates %>% 
+            filter(IslandName == input$VD_IslandName_Isl, 
+                   SurveyType == input$VD_SurveyType_Isl) 
+        }
+      })
+      
+      output$VD_Plot_Isl <- renderPlot({
+        ggplot() +
+          geom_point(data = VD_Filter_Isl(), 
+                     position = position_jitterdodge(jitter.height = .2, jitter.width = .75), size = 2,
+                     aes(x = lubridate::year(Date), y = lubridate::month(Date),
+                         group = SurveyYear, color = SurveyType)) +
+          geom_line(data = VD_Filter_Isl(), show.legend = FALSE, alpha = as.numeric(input$VD_MeanDate_Isl),
+                    aes(x = lubridate::year(Isl_MeanDate), y = lubridate::month(Isl_MeanDate),
+                        group = IslandName, color = IslandName)) +
+          scale_y_continuous(expand = c(0.1, 0), breaks = 4:11, 
+                             labels =  c("Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov")) +
+          scale_x_continuous(breaks = unique(lubridate::year(VD_Filter_Isl()$Date))) +
+          labs(title = glue("{unique(VD_Filter_Isl()$IslandName)}"),
+               color = "Survey Type",
+               x = "Year",
+               y = "Month") +
+          guides(color = guide_legend(nrow = 1)) +
+          theme_minimal() +
+          theme(legend.position = "bottom",
+                legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+                legend.text = element_text(size = 14, vjust = .5),
+                plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                plot.subtitle = element_text(hjust = 0.5, size = 18),
+                plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                axis.title = element_text(size = 16, face = "bold"),
+                axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+                axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
+      })
+      
+      VD_FilterDT_Isl <- reactive({
+        visitDates %>% 
+          group_by(SurveyYear) %>% 
+          mutate(Day_of_Week = lubridate::wday(Date, label = TRUE, abbr = FALSE),
+                 Month = lubridate::month(Date, label = TRUE, abbr = FALSE))%>% 
+          filter(IslandName == input$VD_IslandName_Isl) %>% 
+          distinct(Date, SurveyYear, SiteCode, .keep_all = TRUE) %>% 
+          select(SurveyYear, SiteNumber, IslandName, SiteName, Date, Isl_MeanDate, Day_of_Week, Month) %>% 
+          arrange(Date) 
+      })
+      
+      VD_FilterDT_Isl_One <- reactive({
+        visitDates %>% 
+          mutate(Day_of_Week = lubridate::wday(Date, label = TRUE, abbr = FALSE)) %>% 
+          filter(IslandName == input$VD_IslandName_Isl) %>%
+          distinct(Day_of_Week, Date, SurveyYear) %>%
+          mutate(Count_up_to_2004 = ifelse(SurveyYear < 2005, 1, 0),
+                 Count_after_2004 = ifelse(SurveyYear > 2004, 1, 0)) %>% 
+          group_by(Day_of_Week) %>% 
+          mutate(Count_up_to_2004 = sum(Count_up_to_2004),
+                 Count_after_2004 = sum(Count_after_2004)) %>% 
+          distinct(Day_of_Week, Count_up_to_2004, Count_after_2004) %>% 
+          arrange(Day_of_Week) 
+      })
+      
+      VD_FilterDT_Isl_Two <- reactive({
+        visitDates %>% 
+          mutate(Month = lubridate::month(Date, label = TRUE, abbr = FALSE)) %>% 
+          filter(IslandName == input$VD_IslandName_Isl) %>% 
+          distinct(Month, Date, SurveyYear) %>%
+          mutate(Count_up_to_2004 = ifelse(SurveyYear < 2005, 1, 0),
+                 Count_after_2004 = ifelse(SurveyYear > 2004, 1, 0)) %>% 
+          group_by(Month) %>% 
+          mutate(Count_up_to_2004 = sum(Count_up_to_2004),
+                 Count_after_2004 = sum(Count_after_2004)) %>% 
+          distinct(Month, Count_up_to_2004, Count_after_2004) %>% 
+          arrange(Month)
+      })
+      
+      output$VD_StatSummary_Isl_One <- renderDT({
+        datatable(VD_FilterDT_Isl_One(),
+                  extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    scrollY = "300px",
+                    paging = FALSE,
+                    ordering = TRUE,
+                    info = FALSE,
+                    dom = 'Bfrtip',
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    columnDefs = list(list(className = 'dt-center', targets = 0:2)),
+                    colReorder = TRUE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(VD_FilterDT_Isl_One()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      })
+      
+      output$VD_StatSummary_Isl_Two <- renderDT({
+        datatable(VD_FilterDT_Isl_Two(),
+                  extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    scrollY = "300px",
+                    paging = FALSE,
+                    ordering = TRUE,
+                    info = FALSE,
+                    dom = 'Bfrtip',
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    columnDefs = list(list(className = 'dt-center', targets = 0:2)),
+                    colReorder = TRUE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(VD_FilterDT_Isl_Two()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      })
+      
+      output$VD_Summary_Isl <- renderDT({
+        datatable(VD_FilterDT_Isl(),
+                  extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    initComplete = JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                      "}"),
+                    scrollY = "425px",
+                    paging = FALSE,
+                    ordering = TRUE,
+                    info = FALSE,
+                    dom = 'Bfrtip',
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    columnDefs = list(list(className = 'dt-center', targets = 0:6)),
+                    colReorder = TRUE),
+                  rownames = FALSE) %>% 
+          formatStyle(names(VD_FilterDT_Isl()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
+      })
+
+    }
     
   }
   
