@@ -29,6 +29,9 @@
   library(DT)
   library(ggnewscale)
   library(cowplot)
+  library(ncdf4)
+  # library(raster)
+  library(rnoaa)
 }
 
 { # .. SiteInfo_DF   ----
@@ -502,13 +505,16 @@
 }
 
 
+dat <- brick(nc)
+  ncvar_get(nc, attributes(nc$var)$names[1:2])
+dim(dat)
+
+nc <- buoy(dataset = 'cwind', buoyid = 46054, year = 2000)
 
 
+ncvar_get(nc, attributes(nc$data)$class[1])
 
-
-
-
-
+dim(nc)
 
 
 
