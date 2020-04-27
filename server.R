@@ -267,7 +267,7 @@ server <- function(input, output, session) {
           select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
                  StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
                  Species, SiteNumber, IslandCode, SiteCode, IslandSE) 
-      }) # filtered one meter summary table
+      }) # filtered oneM_ summary table
       
       oneM_RawFilter_One <- reactive({ 
         oneM_DFRaw %>%
@@ -275,7 +275,7 @@ server <- function(input, output, session) {
                  CommonName == input$oneM_SpeciesName_One) %>% 
           group_by(SurveyYear) %>% 
           mutate(Mean = mean(Count))
-      }) # filtered  one Meter raw table
+      }) # filtered  oneM_ raw table
       
       oneM_SpeciesClass_One <- reactive({ 
         SpeciesName %>%
@@ -506,7 +506,7 @@ server <- function(input, output, session) {
                color = "Common Name",
                fill = "Common Name",
                caption = glue("{oneM_Filter_One()$SiteName} is typically surveyed in {
-                 lubridate::lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                 lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                  } and has a mean depth of {round(mean(oneM_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
                y = expression("Mean Density (#/m"^"2"~")")) +
@@ -546,7 +546,7 @@ server <- function(input, output, session) {
                subtitle = glue("{unique(oneM_Filter_One()$IslandName)} {unique(oneM_Filter_One()$SiteName)}"),
                color = "Common Name",
                caption = glue("{oneM_Filter_One()$SiteName} is typically surveyed in {
-                       lubridate::lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
+                       lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(oneM_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year", y = "Smoothed Conditional Mean Values") +
           theme_classic() +
@@ -16193,17 +16193,17 @@ server <- function(input, output, session) {
         mutate(Low_Count = min(Count),
                High_Count = max(Count),
                Mean_Count = mean(Count),
-               StandardError = std.error(Count),
+               StandardError = sd(Count)/sqrt(length(Count)),
                StandardDeviation = sd(Count),
                Date = mean(as.Date(Date)),
                Observers = length(Count))
-    }) # filtered one meter summary table
+    }) # filtered RDFC_ summary table
     
     RDFC_SideBar_Filter <- reactive({ 
       RDFC_DF %>%
         filter(SiteName == input$RDFC_SiteName_One,
                ExperienceLevel == "E") 
-    }) # filtered one meter summary table
+    }) # filtered RDFC_ summary table
     
     output$RDFC_SideBar_One <- renderUI({
       selectInput(inputId = "RDFC_SpeciesName_One",
@@ -18309,15 +18309,7 @@ server <- function(input, output, session) {
   { # ........ Map_Servers ........   ----
     
     { # Leaflet Maps     ----
-      grp <- c("USGS Topo", "USGS Imagery Only", "USGS Imagery Topo",
-               "USGS Shaded Relief", "Hydrography")
-      att <- paste0("<a href='https://www.usgs.gov/'>",
-                    "U.S. Geological Survey</a> | ",
-                    "<a href='https://www.usgs.gov/laws/policies_notices.html'>",
-                    "Policies</a>")
-      GetURL <- function(service, host = "basemap.nationalmap.gov") {
-        sprintf("https://%s/arcgis/services/%s/MapServer/WmsServer", host, service)
-      }
+      
       output$Leaflet <- renderLeaflet({
         leaflet() %>%
           setView(lng = -119.7277, lat = 33.76416, zoom = 9) %>%
@@ -18329,7 +18321,8 @@ server <- function(input, output, session) {
           addPolygons(data = CINMS_boundary, weight = 2, color = "blue", fill = FALSE,
                       label = "Channel Islands National Marine Sanctuary Boundary") %>%
           addPolylines(data = transects, color = transects$Color3)  %>%
-          addMarkers(data = siteInfo2, label = siteInfo2$SiteName)
+          addMarkers(data = siteInfo2, label = paste(siteInfo2$IslandCode, siteInfo2$SiteName)) %>% 
+          addCircleMarkers(data = stations, label = stations$DC.description)
       })
     }
     

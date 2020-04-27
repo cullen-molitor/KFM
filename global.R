@@ -5,22 +5,21 @@
 { # Library    ----
   
   library(shiny) 
-  library(data.table)
   library(lubridate)
   library(glue)
-  library(plyr)
+  # library(plyr)
   library(ggridges)
   library(tidyverse)
-  library(grid)
-  library(gridExtra)
-  library(png)
-  library(rmarkdown)
+  # library(grid)
+  # library(gridExtra)
+  # library(png)
+  # library(rmarkdown)
   library(shinydashboard)
   library(shinyWidgets)
-  library(plotrix)
+  # library(plotrix)
   library(splitstackshape)
-  library(zoo)
-  library(reshape)
+  # library(zoo)
+  # library(reshape)
   library(RColorBrewer)
   library(measurements)
   library(sf)
@@ -30,7 +29,6 @@
   library(ggnewscale)
   library(cowplot)
   library(ncdf4)
-  # library(raster)
   library(rnoaa)
 }
 
@@ -307,10 +305,11 @@
   Protocol_PDFs <- read_csv("Protocols.csv")
 }
 
-{ # ................TAGS...............  ----
+{ # .. TAGS  ----
   
-  ONI_tagList <- tagList(   # ONI Tags   ----
-        tags$h4("The Oceanic Nino Index (ONI) is NOAAs primary metric for monitoring the El Niño-Southern Oscillation (ENSO).
+  {  # ONI Tags   ----
+    ONI_tagList <- tagList(   
+      tags$h4("The Oceanic Nino Index (ONI) is NOAAs primary metric for monitoring the El Niño-Southern Oscillation (ENSO).
               ONI is based on the running 3-month average of sea surface temperatures captured in the Niño region 3.4 (+/- 5° 
               latitude of the equator and between 120°-170° W longitude). The values are compared to a 30-year average for the relative time 
               periods. ENSO has three phases: La Niña, neutral, and El Niño. The color gradient you see in the background to this
@@ -318,32 +317,34 @@
               sea surface temperatures. The Neutral phase is represented in white (bleeds into light blue or light red). 
               El Niño corresponds to red colors to represent warmer than usual sea surface temperatures. 
               Darker colors correspond to more extreme anomalies.", 
-                tags$br(), tags$br(),
-                "La Niña is a 3-month running mean less than - 0.5° (c) below the relative 30-year average for a period of 5 consecutive months",
-                tags$br(), 
-                "Neutral is a 3-month running mean greater than - 0.5° (c) and less than 0.5° (c) the relative 30-year average for any length of time", 
-                tags$br(), 
-                "El Niño is a 3-month running mean greater than 0.5° (c) above the relative 30-year average for a period of 5 consecutive months",
-                tags$br(), tags$br(), 
-                "ENSO effects global weather patterns and is closely correlated to the water temperatures at the Channel Islands,
+              tags$br(), tags$br(),
+              "La Niña is a 3-month running mean less than - 0.5° (c) below the relative 30-year average for a period of 5 consecutive months",
+              tags$br(), 
+              "Neutral is a 3-month running mean greater than - 0.5° (c) and less than 0.5° (c) the relative 30-year average for any length of time", 
+              tags$br(), 
+              "El Niño is a 3-month running mean greater than 0.5° (c) above the relative 30-year average for a period of 5 consecutive months",
+              tags$br(), tags$br(), 
+              "ENSO effects global weather patterns and is closely correlated to the water temperatures at the Channel Islands,
               despite the distance from where ENSO data is collected. This gradient is meant to illuminate trends in species density 
               by allowing for a visual relationship to water temperatures. For instance, as you move north and west among the parks 
               5 islands, water temperatures decrease and the species that make up the kelp forest community change. We therefore 
               conclude that certain species are 'warm water' species while others may be considered 'cold water' species among 
               the islands. In the years following an El Niño event, one might expect to see certain 'warm water' species recruit to 
               'cold water' islands.",
-                tags$br(), tags$br(), 
-                "For a video describing ENSO please visit:",
-                tags$br(),
-                tags$a(href="https://www.youtube.com/watch?v=KpZsoHru9go&list=PLDT7TfWhSREdvJXrqsDJG1fVKmapQ1QPH&index=2", 
-                       "ENSO Video", target = "_blank")),
-        tags$h4("For more detailed information on ONI please visit:",
-                tags$br(),
-                tags$a(href="https://www.climate.gov/news-features/understanding-climate/climate-variability-oceanic-ni%C3%B1o-index", 
-                       "Climate.Gov", target = "_blank")))
-      
-  PDO_NOAA_tagList <- tagList( # PDO NOAA Tags   -----
-        tags$h4("The Pacific Decadal Oscillation (PDO) is a lesser known metric than the El Niño-Southern Oscillation (ENSO) but acts in a similar way.
+              tags$br(), tags$br(), 
+              "For a video describing ENSO please visit:",
+              tags$br(),
+              tags$a(href="https://www.youtube.com/watch?v=KpZsoHru9go&list=PLDT7TfWhSREdvJXrqsDJG1fVKmapQ1QPH&index=2", 
+                     "ENSO Video", target = "_blank")),
+      tags$h4("For more detailed information on ONI please visit:",
+              tags$br(),
+              tags$a(href="https://www.climate.gov/news-features/understanding-climate/climate-variability-oceanic-ni%C3%B1o-index", 
+                     "Climate.Gov", target = "_blank")))
+  }  
+  
+  {  # PDO NOAA Tags   -----
+    PDO_NOAA_tagList <- tagList( 
+      tags$h4("The Pacific Decadal Oscillation (PDO) is a lesser known metric than the El Niño-Southern Oscillation (ENSO) but acts in a similar way.
               The PDO is a longer-lived pattern of Pacific climate variability than ENSO. The extremes of PDO represent periods of 
               either warm or cool sea surface temperatures. When sea surface temperatures are cool in the interior of the North 
               Pacific, warm along the Pacific Coast, and sea level atmospheric pressure is lower than average over the North Pacific
@@ -351,16 +352,18 @@
               cool along the Pacific Coast, and sea level atmospheric pressure is higher than average over the North Pacific then the 
               PDO has a negative value. In this plot, positive PDO values are represented in red (for warm coastal waters), while 
               negative PDO values correspond to blue colors (for cool coastal waters). Darker colors correspond to more extreme anomalies.", 
-                tags$br(), tags$br(),
-                "For a video describing the PDO please visit:",
-                tags$br(),
-                tags$a(href="https://www.youtube.com/watch?v=Sc3tOEcM0YE", "PDO Video", target = "_blank")),
-        tags$h4("For more detailed information on the PDO and the associated data from NOAA please visit:",
-                tags$br(),
-                tags$a(href="https://www.ncdc.noaa.gov/teleconnections/pdo/", "NOAA.gov", target = "_blank")))
+              tags$br(), tags$br(),
+              "For a video describing the PDO please visit:",
+              tags$br(),
+              tags$a(href="https://www.youtube.com/watch?v=Sc3tOEcM0YE", "PDO Video", target = "_blank")),
+      tags$h4("For more detailed information on the PDO and the associated data from NOAA please visit:",
+              tags$br(),
+              tags$a(href="https://www.ncdc.noaa.gov/teleconnections/pdo/", "NOAA.gov", target = "_blank")))
+  }
   
-  PDO_UW_tagList <- tagList( # PDO UW Tags  -----
-        tags$h4("The Pacific Decadal Oscillation (PDO) is a lesser known metric than the El Niño-Southern Oscillation (ENSO) but acts in a similar way.
+  {  # PDO UW Tags  -----
+    PDO_UW_tagList <- tagList( 
+      tags$h4("The Pacific Decadal Oscillation (PDO) is a lesser known metric than the El Niño-Southern Oscillation (ENSO) but acts in a similar way.
               The PDO is a longer-lived pattern of Pacific climate variability than ENSO. The extremes of PDO represent periods of 
               either warm or cool sea surface temperatures. When sea surface temperatures are cool in the interior of the North 
               Pacific, warm along the Pacific Coast, and sea level atmospheric pressure is lower than average over the North Pacific,
@@ -368,21 +371,23 @@
               cool along the Pacific Coast, and sea level atmospheric pressure is higher than average over the North Pacific, then the 
               PDO has a negative value. In this plot, positive PDO values are represented in red (for warm coastal waters), while 
               negative PDO values correspond to blue colors (for cool coastal waters). Darker colors correspond to more extreme anomalies.", 
-                tags$br(), tags$br(),
-                "For a video describing the PDO please visit:",
-                tags$br(),
-                tags$a(href="https://www.youtube.com/watch?v=Sc3tOEcM0YE", "PDO Video", target = "_blank")),
-        tags$h4("For more detailed information on the PDO and the associated data from University of Washington (UW) please visit:",
-                tags$br(),
-                tags$a(href="http://research.jisao.washington.edu/pdo/", "washington.edu", target = "_blank")))
+              tags$br(), tags$br(),
+              "For a video describing the PDO please visit:",
+              tags$br(),
+              tags$a(href="https://www.youtube.com/watch?v=Sc3tOEcM0YE", "PDO Video", target = "_blank")),
+      tags$h4("For more detailed information on the PDO and the associated data from University of Washington (UW) please visit:",
+              tags$br(),
+              tags$a(href="http://research.jisao.washington.edu/pdo/", "washington.edu", target = "_blank")))
+  } 
   
-  MPA_tagList <- tagList( # MPA Tags  ------
-        tags$h4("California’s Marine Life Protection Act (MLPA) established a network of Marine Protected Areas (MPAs) 
+  {  # MPA Tags  ------
+    MPA_tagList <- tagList( 
+      tags$h4("California’s Marine Life Protection Act (MLPA) established a network of Marine Protected Areas (MPAs) 
                 along the California coastline and around California’s islands. This network includes State Marine 
                 Reserves (SMRs), State Marine Conservation Areas (SMCAs), and State Marine Parks (SMPs). The waters of 
                 Channel Islands National Park (CINP) have 11 MPAs, including 9 SMRs and 2 SMCAs.", 
-                tags$br(), tags$br(),
-                "In 2005, CINP was awarded funding from the NPS Natural Resources Preservation Program (NRPP) to 
+              tags$br(), tags$br(),
+              "In 2005, CINP was awarded funding from the NPS Natural Resources Preservation Program (NRPP) to 
                 establish baseline ecological conditions of newly established MPAs in CINP. This project began with 
                 the establishment of 16 new permanent monitoring sites. These sites were placed inside or adjacent 
                 to the following four newly established SMRs: Santa Barbara Island SMR, Anacapa Island SMR, Scorpion 
@@ -390,135 +395,227 @@
                 to complement existing sites so that three sites were inside and three were adjacent to each of
                 the four chosen SMRs. This means that 24 sites are considered reference sites with 6 sites at each of the
                 four chosen SMRs.",
-                tags$br(), tags$br(),
-                "When looking at the graphs plotted by the MPA means, the data being plotted is filtered to only include 
+              tags$br(), tags$br(),
+              "When looking at the graphs plotted by the MPA means, the data being plotted is filtered to only include 
                 the 24 SMR reference sites. When the data is broken out by site means, the data being plotted is similarly 
                 filtered except when viewing line plots or smooth line plots which will also include data from Keyhole on 
                 Anacapa Island. Keyhole lies within the Anacapa Island SMCA which allows for the take of CA spiny lobster 
                 and pelagic finfish. Keyhole will appear as a dotted line rather than solid or dashed.",
-                tags$br(), tags$br(),
-                "To view all sites that as inside an MPA vs outside an MPA please visit the 'One Species by Island' option.
+              tags$br(), tags$br(),
+              "To view all sites that as inside an MPA vs outside an MPA please visit the 'One Species by Island' option.
                 Please note that different sites were made into MPAs at different times and currently those graphs only 
                 reflect their current MPA status. Use caution as some sites have been inside MPAs since KFM's inception, while 
                 others (most that are in MPAs today) were designated in 2003. In the future it is intended to make this more clear
                 under that option.",
-                tags$br(), tags$br(),
-                "For a video describing California’s MPA network please visit:",
-                tags$br(), tags$br(),
-                tags$a(href="https://www.youtube.com/watch?v=xB_yqcfN7DE", "MPA Video", target = "_blank"),
-                tags$br(), tags$br(),
-                "For more detailed information on California's MPA network from California's Department of Fish and Wildlife (CDFW) please visit:",
-                tags$br(), tags$br(),
-                tags$a(href="https://wildlife.ca.gov/Conservation/Marine/MPAs", "wildlife.ca.gov", target = "_blank")))
+              tags$br(), tags$br(),
+              "For a video describing California’s MPA network please visit:",
+              tags$br(), tags$br(),
+              tags$a(href="https://www.youtube.com/watch?v=xB_yqcfN7DE", "MPA Video", target = "_blank"),
+              tags$br(), tags$br(),
+              "For more detailed information on California's MPA network from California's Department of Fish and Wildlife (CDFW) please visit:",
+              tags$br(), tags$br(),
+              tags$a(href="https://wildlife.ca.gov/Conservation/Marine/MPAs", "wildlife.ca.gov", target = "_blank")))
+  } 
   
-  
-  NPS_tagList <- tagList(  # NPS Tags   ------
-    tags$h4("The above pdf is a small section from the KFM Handbook. This handbook is a living document that changes as needed to best
+  {  # NPS Tags   ------ 
+    NPS_tagList <- tagList( 
+      tags$h4("The above pdf is a small section from the KFM Handbook. This handbook is a living document that changes as needed to best
                 reflect the history, methods, and data management for the program.",
-            tags$br(), tags$br(),
-            "To view a lecture on the importance of long-term monitoring at the Channel Islands please visit:",
-            tags$br(),
-            tags$a(href="https://www.youtube.com/watch?v=86foiSxQmVU", "KFM Lecture Part 1", target = "_blank"),
-            tags$br(),
-            tags$a(href="https://www.youtube.com/watch?v=pv9N2xDu0y8", "KFM Lecture Part 2", target = "_blank"),
-            
-            tags$br(), tags$br(),
-            "To view the blog posts from the Our World Underwater Scholarship Society's (OWUSS) NPS Interns please visit:",
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2011/11/channel-islands-national-park/", 
-                   "2011 Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2012/09/channel-islands-national-park-a-paradise-hidden-in-plain-sight/", 
-                   "2012 Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2013/08/kelp-forest-monitoring-in-the-channel-islands/", 
-                   "2013 Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2014/08/exploring-the-mysteries-of-the-channel-islands/", 
-                   "2014  Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2015/07/cruising-monitoring-at-the-channel-islands/", 
-                   "2015 Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2016/10/ventura-channel-islands-national-park/", 
-                   "2016 Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="https://blog.owuscholarship.org/2018/02/a-kelp-forest-homecoming-at-channel-islands-national-park/", 
-                   "2017 Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2018/06/channel-islands-national-parks-exploring-the-majestic-kelp-forests/", 
-                   "2018 Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2019/10/exploring-submerged-forests-at-channel-islands-national-park/", 
-                   "2019 Blog Post", target = "_blank")
-            ),
-    tags$h4("For more detailed information on KFM or to download the handbook or the annual reports please visit:",
-            tags$br(),
-            tags$a(href = "https://www.nps.gov/im/medn/kelp-forest-communities.htm", "NPS.gov", taget = "_blank")),
-    tags$hr())
+              tags$br(), tags$br(),
+              "To view a lecture on the importance of long-term monitoring at the Channel Islands please visit:",
+              tags$br(),
+              tags$a(href="https://www.youtube.com/watch?v=86foiSxQmVU", "KFM Lecture Part 1", target = "_blank"),
+              tags$br(),
+              tags$a(href="https://www.youtube.com/watch?v=pv9N2xDu0y8", "KFM Lecture Part 2", target = "_blank"),
+              
+              tags$br(), tags$br(),
+              "To view the blog posts from the Our World Underwater Scholarship Society's (OWUSS) NPS Interns please visit:",
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2011/11/channel-islands-national-park/", 
+                     "2011 Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2012/09/channel-islands-national-park-a-paradise-hidden-in-plain-sight/", 
+                     "2012 Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2013/08/kelp-forest-monitoring-in-the-channel-islands/", 
+                     "2013 Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2014/08/exploring-the-mysteries-of-the-channel-islands/", 
+                     "2014  Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2015/07/cruising-monitoring-at-the-channel-islands/", 
+                     "2015 Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2016/10/ventura-channel-islands-national-park/", 
+                     "2016 Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="https://blog.owuscholarship.org/2018/02/a-kelp-forest-homecoming-at-channel-islands-national-park/", 
+                     "2017 Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2018/06/channel-islands-national-parks-exploring-the-majestic-kelp-forests/", 
+                     "2018 Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2019/10/exploring-submerged-forests-at-channel-islands-national-park/", 
+                     "2019 Blog Post", target = "_blank")
+      ),
+      tags$h4("For more detailed information on KFM or to download the handbook or the annual reports please visit:",
+              tags$br(),
+              tags$a(href = "https://www.nps.gov/im/medn/kelp-forest-communities.htm", "NPS.gov", taget = "_blank")),
+      tags$hr())
+  }
   
-  NPSreports_tagList <- tagList(  # NPS Tags   ------
-    tags$h4("The latest annual report to have been published was the 2012 report. They are currently behind but expect new 
+  { # NPS Tags   ------
+    NPSreports_tagList <- tagList(  
+      tags$h4("The latest annual report to have been published was the 2012 report. They are currently behind but expect new 
             reports to be published soon.",
-            tags$br(),
-            "To view a lecture on the importance of long-term monitoring at the Channel Islands please visit:",
-            tags$br(),
-            tags$a(href="https://www.youtube.com/watch?v=86foiSxQmVU", "KFM Lecture Part 1", target = "_blank"),
-            tags$br(),
-            tags$a(href="https://www.youtube.com/watch?v=pv9N2xDu0y8", "KFM Lecture Part 2", target = "_blank"),
-            
-            tags$br(), tags$br(),
-            "To view the blog posts from the Our World Underwater Scholarship Society's (OWUSS) NPS Interns please visit:",
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2011/11/channel-islands-national-park/", 
-                   "2011 Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2012/09/channel-islands-national-park-a-paradise-hidden-in-plain-sight/", 
-                   "2012 Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2013/08/kelp-forest-monitoring-in-the-channel-islands/", 
-                   "2013 Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2014/08/exploring-the-mysteries-of-the-channel-islands/", 
-                   "2014  Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2015/07/cruising-monitoring-at-the-channel-islands/", 
-                   "2015 Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2016/10/ventura-channel-islands-national-park/", 
-                   "2016 Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="https://blog.owuscholarship.org/2018/02/a-kelp-forest-homecoming-at-channel-islands-national-park/", 
-                   "2017 Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2018/06/channel-islands-national-parks-exploring-the-majestic-kelp-forests/", 
-                   "2018 Blog Post", target = "_blank"),
-            tags$br(),
-            tags$a(href="http://blog.owuscholarship.org/2019/10/exploring-submerged-forests-at-channel-islands-national-park/", 
-                   "2019 Blog Post", target = "_blank")
-    ),
-    tags$h4("For more detailed information on KFM or to download the the annual reports please visit:",
-            tags$br(),
-            tags$a(href = "https://www.nps.gov/im/medn/kelp-forest-communities.htm", "NPS.gov", taget = "_blank")),
-    tags$hr())
-  
+              tags$br(),
+              "To view a lecture on the importance of long-term monitoring at the Channel Islands please visit:",
+              tags$br(),
+              tags$a(href="https://www.youtube.com/watch?v=86foiSxQmVU", "KFM Lecture Part 1", target = "_blank"),
+              tags$br(),
+              tags$a(href="https://www.youtube.com/watch?v=pv9N2xDu0y8", "KFM Lecture Part 2", target = "_blank"),
+              
+              tags$br(), tags$br(),
+              "To view the blog posts from the Our World Underwater Scholarship Society's (OWUSS) NPS Interns please visit:",
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2011/11/channel-islands-national-park/", 
+                     "2011 Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2012/09/channel-islands-national-park-a-paradise-hidden-in-plain-sight/", 
+                     "2012 Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2013/08/kelp-forest-monitoring-in-the-channel-islands/", 
+                     "2013 Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2014/08/exploring-the-mysteries-of-the-channel-islands/", 
+                     "2014  Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2015/07/cruising-monitoring-at-the-channel-islands/", 
+                     "2015 Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2016/10/ventura-channel-islands-national-park/", 
+                     "2016 Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="https://blog.owuscholarship.org/2018/02/a-kelp-forest-homecoming-at-channel-islands-national-park/", 
+                     "2017 Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2018/06/channel-islands-national-parks-exploring-the-majestic-kelp-forests/", 
+                     "2018 Blog Post", target = "_blank"),
+              tags$br(),
+              tags$a(href="http://blog.owuscholarship.org/2019/10/exploring-submerged-forests-at-channel-islands-national-park/", 
+                     "2019 Blog Post", target = "_blank")
+      ),
+      tags$h4("For more detailed information on KFM or to download the the annual reports please visit:",
+              tags$br(),
+              tags$a(href = "https://www.nps.gov/im/medn/kelp-forest-communities.htm", "NPS.gov", taget = "_blank")),
+      tags$hr())
+  }
 }
 
-
-dat <- brick(nc)
-  ncvar_get(nc, attributes(nc$var)$names[1:2])
-dim(dat)
-
-nc <- buoy(dataset = 'cwind', buoyid = 46054, year = 2000)
-
-
-ncvar_get(nc, attributes(nc$data)$class[1])
-
-dim(nc)
-
-
-
-
+{ # .. Buoys  ----
+  
+  { # Buoy Stations ----
+    stations <- read_csv("Buoy_Stations.csv")
+  }
+  
+  { # 46053 EAST SANTA BARBARA  ----
+    Buoy_46053_DF <- read_csv(
+      "Buoy_46053.csv",
+      col_types = cols(
+        Date = col_date(format = ""),
+        Time = col_time(format = ""),
+        lat = col_double(),
+        lon = col_double(),
+        wind_dir = col_double(),
+        wind_spd = col_double(),
+        gust = col_double(),
+        wave_height = col_double(),
+        dominant_wpd = col_double(),
+        average_wpd = col_double(),
+        mean_wave_dir = col_double(),
+        air_pressure = col_double(),
+        air_temperature = col_double(),
+        sea_surface_temperature = col_double(),
+        dewpt_temperature = col_double(),
+        visibility = col_double(),
+        water_level = col_double()
+      ))
+  }
+  
+  { # 46054 WEST SANTA BARBARA  ----
+    Buoy_46054_DF <- read_csv(
+      "Buoy_46054.csv",
+      col_types = cols(
+        Date = col_date(format = ""),
+        Time = col_time(format = ""),
+        lat = col_double(),
+        lon = col_double(),
+        wind_dir = col_double(),
+        wind_spd = col_double(),
+        gust = col_double(),
+        wave_height = col_double(),
+        dominant_wpd = col_double(),
+        average_wpd = col_double(),
+        mean_wave_dir = col_double(),
+        air_pressure = col_double(),
+        air_temperature = col_double(),
+        sea_surface_temperature = col_double(),
+        dewpt_temperature = col_double(),
+        visibility = col_double(),
+        water_level = col_double()
+      ))
+  }
+  
+  { # 46218 (Platform) Harvest SIO 071 ----
+    Buoy_46218_DF <- read_csv(
+      "Buoy_46218.csv",
+      col_types = cols(
+        Date = col_date(format = ""),
+        Time = col_time(format = ""),
+        lat = col_double(),
+        lon = col_double(),
+        wind_dir = col_double(),
+        wind_spd = col_double(),
+        gust = col_double(),
+        wave_height = col_double(),
+        dominant_wpd = col_double(),
+        average_wpd = col_double(),
+        mean_wave_dir = col_double(),
+        air_pressure = col_double(),
+        air_temperature = col_double(),
+        sea_surface_temperature = col_double(),
+        dewpt_temperature = col_double(),
+        visibility = col_double(),
+        water_level = col_double()
+      ))
+  }
+  
+  { # 46251 Santa Cruz Basin SIO 203   ----
+    Buoy_46251_DF <- read_csv(
+      "Buoy_46251.csv",
+      col_types = cols(
+        Date = col_date(format = ""),
+        Time = col_time(format = ""),
+        lat = col_double(),
+        lon = col_double(),
+        wind_dir = col_double(),
+        wind_spd = col_double(),
+        gust = col_double(),
+        wave_height = col_double(),
+        dominant_wpd = col_double(),
+        average_wpd = col_double(),
+        mean_wave_dir = col_double(),
+        air_pressure = col_double(),
+        air_temperature = col_double(),
+        sea_surface_temperature = col_double(),
+        dewpt_temperature = col_double(),
+        visibility = col_double(),
+        water_level = col_double()
+      ))
+  }
+ 
+  
+}
 
 
 
