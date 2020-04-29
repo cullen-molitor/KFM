@@ -16171,6 +16171,31 @@ server <- function(input, output, session) {
       dyn_ui <- tabPanel("Roving Diver Fish Count", value = "RDFC_TP",
                          plotOutput(outputId = "RDFC_Plot", 
                                     height = 600),
+                         conditionalPanel("input.RDFC_GraphOptions_One == 'With ONI'",
+                                          tags$hr(),
+                                          ONI_tagList),
+                         conditionalPanel("input.RDFC_GraphOptions_One == 'With PDO (NOAA)'",
+                                          tags$hr(),
+                                          PDO_NOAA_tagList),
+                         conditionalPanel("input.RDFC_GraphOptions_One == 'With PDO (UW)'",
+                                          tags$hr(),
+                                          PDO_UW_tagList),
+                         conditionalPanel("input.RDFC_GraphOptions_One == 'Boxplot'",
+                                          tags$hr(),
+                                          imageOutput(outputId = "RDFC_BoxplotDescription_One")),
+                         tags$hr(),
+                         fluidRow(column(4, tags$h2(tags$strong(input$RDFC_SpeciesName_One)),
+                                         imageOutput(outputId = "RDFC_LargeSpPhoto_One",
+                                                     height = 500)),
+                                  column(3, tags$h2(tags$strong("Species Classification")),
+                                         DTOutput(outputId = "RDFC_DToutClass_One",
+                                                  height = 500)),
+                                  column(5, tags$h2(tags$strong("Species Description")),
+                                         DTOutput(outputId = "RDFC_DToutDesc_One",
+                                                  height = 500))),
+                         tags$hr(),
+                         DTOutput(outputId = "RDFC_DToutData_One",
+                                  height = 550),
                          tags$hr())
     }
     else if(input$RDFC_allORone == "One Species by Island"){ # By Island  ----
@@ -16203,14 +16228,101 @@ server <- function(input, output, session) {
       RDFC_DF %>%
         filter(SiteName == input$RDFC_SiteName_One,
                ExperienceLevel == "E") 
-    }) # filtered RDFC_ summary table
+    }) # filtered RDFC_ summary table for sidebar menu
     
     output$RDFC_SideBar_One <- renderUI({
       selectInput(inputId = "RDFC_SpeciesName_One",
                   label = "Choose a Species:",
                   choices = levels(factor(RDFC_SideBar_Filter()$CommonName)),
                   selected = "California sheephead, male")
-    })
+    }) # Sidebar species menu
+    
+    RDFC_SpeciesDescription_One <- reactive({
+      SpeciesName %>%
+        filter(CommonName == input$RDFC_SpeciesName_One) %>%
+        select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
+        pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
+        select(Category, Information)
+    }) # filtered Species Description table  
+    
+    output$RDFC_TopPhoto_One <- renderImage({
+      
+      if (input$RDFC_allORone =='One Species by Site') {
+        return(list(
+          src = glue("www/Indicator_Species/{unique(RDFC_Filter_One()$Species)}.jpg"),
+          contentType = "image/jpg", width = 210, height = 210))
+      }
+      else if (input$RDFC_allORone == 'One Species by Island') {
+        return(list(
+          src = glue("www/Indicator_Species/{unique(RDFC_FilterByIsl_Isl()$Species)}.jpg"),
+          contentType = "image/jpg", width = 210, height = 210))
+      }
+      else if (input$RDFC_allORone == 'One Species by MPA') {
+        return(list(
+          src = glue("www/Indicator_Species/{unique(RDFC_Filter_MPA()$Species)}.jpg"),
+          contentType = "image/jpg", width = 210, height = 210))
+      }
+      else if (input$RDFC_allORone == 'Two Species by Site') {
+        return(list(
+          src = glue("www/Indicator_Species/{unique(RDFC_Filter_Two_One()$Species)}.jpg"),
+          contentType = "image/jpg", width = 210, height = 210))
+      }
+    }, deleteFile = FALSE) # Small species photo above plot
+    
+    output$RDFC_LargeSpPhoto_One <- renderImage({
+      list(src = glue("www/Indicator_Species/{unique(RDFC_Filter_One()$Species)}.jpg"),
+           contentType = "image/jpg", width = 400, height = 400)
+    }, deleteFile = FALSE) # Large species photo below plot
+    
+    output$RDFC_TopSitePhoto_One <- renderImage({
+      list(src = glue("www/Sat_Imagery/{unique(RDFC_Filter_One()$SiteCode)}.png"),
+           contentType = "image/png", width = 430, height = 210)
+    }, deleteFile = FALSE) # Small Site photo above plot
+    
+    output$RDFC_LargeSitePhoto_One <- renderImage({
+      list(src = glue("www/Sat_Imagery/{unique(RDFC_Filter_One()$SiteCode)}.png"),
+           contentType = "image/png", width = 1250, height = 625)
+    }, deleteFile = FALSE) # Large Site photo below plot
+    
+    output$RDFC_DToutClass_One <- renderDT({
+      datatable(RDFC_SpeciesClass_One(), 
+                options = list(
+                  initComplete = JS(
+                    "function(settings, json) {",
+                    "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                    "}"),
+                  searching = FALSE,
+                  lengthChange = FALSE,
+                  paging = FALSE,
+                  ordering = FALSE,
+                  info = FALSE),
+                rownames = FALSE) %>% 
+        formatStyle(names(RDFC_SpeciesClass_One()),
+                    color = "black",
+                    backgroundColor = 'white',
+                    backgroundPosition = 'center'
+        )
+    }) # Species Classification data table
+    
+    output$RDFC_DToutDesc_One <- renderDT({
+      datatable(RDFC_SpeciesDescription_One(), 
+                options = list(
+                  initComplete = JS(
+                    "function(settings, json) {",
+                    "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                    "}"),
+                  searching = FALSE,
+                  lengthChange = FALSE,
+                  paging = FALSE,
+                  ordering = FALSE,
+                  info = FALSE),
+                rownames = FALSE) %>% 
+        formatStyle(names(RDFC_SpeciesDescription_One()),
+                    color = "black",
+                    backgroundColor = 'white',
+                    backgroundPosition = 'center'
+        )
+    }) # Species Description data table
     
     RDFC_alphaONI_one <- reactive({
       if(input$RDFC_GraphOptions_One == "With No Index"){

@@ -540,7 +540,8 @@
         visibility = col_double(),
         water_level = col_double()
       )) 
-    Buoy_46053_DF <- Buoy_46053_DF[Buoy_46053_DF$Date %in% visitDates$Date, ]
+    # Buoy_46053_DF <- Buoy_46053_DF[Buoy_46053_DF$Date %in% visitDates$Date, ]
+    # write_csv(Buoy_46053_DF, "Buoy_46053.csv")
     
   }
   
@@ -566,6 +567,8 @@
         visibility = col_double(),
         water_level = col_double()
       ))
+    # Buoy_46054_DF <- Buoy_46054_DF[Buoy_46054_DF$Date %in% visitDates$Date, ]
+    # write_csv(Buoy_46054_DF, "Buoy_46054.csv")
   }
   
   { # 46218 (Platform) Harvest SIO 071 ----
@@ -590,6 +593,8 @@
         visibility = col_double(),
         water_level = col_double()
       ))
+    # Buoy_46218_DF <- Buoy_46218_DF[Buoy_46218_DF$Date %in% visitDates$Date, ]
+    # write_csv(Buoy_46218_DF, "Buoy_46218.csv")
   }
   
   { # 46251 Santa Cruz Basin SIO 203   ----
@@ -614,6 +619,8 @@
         visibility = col_double(),
         water_level = col_double()
       ))
+    # Buoy_46251_DF <- Buoy_46251_DF[Buoy_46251_DF$Date %in% visitDates$Date, ]
+    # write_csv(Buoy_46251_DF, "Buoy_46251.csv")
   }
  
   
