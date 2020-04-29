@@ -515,7 +515,7 @@
 { # .. Buoys  ----
   
   { # Buoy Stations ----
-    stations <- read_csv("Buoy_Stations.csv")
+    Buoys_List <- read_csv("Buoy_Stations.csv")
   }
   
   { # 46053 EAST SANTA BARBARA  ----
@@ -539,7 +539,9 @@
         dewpt_temperature = col_double(),
         visibility = col_double(),
         water_level = col_double()
-      ))
+      )) 
+    Buoy_46053_DF <- Buoy_46053_DF[Buoy_46053_DF$Date %in% visitDates$Date, ]
+    
   }
   
   { # 46054 WEST SANTA BARBARA  ----
