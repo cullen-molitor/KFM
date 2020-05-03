@@ -35,7 +35,6 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                    label = "Choose a Species:",
                                    choices = levels(factor(oneM_DF$CommonName)),
                                    selected = "Bat Star"),
-                       tags$hr(),
                        radioButtons(inputId = "oneM_Graph_One",
                                     label = "Choose a graph:",
                                     choices = c("Line", "Bar", "Smooth Line", 'Boxplot')),
@@ -77,7 +76,6 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                    label = "Choose a Species:",
                                    choices = levels(factor(oneM_DF$CommonName)),
                                    selected = "Warty Sea Cucumber"),
-                       tags$hr(),
                        radioButtons(inputId = "oneM_Graph_MPA",
                                     label = "Choose a graph:",
                                     choices = c("Line", "Bar", "Smooth Line")),
@@ -89,8 +87,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                     choices = c("Locked Scales", "Free Scales")),
                        radioButtons(inputId = "oneM_GraphOptions_MPA",
                                     label =  "Graph Options:",
-                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)")),
-                       tags$hr()
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)"))
       ),
       # ...... Two Species ----
       conditionalPanel(condition = "input.tabselected=='oneM_TP' && input.oneM_allORone=='Two Species by Site'",
@@ -105,27 +102,21 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                    label = "Species Two:",
                                    choices = levels(factor(oneM_DF$CommonName)),
                                    selected = "Giant Kelp (Adult)"),
-                       tags$hr(),
                        radioButtons(inputId = "oneM_Graph_Two",
                                     label = "Choose a graph:",
                                     choices = c("Line", "Bar", "Smooth Line")),
                        radioButtons(inputId = "oneM_GraphOptions_Two",
                                     label =  "Graph Options:",
-                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)"
-                                    )
-                       )
+                                    choices = c("With No Index", "With ONI", "With PDO (NOAA)", "With PDO (UW)"))
       ),
       # ...... All Species ----
       conditionalPanel(condition ="input.tabselected=='oneM_TP' && input.oneM_allORone=='All Species'",
-                       tags$hr(),
                        selectInput(inputId = "oneM_SiteNameAll",
                                    label = "Choose a Site:",
                                    choices = SiteNames),
-                       tags$hr(),
                        radioButtons(inputId = "oneM_GraphAll",
                                     label = "Choose a graph:",
-                                    choices = c("Line", "Bar")),
-                       tags$hr()
+                                    choices = c("Line", "Bar"))
       ),
       # ~ fiveM_Conditional  ----
       # ...... One Species ----
@@ -989,15 +980,22 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                        tags$hr()
       ),
       # ~ Samplimg Protocol Conditional  ----
-      conditionalPanel(condition = "input.tabselected=='protocol'",
-                       tags$hr(),
+      # ...... Survey Protocols   ----
+      conditionalPanel(condition = "input.tabselected=='protocol' && input.Proto != 'Other Guides'",
                        radioButtons(inputId = "protoChoice",
-                                    label = "Choose:",
+                                    label = "Choose a Protocol:",
                                     choices = unique(Protocol_PDFs$Alt_SurveyType)),
                        tags$hr()
       ),
-      # ...... Survey Protocols   ----
-      # ...... Data Management and History    -----
+      # ...... Other Guides    -----
+      conditionalPanel(condition = "input.tabselected=='protocol' && input.Proto == 'Other Guides'",
+                       radioButtons(inputId = "other_guides",
+                                    label = "Choose a Guide:",
+                                    choices = c("Santa Barbara Coastal LTER",
+                                                "Urchin Disease Guide",
+                                                "PISCO ")),
+                       tags$hr()
+      ),
       # ~ Photo Conditional   ----
       # ...... Indicator Algae  ----
       conditionalPanel(condition = "input.tabselected=='photo' && input.photogroups=='Indicator Species' && input.class=='Algae'",
@@ -1055,6 +1053,13 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
       # ~ Map_Conditional  ----
       # ...... Leaflet Maps  ----
       conditionalPanel(condition = "input.tabselected=='maps' && input.maptype=='Leaflet Maps'",
+                       radioButtons(inputId = "maps_ProviderTiles_Leaflet",
+                                    label = "Choose provider tiles",
+                                    choices = c("Esri",
+                                                "Ocean Base",
+                                                "World Imagery",
+                                                "World Topography",
+                                                "National Geographic")),
                        tags$hr()
       ),
       # ...... Static Site Maps  ----
@@ -1162,7 +1167,9 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
         ".nav-tabs {border-bottom: 0px ;}",
         "ul.sidebar-menu hr {border-top: 2px solid white; margin-top: 10px; margin-bottom: 10px;}",
         "label {color: #f4f4f4;}",
-        "input {color: black;}"
+        "input {color: black;}",
+        ".form-group {margin-bottom: 0px;}",
+        "section.sidebar .shiny-input-container {padding: 5px 15px 0px 15px;}"
         ))
   ),
   dashboardBody( # Dash_B_Body    ----
@@ -1196,8 +1203,9 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                          "Protocol Guides",
                                          "Species Guides",
                                          "Data Management and History",
-                                         "Datasheets"),
-                             inline = TRUE),
+                                         "Datasheets",
+                                         "Other Guides"),
+                             inline = FALSE),
                 tags$hr(),
                 htmlOutput(outputId = "SurveyProtocols"),
                 tags$hr()), 
@@ -1213,23 +1221,17 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                                             # "Two Species by MPA",
                                                             "All Species"),
                                                 inline = FALSE)),
-                         column(2, conditionalPanel(
-                           condition = "input.oneM_allORone == 'One Species by Site' 
-                                                 || input.oneM_allORone == 'One Species by Island' 
-                                                 || input.oneM_allORone == 'One Species by MPA'
-                                                 || input.oneM_allORone == 'Two Species by Site'",
-                           imageOutput(outputId = "oneM_TopPhoto_One",
-                                       height = 200))),
+                         column(2, imageOutput(outputId = "oneM_TopPhoto_One",
+                                       height = 200)),
                          conditionalPanel(condition = "input.oneM_allORone == 'Two Species by Site'",
                                           column(2,imageOutput(outputId = "oneM_TopPhoto_Two",
-                                                               height = 200)),
-                                          column(2, imageOutput(outputId = "oneM_TopSitePhoto_Two",
-                                                                height = 200))),
-                         column(2, conditionalPanel(
-                           condition = "input.oneM_allORone == 'One Species by Site'",
-                           imageOutput(outputId = "oneM_TopSitePhoto_One",
-                                       height = 200)))),
-                uiOutput(outputId = "oneM_UIout")),
+                                                               height = 200))),
+                         column(2, imageOutput(outputId = "oneM_TopSitePhoto_One",
+                                       height = 200))),
+                uiOutput(outputId = "oneM_UIout"),
+                imageOutput(outputId = "oneM_LargeSitePhoto_One",
+                            height = 625),
+                tags$hr()),
        tabPanel("5 m Quadrats", value = "fiveM_TP", # ** fiveM_TP       ---- 
                 fluidRow(column(6, offset = 2, tags$h1(tags$strong("5 m Quadrat Species Densities")))),
                 fluidRow(column(3, radioButtons(inputId = "fiveM_allORone",
@@ -1499,6 +1501,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                          "ARM Maps", 
                                          "Site Descriptions"),
                              inline = TRUE),
+                tags$hr(),
                 uiOutput(outputId = "MAPS"),
                 tags$hr()),
        tabPanel("Reports", value = 'reports', # ** Reports_TP      ----

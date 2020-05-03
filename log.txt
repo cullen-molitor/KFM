@@ -1,0 +1,24 @@
+Warning 6: Field Date create as date field, though DateTime requested.
+Warning 6: Field GPS_Date create as date field, though DateTime requested.
+Warning 6: Normalized/laundered field name: 'Shape_Length' to 'Shape_Leng'
+Warning 6: Normalized/laundered field name: 'Island_Code' to 'Island_Cod'
+Warning 6: Field Date create as date field, though DateTime requested.
+Warning 6: Field GPS_Date create as date field, though DateTime requested.
+Warning 6: Normalized/laundered field name: 'Shape_Length' to 'Shape_Leng'
+Warning 6: Normalized/laundered field name: 'Island_Code' to 'Island_Cod'
+Warning 6: Field Date create as date field, though DateTime requested.
+Warning 6: Field GPS_Date create as date field, though DateTime requested.
+Warning 6: Normalized/laundered field name: 'Shape_Length' to 'Shape_Leng'
+Warning 6: Normalized/laundered field name: 'Island_Code' to 'Island_Cod'
+Warning 6: Field Date create as date field, though DateTime requested.
+Warning 6: Field GPS_Date create as date field, though DateTime requested.
+Warning 6: Normalized/laundered field name: 'Island_Code' to 'Island_Cod'
+Warning 6: Normalized/laundered field name: 'Shape_Length' to 'Shape_Leng'
+Warning 6: Field Date create as date field, though DateTime requested.
+Warning 6: Field GPS_Date create as date field, though DateTime requested.
+Warning 6: Normalized/laundered field name: 'Island_Code' to 'Island_Cod'
+Warning 6: Normalized/laundered field name: 'Shape_Length' to 'Shape_Leng'
+Warning 6: Field Date create as date field, though DateTime requested.
+Warning 6: Field GPS_Date create as date field, though DateTime requested.
+Warning 6: Normalized/laundered field name: 'Island_Code' to 'Island_Cod'
+Warning 6: Normalized/laundered field name: 'Shape_Length' to 'Shape_Leng'

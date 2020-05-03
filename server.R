@@ -1,4 +1,4 @@
- 
+
 
 # Define server logic
 server <- function(input, output, session) {
@@ -14,8 +14,7 @@ server <- function(input, output, session) {
                                     height = 500),
                          tags$hr(),
                          fluidRow(
-                           conditionalPanel("input.oneM_Graph_One == 'Line' || 
-                                            input.oneM_Graph_One == 'Bar'",
+                           conditionalPanel("input.oneM_Graph_One == 'Line' || input.oneM_Graph_One == 'Bar'",
                                             column(3, radioButtons(inputId = "oneM_EB_one",
                                                                    label = "Show error bars?",
                                                                    choices = c("Yes" = 1, "No" = 0),
@@ -69,9 +68,7 @@ server <- function(input, output, session) {
                          tags$hr(),
                          DTOutput(outputId = "oneM_DToutData_One",
                                   height = 550),
-                         tags$hr(), tags$hr(),
-                         imageOutput(outputId = "oneM_LargeSitePhoto_One",
-                                     height = 625),
+                         tags$hr(),
                          tags$hr()
       )
     } 
@@ -113,7 +110,7 @@ server <- function(input, output, session) {
                                   conditionalPanel("input.oneM_GraphOptions_Isl == 'With ONI' ||
                                                       input.oneM_GraphOptions_Isl == 'With PDO (NOAA)' ||
                                                       input.oneM_GraphOptions_Isl == 'With PDO (UW)'",
-                                                             column(6, imageOutput(outputId = "oneM_ONIpdoPIC_Isl",
+                                                   column(6, imageOutput(outputId = "oneM_ONIpdoPIC_Isl",
                                                                          height = 75)))),
                          fluidRow(conditionalPanel("input.oneM_Graph_Isl == 'Line' || input.oneM_Graph_Isl == 'Bar'",
                                                    tags$hr())),
@@ -123,13 +120,13 @@ server <- function(input, output, session) {
                                                       Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
                                                       min = 0, max = 1, step = .05, value = .5, width = "100%"),
                                           fluidRow(column(3, radioButtons(inputId = "oneM_SmoothSE_Isl",
-                                                       label = "Show the standard error?",
-                                                       choices = c("Yes" = TRUE, "No" = FALSE),
-                                                       inline = TRUE)),
+                                                                          label = "Show the standard error?",
+                                                                          choices = c("Yes" = TRUE, "No" = FALSE),
+                                                                          inline = TRUE)),
                                                    column(3, radioButtons(inputId = "oneM_SmoothPoint_Isl",
-                                                       label = "Show the mean values?",
-                                                       choices = c("Yes" = 1, "No" = 0),
-                                                       inline = TRUE))),
+                                                                          label = "Show the mean values?",
+                                                                          choices = c("Yes" = 1, "No" = 0),
+                                                                          inline = TRUE))),
                                           tags$hr()),
                          conditionalPanel("input.oneM_GraphOptions_Isl == 'With ONI'",
                                           ONI_tagList,
@@ -169,9 +166,9 @@ server <- function(input, output, session) {
                                                       Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
                                                       min = 0, max = 1, step = .05, value = .5, width = "100%"),
                                           fluidRow(column(3, radioButtons(inputId = "oneM_SmoothSE_MPA",
-                                                       label = "Show the standard error?",
-                                                       choices = c("Yes" = TRUE, "No" = FALSE),
-                                                       inline = TRUE)),
+                                                                          label = "Show the standard error?",
+                                                                          choices = c("Yes" = TRUE, "No" = FALSE),
+                                                                          inline = TRUE)),
                                                    column(3, radioButtons(inputId = "oneM_SmoothPoint_MPA",
                                                                           label = "Show the mean values?",
                                                                           choices = c("Yes" = 1, "No" = 0),
@@ -240,9 +237,6 @@ server <- function(input, output, session) {
                                          DTOutput(outputId = "oneM_DToutData_Two_1")),
                                   column(6, tags$h1(tags$strong(input$oneM_SpeciesName_Two_Two)),
                                          DTOutput(outputId = "oneM_DToutData_Two_2"))),
-                         tags$hr(),
-                         imageOutput(outputId = "oneM_LargeSitePhoto_Two",
-                                     height = 625),
                          tags$hr()
       )
     }
@@ -251,7 +245,8 @@ server <- function(input, output, session) {
                          fluidRow(column(12, tags$h1(tags$strong(
                            "This section has the species in the order they appear on the datasheet")))),
                          plotOutput(outputId = "oneM_Plot_All",
-                                    height = 7000))
+                                    height = 7000),
+                         tags$hr())
     }
     return(dyn_ui)
   })
@@ -267,7 +262,7 @@ server <- function(input, output, session) {
           select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
                  StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
                  Species, SiteNumber, IslandCode, SiteCode, IslandSE) 
-      }) # filtered oneM_ summary table
+      }) # filtered summary table
       
       oneM_RawFilter_One <- reactive({ 
         oneM_DFRaw %>%
@@ -275,7 +270,7 @@ server <- function(input, output, session) {
                  CommonName == input$oneM_SpeciesName_One) %>% 
           group_by(SurveyYear) %>% 
           mutate(Mean = mean(Count))
-      }) # filtered  oneM_ raw table
+      }) # filtered raw table
       
       oneM_SpeciesClass_One <- reactive({ 
         SpeciesName %>%
@@ -297,26 +292,25 @@ server <- function(input, output, session) {
       output$oneM_TopPhoto_One <- renderImage({
         
         if (input$oneM_allORone =='One Species by Site') {
-          return(list(
-            src = glue("www/Indicator_Species/{unique(oneM_Filter_One()$Species)}.jpg"),
-            contentType = "image/jpg", width = 210, height = 210))
+          return(list(src = glue("www/Indicator_Species/{unique(oneM_Filter_One()$Species)}.jpg"),
+                      contentType = "image/jpg", width = 210, height = 210))
         }
         else if (input$oneM_allORone == 'One Species by Island') {
-          return(list(
-            src = glue("www/Indicator_Species/{unique(oneM_FilterByIsl_Isl()$Species)}.jpg"),
-            contentType = "image/jpg", width = 210, height = 210))
+          return(list(src = glue("www/Indicator_Species/{unique(oneM_FilterByIsl_Isl()$Species)}.jpg"),
+                      contentType = "image/jpg", width = 210, height = 210))
         }
         else if (input$oneM_allORone == 'One Species by MPA') {
-          return(list(
-            src = glue("www/Indicator_Species/{unique(oneM_Filter_MPA()$Species)}.jpg"),
-            contentType = "image/jpg", width = 210, height = 210))
+          return(list(src = glue("www/Indicator_Species/{unique(oneM_Filter_MPA()$Species)}.jpg"),
+                      contentType = "image/jpg", width = 210, height = 210))
         }
         else if (input$oneM_allORone == 'Two Species by Site') {
-          return(list(
-            src = glue("www/Indicator_Species/{unique(oneM_Filter_Two_One()$Species)}.jpg"),
-            contentType = "image/jpg", width = 210, height = 210))
+          return(list(src = glue("www/Indicator_Species/{unique(oneM_Filter_Two_One()$Species)}.jpg"),
+                      contentType = "image/jpg", width = 210, height = 210))
         }
-      }, deleteFile = FALSE) # Small species photo above plot
+        else if (input$oneM_allORone == 'All Species') {
+          return(list(src = glue("www/1mQuads.jpg"), contentType = "image/jpg", width = 210, height = 210))
+        }
+      }, deleteFile = FALSE) # 1st Small species photo above plot
       
       output$oneM_TopPhoto_Two <- renderImage({
         list(src = glue("www/Indicator_Species/{unique(oneM_Filter_Two_Two()$Species)}.jpg"),
@@ -329,13 +323,51 @@ server <- function(input, output, session) {
       }, deleteFile = FALSE) # Large species photo below plot
       
       output$oneM_TopSitePhoto_One <- renderImage({
-        list(src = glue("www/Sat_Imagery/{unique(oneM_Filter_One()$SiteCode)}.png"),
-            contentType = "image/png", width = 430, height = 210)
+        
+        if (input$oneM_allORone =='One Species by Site') {
+          return(list(src = glue("www/Sat_Imagery/{unique(oneM_Filter_One()$SiteCode)}.png"),
+                      contentType = "image/png", width = 430, height = 210))
+        }
+        else if (input$oneM_allORone == 'One Species by Island') {
+          return(list(src = "www/Sat_Imagery/CHISisl.png",
+                      contentType = "image/png", width = 430, height = 210))
+        }
+        else if (input$oneM_allORone == 'One Species by MPA') {
+          return(list(src = "www/Sat_Imagery/CHISmpa.png",
+                      contentType = "image/png", width = 430, height = 210))
+        }
+        else if (input$oneM_allORone == 'Two Species by Site') {
+          return(list(src = glue("www/Sat_Imagery/{unique(oneM_Filter_Two_One()$SiteCode)}.png"),
+                      contentType = "image/png", width = 430, height = 210))
+        }
+        else if (input$oneM_allORone == 'All Species') {
+          return(list(src = glue("www/Sat_Imagery/{unique(oneM_Filter_All()$SiteCode)}.png"),
+                      contentType = "image/png", width = 430, height = 210))
+        }
       }, deleteFile = FALSE) # Small Site photo above plot
       
       output$oneM_LargeSitePhoto_One <- renderImage({
-        list(src = glue("www/Sat_Imagery/{unique(oneM_Filter_One()$SiteCode)}.png"),
-            contentType = "image/png", width = 1250, height = 625)
+        if (input$oneM_allORone =='One Species by Site') {
+          return(list(src = glue("www/Sat_Imagery/{unique(oneM_Filter_One()$SiteCode)}.png"),
+                      contentType = "image/png", width = 1250, height = 625))
+        }
+        else if (input$oneM_allORone == 'One Species by Island') {
+          return(list(src = "www/Sat_Imagery/CHISisl.png",
+                      contentType = "image/png", width = 1250, height = 625))
+        }
+        else if (input$oneM_allORone == 'One Species by MPA') {
+          return(list(src = "www/Sat_Imagery/CHISmpa.png",
+                      contentType = "image/png", width = 1250, height = 625))
+        }
+        else if (input$oneM_allORone == 'Two Species by Site') {
+          return(list(src = glue("www/Sat_Imagery/{unique(oneM_Filter_Two_One()$SiteCode)}.png"),
+                      contentType = "image/png", width = 1250, height = 625))
+        }
+        else if (input$oneM_allORone == 'All Species') {
+          return(list(src = glue("www/Sat_Imagery/{unique(oneM_Filter_All()$SiteCode)}.png"),
+                      contentType = "image/png", width = 1250, height = 625))
+        }
+        
       }, deleteFile = FALSE) # Large Site photo below plot
       
       output$oneM_DToutClass_One <- renderDT({
@@ -475,7 +507,7 @@ server <- function(input, output, session) {
                 axis.title = element_text(size = 16, face = "bold"),
                 axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
                 axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
-      }) # Main Line Plot
+      }) # Line Plot
       
       oneM_BarPlot_One <- reactive({
         ggplot() +
@@ -521,7 +553,7 @@ server <- function(input, output, session) {
                 axis.title = element_text(size = 16, face = "bold"),
                 axis.text.y = element_text(size = 12, face = "bold", color = "black"),
                 axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
-      }) # Main Bar Plot
+      }) # Bar Plot
       
       oneM_SmoothPlot_One <- reactive({
         ggplot() +
@@ -559,7 +591,7 @@ server <- function(input, output, session) {
                 axis.title = element_text(size = 16, face = "bold"),
                 axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
                 axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
-      }) # Main Smooth Line Plot
+      }) # Smooth Line Plot
       
       oneM_BoxPlot_One <- reactive({
         ggplot() +
@@ -595,7 +627,7 @@ server <- function(input, output, session) {
                 axis.title = element_text(size = 16, face = "bold"),
                 axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
                 axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
-      }) # Main Boxplot Plot
+      }) # Boxplot Plot
       
       output$oneM_Plot_One <- renderPlot({
         
@@ -669,7 +701,7 @@ server <- function(input, output, session) {
             scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2)) 
         }
         return(p)
-      }) # Main Plot for oneM_ Quadrats with one species 
+      }) # Main Plot 
       
       output$oneM_BoxplotDescription_One <- renderImage({
         list(src = glue("www/Boxplot_Description.jpg"), contentType = "image/jpg", width = 550, height = 400)
@@ -1037,7 +1069,7 @@ server <- function(input, output, session) {
                          size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Isl),inherit.aes = FALSE) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
-                                                                                 max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
+                                      max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
                            expand = c(0.01, 0)) +
               labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
@@ -1865,35 +1897,6 @@ server <- function(input, output, session) {
         }
       }, deleteFile = FALSE)
       
-      output$oneM_TopSitePhoto_Two <- renderImage({
-        if (is.null(input$oneM_SpeciesName_Two_One))
-          return(NULL)
-        
-        if (input$oneM_SiteName_Two == unique(oneM_Filter_Two_One()$SiteName)) {
-          return(list(
-            src = glue("www/Sat_Imagery/{unique(oneM_Filter_Two_One()$SiteCode)}.png"),
-            contentType = "image/png",
-            alt = glue("{unique(oneM_Filter_Two_One()$SiteName)}"),
-            width = 430,
-            height = 210
-          ))
-        }
-      }, deleteFile = FALSE)
-      
-      output$oneM_LargeSitePhoto_Two <- renderImage({
-        if (is.null(input$oneM_SpeciesName_Two_One))
-          return(NULL)
-        
-        if (input$oneM_SiteName_Two == unique(oneM_Filter_Two_One()$SiteName)) {
-          return(list(
-            src = glue("www/Sat_Imagery/{unique(oneM_Filter_Two_One()$SiteCode)}.png"),
-            contentType = "image/png",
-            alt = glue("{unique(oneM_Filter_Two_One()$SiteName)}"),
-            width = 1250,
-            height = 625
-          ))
-        }
-      }, deleteFile = FALSE)
       
       oneM_alphaONI_Two <- reactive({
         if(input$oneM_GraphOptions_Two == "With No Index"){
@@ -6859,9 +6862,9 @@ server <- function(input, output, session) {
                                                       value = .5,
                                                       width = "100%"),
                                           fluidRow(column(3, radioButtons(inputId = "core_SmoothSE_Two",
-                                                                         label = "Show the standard error?",
-                                                                         choices = c("Yes" = TRUE, "No" = FALSE),
-                                                                         inline = TRUE)),
+                                                                          label = "Show the standard error?",
+                                                                          choices = c("Yes" = TRUE, "No" = FALSE),
+                                                                          inline = TRUE)),
                                                    column(3, radioButtons(inputId = "core_SmoothPoint_Two",
                                                                           label = "Show the mean values?",
                                                                           choices = c("Yes" = 1, "No" = 0),
@@ -7533,7 +7536,7 @@ server <- function(input, output, session) {
                                       max(as.Date(core_Filter_Isl_One()$IslandDate))+365),
                            expand = c(0.01, 0)) +
               labs(title = glue("{unique(core_Filter_Isl_One()$ScientificName)} and {unique(core_Filter_Isl_Two()$ScientificName)}"),
-                     subtitle = glue("{unique(core_Filter_Isl_One()$IslandName)}"), 
+                   subtitle = glue("{unique(core_Filter_Isl_One()$IslandName)}"), 
                    color = "Common Name",
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
@@ -10793,7 +10796,7 @@ server <- function(input, output, session) {
               geom_point(data = NHSF_RawFilter_One(), size = 1, color = "black",
                          aes(x = Date, y = mean(Size_mm), group = SurveyYear)) +
               geom_text(data = NHSF_RawFilter_One(), aes(x = Date, y = -1, group = Date, 
-                        label = paste(' n = \n', NHSF_RawFilter_One()$TotalCount)), size = 4) +
+                                                         label = paste(' n = \n', NHSF_RawFilter_One()$TotalCount)), size = 4) +
               scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_One()$Date), expand = c(0.01, 0),
                            limits = c(min(NHSF_RawFilter_One()$Date) - 150, max(NHSF_RawFilter_One()$Date) + 150)) +
               labs(title = glue("{unique(NHSF_RawFilter_One()$ScientificName)}"),
@@ -11023,7 +11026,7 @@ server <- function(input, output, session) {
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
               new_scale_fill() +
               geom_violin(data = NHSF_RawFilter_Isl(), width = 150,
-                           aes(x = Date, y = Size_mm, group = SurveyYear, fill = CommonName)) +
+                          aes(x = Date, y = Size_mm, group = SurveyYear, fill = CommonName)) +
               geom_point(data = NHSF_RawFilter_Isl(), size = 1, color = "black",
                          aes(x = Date, y = MeanSize, group = SurveyYear)) +
               scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_Isl()$Date), expand = c(0.01, 0),
@@ -11221,7 +11224,7 @@ server <- function(input, output, session) {
     }
     
   }
-    
+  
   { # ........ NHSF_MeanSizes ........   ----
     
     { # NHSF_MS_One_Species   ----
@@ -14154,8 +14157,8 @@ server <- function(input, output, session) {
                    x = "Year",
                    y = "Size Distribution (cm)") +
               facet_grid(rows = ifelse(input$FSF_FreeOrLock_SD_MPA == "Locked Scales", vars(ReserveStatus), 
-                                            ifelse(input$FSF_FreeOrLock_SD_MPA == "Free Scales", vars(ReserveStatus), 
-                                                   vars(CommonName))), scales = FSF_AxisScale_SD_MPA()) +
+                                       ifelse(input$FSF_FreeOrLock_SD_MPA == "Free Scales", vars(ReserveStatus), 
+                                              vars(CommonName))), scales = FSF_AxisScale_SD_MPA()) +
               scale_fill_manual(values = c(Inside = "green3", Outside = "red3")) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -16171,6 +16174,14 @@ server <- function(input, output, session) {
       dyn_ui <- tabPanel("Roving Diver Fish Count", value = "RDFC_TP",
                          plotOutput(outputId = "RDFC_Plot", 
                                     height = 600),
+                         tags$hr(),
+                         fluidRow(
+                           conditionalPanel("input.RDFC_Graph_One == 'Line' || 
+                                            input.RDFC_Graph_One == 'Bar'",
+                                            column(3, radioButtons(inputId = "RDFC_EB_one",
+                                                                   label = "Show error bars?",
+                                                                   choices = c("Yes" = 1, "No" = 0),
+                                                                   inline = TRUE)))),
                          conditionalPanel("input.RDFC_GraphOptions_One == 'With ONI'",
                                           tags$hr(),
                                           ONI_tagList),
@@ -16217,11 +16228,15 @@ server <- function(input, output, session) {
         group_by(SurveyYear, IslandName, SiteName, ScientificName, CommonName) %>%
         mutate(Low_Count = min(Count),
                High_Count = max(Count),
-               Mean_Count = mean(Count),
-               StandardError = sd(Count)/sqrt(length(Count)),
-               StandardDeviation = sd(Count),
+               Mean_Count = round(mean(Count), 2),
+               StandardError = round(sd(Count)/sqrt(length(Count)), 2),
+               StandardDeviation = round(sd(Count), 2),
                Date = mean(as.Date(Date)),
-               Observers = length(Count))
+               Observers = length(Count)) %>% 
+        select("SiteNumber", "SurveyYear", "Date", "IslandName", "SiteName", "ScientificName", "CommonName", "Score", 
+               "Abundance", "Count", "Low_Count", "High_Count", "Mean_Count", "StandardError", "StandardDeviation",  
+               "Observers", "PermanentObserverNumber", "ExperienceLevel", "IslandCode", "SiteCode", "Species", 
+               "ReserveStatus", "MeanDepth", "IslandDate")
     }) # filtered RDFC_ summary table
     
     RDFC_SideBar_Filter <- reactive({ 
@@ -16237,8 +16252,17 @@ server <- function(input, output, session) {
                   selected = "California sheephead, male")
     }) # Sidebar species menu
     
+    RDFC_SpeciesClass_One <- reactive({ 
+      SpeciesFish %>%
+        filter(CommonName == input$RDFC_SpeciesName_One) %>%
+        select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
+               Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
+        pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
+        select(Rank, Name)
+    }) # filtered Species classification table
+    
     RDFC_SpeciesDescription_One <- reactive({
-      SpeciesName %>%
+      SpeciesFish %>%
         filter(CommonName == input$RDFC_SpeciesName_One) %>%
         select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
         pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
@@ -16383,12 +16407,12 @@ server <- function(input, output, session) {
         geom_line(data = RDFC_Filter_One(), size = 1, linetype = "solid", 
                   aes(x = Date, y = High_Count, group = ScientificName, color = CommonName)) +
         geom_point(data = RDFC_Filter_One(), size = 2,
-                  aes(x = Date, y = Mean_Count, group = ScientificName, color = CommonName)) +
+                   aes(x = Date, y = Mean_Count, group = ScientificName, color = CommonName)) +
         geom_line(data = RDFC_Filter_One(), size = 1, linetype = "dashed",
                   aes(x = Date, y = Low_Count, group = ScientificName, color = CommonName)) +
         geom_errorbar(data = RDFC_Filter_One(),
                       aes(x = Date, ymin = Mean_Count - StandardError, ymax = Mean_Count + StandardError),
-                      width = 0, color = "black") + #, alpha = as.numeric(input$FSF_EB_one)) +
+                      width = 0, color = "black", alpha = as.numeric(input$RDFC_EB_one)) +
         geom_text(data = RDFC_Filter_One(), size = 4, fontface = "plain", position = position_dodge(1),
                   aes(x = Date, y = max(RDFC_Filter_One()$High_Count)*1.1, 
                       group = Date, label = paste(' N = \n', RDFC_Filter_One()$Observers))) +
@@ -16415,6 +16439,32 @@ server <- function(input, output, session) {
               axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
               axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
     })
+    
+    output$RDFC_DToutData_One <- renderDT({
+      datatable(RDFC_Filter_One(),
+                extensions = c('Buttons', 'ColReorder'),
+                options = list(
+                  initComplete = JS(
+                    "function(settings, json) {",
+                    "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                    "}"),
+                  scrollY = "500px",
+                  scrollX = TRUE, 
+                  paging = FALSE,
+                  ordering = TRUE,
+                  info = FALSE,
+                  dom = 'Bfrtip',
+                  buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                  columnDefs = c( # list(list(visible = FALSE, targets = c(10, 12, 13, 14, 15))), 
+                    list(list(className = 'dt-center', targets = 0:23))),
+                  colReorder = TRUE),
+                rownames = FALSE) %>% 
+        formatStyle(names(RDFC_Filter_One()),
+                    color = "black",
+                    backgroundColor = 'white'
+        )
+    }) # Filtered data table output
+    
   }
   
   output$outTemp <- renderUI({ # Temp_UI ----
@@ -16505,7 +16555,7 @@ server <- function(input, output, session) {
       output$temp_TopSitePhoto <- renderImage({
         if(is.null(input$temp_allORone)){
           return(NULL)
-          }
+        }
         else if(input$temp_allORone == "Benthic Temperature by Site") {
           return(list(src = glue("www/Sat_Imagery/{unique(temp_Filter_One()$SiteCode)}.png"),
                       contentType = "image/png", width = 430, height = 210)) 
@@ -16524,8 +16574,8 @@ server <- function(input, output, session) {
         }
         else if(input$temp_allORone == "Scripps Institute of Oceanography (SIO)") {
           return(
-                 list(src = "www/Sat_Imagery/SIO.png",
-                           contentType = "image/png", width = 450, height = 210)
+            list(src = "www/Sat_Imagery/SIO.png",
+                 contentType = "image/png", width = 450, height = 210)
           ) 
         }
       }, deleteFile = FALSE)
@@ -16906,7 +16956,7 @@ server <- function(input, output, session) {
                 axis.text.y = element_text(size = 12, face = "bold"),
                 axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"))
       })
-    
+      
     }
     
     { # Temp_ONI_Server ----
@@ -16994,9 +17044,9 @@ server <- function(input, output, session) {
         }
         if (!is.null(input$brushoni) && input$graphONI == "Gradient") {
           return({onigrad <- onigrad + scale_x_date(date_labels = "%b %Y", date_breaks = "1 year", 
-                                                   limits = c(as.Date("1970-01-01") + input$brushoni$xmin, 
-                                                              as.Date("1970-01-01") + input$brushoni$xmax),
-                                                   expand = c(0.01,0))
+                                                    limits = c(as.Date("1970-01-01") + input$brushoni$xmin, 
+                                                               as.Date("1970-01-01") + input$brushoni$xmax),
+                                                    expand = c(0.01,0))
           })
         }
         else if (is.null(input$brushoni) && input$graphONI == "Bar") {
@@ -17249,35 +17299,35 @@ server <- function(input, output, session) {
         if (input$dataSIO == "Surface Temp") {
           return({
             ggplot() + 
-                geom_boxplot(data = sioData(), 
-                             aes(x = year(End_of_Week), y = MeanSurfTemp, color = MeanSurfTemp, group = year(End_of_Week))) +
-                stat_smooth(data = sioData(), 
-                            aes(x = year(End_of_Week), y = MeanSurfTemp, color = MeanSurfTemp),
-                            se = FALSE, span = 0.75, color = "deeppink") +
-                scale_x_continuous(breaks = seq(1916, 2019, 2), expand = c(0.01,0)) +
-                labs(title = "Sea Surface Temperatures",
-                     subtitle = "Scripps Institute of Oceanography (SIO)",
-                     fill = "Water Temperature (°C)",
-                     x = NULL,
-                     y = "Mean Weekly Temperatures (°C)") +
-                geom_vline(size = 1, xintercept = 1982.5, alpha = .25) +
-                geom_label(x = 1982.5,
-                           y= Inf, aes(label = "KFM begins"),
-                           hjust = 0,
-                           vjust = 1,
-                           inherit.aes = FALSE) +
-                theme_minimal()+
-                theme(legend.position = "bottom",
-                      legend.title = element_text(angle = 0, size = 16, face = "bold"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(angle = 45, size = 14, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 14, face = "bold"),
-                      panel.grid.major = element_blank(),
-                      panel.grid.minor = element_blank(),
-                      axis.line = element_line(colour = "black"))
-            })
+              geom_boxplot(data = sioData(), 
+                           aes(x = year(End_of_Week), y = MeanSurfTemp, color = MeanSurfTemp, group = year(End_of_Week))) +
+              stat_smooth(data = sioData(), 
+                          aes(x = year(End_of_Week), y = MeanSurfTemp, color = MeanSurfTemp),
+                          se = FALSE, span = 0.75, color = "deeppink") +
+              scale_x_continuous(breaks = seq(1916, 2019, 2), expand = c(0.01,0)) +
+              labs(title = "Sea Surface Temperatures",
+                   subtitle = "Scripps Institute of Oceanography (SIO)",
+                   fill = "Water Temperature (°C)",
+                   x = NULL,
+                   y = "Mean Weekly Temperatures (°C)") +
+              geom_vline(size = 1, xintercept = 1982.5, alpha = .25) +
+              geom_label(x = 1982.5,
+                         y= Inf, aes(label = "KFM begins"),
+                         hjust = 0,
+                         vjust = 1,
+                         inherit.aes = FALSE) +
+              theme_minimal()+
+              theme(legend.position = "bottom",
+                    legend.title = element_text(angle = 0, size = 16, face = "bold"),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    axis.title = element_text(size = 16, face = "bold"),
+                    axis.text.y = element_text(angle = 45, size = 14, face = "bold"),
+                    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 14, face = "bold"),
+                    panel.grid.major = element_blank(),
+                    panel.grid.minor = element_blank(),
+                    axis.line = element_line(colour = "black"))
+          })
         }
         else if (input$dataSIO == "Bottom Temp (~ 5 m)") {
           return({
@@ -17769,7 +17819,7 @@ server <- function(input, output, session) {
                       label = "Choose a Species:",
                       choices =unique(bands_DFRaw$CommonName)))
       }
-    
+      
     })
     
     output$StatDataOut3 <- renderUI({ # by_All   ----
@@ -17969,7 +18019,7 @@ server <- function(input, output, session) {
     
   }
   
-  output$HistoryPDF <- renderUI({ # ........ Datasheet_PDF_Archive ........   -----
+  output$HistoryPDF <- renderUI({ # ........ History_PDF_Archive ........   -----
     
     tags$iframe(
       style="height:600px; width:100%; scrolling=yes",
@@ -18083,7 +18133,7 @@ server <- function(input, output, session) {
                                           fluidRow(column(12, offset = 3, tags$h1(tags$strong("Bat Star Wasting Disease")))),
                                           fluidRow(
                                             column(9, imageOutput(outputId = "BatWD",
-                                                               height = 600)),
+                                                                  height = 600)),
                                             column(1, actionButton(inputId = "Disease_previous",
                                                                    label = "Previous")),
                                             column(1, verbatimTextOutput(outputId = "Disease_numK")),
@@ -18226,7 +18276,7 @@ server <- function(input, output, session) {
     }
     
     { # Disease Server   ----
-  
+      
       d <- reactive({
         1 + input$Disease_next - input$Disease_previous
       })
@@ -18330,7 +18380,7 @@ server <- function(input, output, session) {
     { # Kelp Forest Scenes   -----
       
       k <- reactive({
-          1 + input$KFS_next - input$KFS_previous
+        1 + input$KFS_next - input$KFS_previous
       })
       
       l <- reactive({
@@ -18343,35 +18393,35 @@ server <- function(input, output, session) {
       
       output$KFS_numK <- renderText({
         glue("{k()}/{length(list.files(path = 'www/kelp_forest_scenes/Kenan_Chan'))}")
-        })
+      })
       
       output$KFS_numL <- renderText({
-          glue("{l()}/{length(list.files(path = 'www/kelp_forest_scenes/Laurie_Montgomery'))}")
-        })
+        glue("{l()}/{length(list.files(path = 'www/kelp_forest_scenes/Laurie_Montgomery'))}")
+      })
       
       output$KFS_numB <- renderText({
-          glue("{b()}/{length(list.files(path = 'www/kelp_forest_scenes/Brett_Seymour'))}")
-        })
+        glue("{b()}/{length(list.files(path = 'www/kelp_forest_scenes/Brett_Seymour'))}")
+      })
       
       output$KFS_photo_K <- renderImage({
-         list(src = glue("www/kelp_forest_scenes/Kenan_Chan/1 ({k()}).jpg"),
+        list(src = glue("www/kelp_forest_scenes/Kenan_Chan/1 ({k()}).jpg"),
              contentType = "image/jpg",
              height = 600,
              width = 900) 
       }, deleteFile = FALSE)
-        
+      
       output$KFS_photo_L <- renderImage({
         list(src = glue("www/kelp_forest_scenes/Laurie_Montgomery/1 ({l()}).jpg"),
-               contentType = "image/jpg",
-               height = 600,
-               width = 900) 
+             contentType = "image/jpg",
+             height = 600,
+             width = 900) 
       }, deleteFile = FALSE)
       
       output$KFS_photo_B <- renderImage({
-          list(src = glue("www/kelp_forest_scenes/Brett_Seymour/1 ({b()}).jpg"),
-               contentType = "image/jpg",
-               height = 600,
-               width = 900) 
+        list(src = glue("www/kelp_forest_scenes/Brett_Seymour/1 ({b()}).jpg"),
+             contentType = "image/jpg",
+             height = 600,
+             width = 900) 
       }, deleteFile = FALSE)
       
     }
@@ -18384,7 +18434,7 @@ server <- function(input, output, session) {
     if(input$maptype == "Leaflet Maps") {
       dyn_ui <- tabPanel("Site Maps", value = "maps", # Maps_TP_Leaflet      ----
                          fluidRow(column(8, leafletOutput(outputId = "Leaflet",
-                                                          height = 600, width = 1000)
+                                                          height = 600, width = '100%')
                          ))
       )
     }
@@ -18418,23 +18468,42 @@ server <- function(input, output, session) {
     return(dyn_ui)
   })
   
+  
   { # ........ Map_Servers ........   ----
+    
+    ProviderTile <- reactive({
+      if (input$maps_ProviderTiles_Leaflet == "Esri"){
+        return(providers$Esri)
+      }
+      else if (input$maps_ProviderTiles_Leaflet == "Ocean Base"){
+        return(providers$Esri.OceanBasemap)
+      }
+      else if (input$maps_ProviderTiles_Leaflet == "World Imagery"){
+        return(providers$Esri.WorldImagery)
+      }
+      else if (input$maps_ProviderTiles_Leaflet == "World Topography"){
+        return(providers$Esri.WorldTopoMap)
+      }
+      else if (input$maps_ProviderTiles_Leaflet == "National Geographic"){
+        return(providers$Esri.NatGeoWorldMap)
+      }
+    })
     
     { # Leaflet Maps     ----
       
       output$Leaflet <- renderLeaflet({
         leaflet() %>%
           setView(lng = -119.7277, lat = 33.76416, zoom = 9) %>%
-          addProviderTiles(providers$Esri.WorldImagery) %>%
-          addPolygons(data = marine, color = marine$Color, weight = 1, 
+          addProviderTiles(ProviderTile()) %>%
+          addPolygons(data = marine, color = marine$Color, weight = 1,
                       fillOpacity = 0.1, opacity = 0.25, label = marine$NAME)  %>%
           addPolygons(data = NPS_boundary, weight = 2, color = "green", fill = FALSE,
                       label = "Channel Islands National Park Boundary") %>%
           addPolygons(data = CINMS_boundary, weight = 2, color = "blue", fill = FALSE,
                       label = "Channel Islands National Marine Sanctuary Boundary") %>%
-          addPolylines(data = transects, color = transects$Color3)  %>%
+          addPolylines(data = transects)  %>%
           addMarkers(data = siteInfo2, label = paste(siteInfo2$IslandCode, siteInfo2$SiteName)) %>% 
-          addCircleMarkers(data = stations, label = stations$DC.description)
+          addCircleMarkers(data = Buoys_List, label = Buoys_List$DC.description)
       })
     }
     
@@ -18582,7 +18651,7 @@ server <- function(input, output, session) {
           return(
             visitDates %>%
               filter(SiteName == input$VD_SiteName_One) 
-            )
+          )
         }else if(input$VD_SurveyType_One == "Core Vs Fish"){
           visitDates$SurveyType <- visitDates$CvsF
           visitDates %>% 
@@ -18630,7 +18699,7 @@ server <- function(input, output, session) {
                     aes(x = lubridate::year(MeanDate), y = lubridate::month(MeanDate),
                         group = SiteName), color = "black") +
           scale_y_continuous(expand = c(0.1, 0), breaks = 4:11, 
-                                    labels =  c("Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov")) +
+                             labels =  c("Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov")) +
           scale_x_continuous(breaks = unique(lubridate::year(VD_Filter_One()$Date))) +
           labs(title = glue("{unique(VD_Filter_One()$IslandName)} {unique(VD_Filter_One()$SiteName)}"),
                color = "Survey Type",
@@ -18789,7 +18858,7 @@ server <- function(input, output, session) {
     }
     
     { # By Island     ----
-
+      
       VD_Filter_Isl <- reactive({
         if (input$VD_SurveyType_Isl == "All"){
           return(
@@ -18946,7 +19015,7 @@ server <- function(input, output, session) {
                       backgroundPosition = 'center'
           )
       })
-
+      
     }
     
   }
