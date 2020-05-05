@@ -993,7 +993,9 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                     label = "Choose a Guide:",
                                     choices = c("Santa Barbara Coastal LTER",
                                                 "Urchin Disease Guide",
-                                                "PISCO ")),
+                                                "PISCO UPC",
+                                                "PISCO UPC (Algae Only)",
+                                                "PISCO Swath Inverts")),
                        tags$hr()
       ),
       # ~ Photo Conditional   ----
@@ -1053,13 +1055,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
       # ~ Map_Conditional  ----
       # ...... Leaflet Maps  ----
       conditionalPanel(condition = "input.tabselected=='maps' && input.maptype=='Leaflet Maps'",
-                       radioButtons(inputId = "maps_ProviderTiles_Leaflet",
-                                    label = "Choose provider tiles",
-                                    choices = c("Esri",
-                                                "Ocean Base",
-                                                "World Imagery",
-                                                "World Topography",
-                                                "National Geographic")),
+                       
                        tags$hr()
       ),
       # ...... Static Site Maps  ----
@@ -1169,7 +1165,8 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
         "label {color: #f4f4f4;}",
         "input {color: black;}",
         ".form-group {margin-bottom: 0px;}",
-        "section.sidebar .shiny-input-container {padding: 5px 15px 0px 15px;}"
+        "section.sidebar .shiny-input-container {padding: 5px 15px 0px 15px;}",
+        ".leaflet-control-layers label {color: black;}"
         ))
   ),
   dashboardBody( # Dash_B_Body    ----

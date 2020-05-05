@@ -18045,42 +18045,40 @@ server <- function(input, output, session) {
         })
       }
       else if(input$Proto == "Protocol Guides"){ # Protocol Guide PDFs   -----
-        return({
-          tags$iframe(
-            style="height:600px; width:100%; scrolling=yes",
-            src = glue("Handbook/Protocol_Guides/{unique(Protocol_filter()$ProtocolGuide)}")) 
-        })
+        return(tags$iframe(style="height:600px; width:100%; scrolling=yes",
+                           src = glue("Handbook/Protocol_Guides/{unique(Protocol_filter()$ProtocolGuide)}")))
       }
       else if(input$Proto == "Species Guides"){ # Protocol Guide PDFs   -----
-        return({
-          tags$iframe(
-            style="height:600px; width:100%; scrolling=yes",
-            src = glue("Handbook/Species_Guides/{unique(Protocol_filter()$SpeciesGuide)}")) 
-        })
+        return(tags$iframe(style="height:600px; width:100%; scrolling=yes",
+                           src = glue("Handbook/Species_Guides/{unique(Protocol_filter()$SpeciesGuide)}")))
       }
       else if(input$Proto == "Data Management and History") {  # Data Management_PDFs   -----
-        return({
-          tags$iframe(
-            style="height:600px; width:100%; scrolling=yes",
-            src = glue("Handbook/Data_Managment/{unique(Protocol_filter()$DataManagement)}")) 
-        })
+        return(tags$iframe(style="height:600px; width:100%; scrolling=yes",
+                           src = glue("Handbook/Data_Managment/{unique(Protocol_filter()$DataManagement)}")))
       }
       else if(input$Proto == "Datasheets") {  # Datasheet_PDFs   -----
-        return({
-          tags$iframe(
-            style="height:600px; width:100%; scrolling=yes",
-            src = glue("Datasheets/{unique(Protocol_filter()$Datasheet)}")) 
-        })
+        return(tags$iframe(style="height:600px; width:100%; scrolling=yes",
+                           src = glue("Datasheets/{unique(Protocol_filter()$Datasheet)}")))
       }
-      else if(input$Proto == "Other Guides" && input$other_guides == "Santa Barbara Coastal LTER") {  # Datasheet_PDFs   -----
-        return({tags$iframe(style="height:600px; width:100%; scrolling=yes",
-                            src = "Handbook/Other_Guides/LTER FieldGuide 2015.pdf") 
-        })
+      else if(input$Proto == "Other Guides" && input$other_guides == "Santa Barbara Coastal LTER") {  # SBC_LTER PDFs   -----
+        return(tags$iframe(style="height:600px; width:100%; scrolling=yes",
+                            src = "Handbook/Other_Guides/LTER FieldGuide 2015.pdf"))
       }
-      else if(input$Proto == "Other Guides" && input$other_guides == "Urchin Disease Guide") {  # Datasheet_PDFs   -----
-        return({tags$iframe(style="height:600px; width:100%; scrolling=yes",
-                            src = "Handbook/Other_Guides/urchin_disease_guide.pdf") 
-        })
+      else if(input$Proto == "Other Guides" && input$other_guides == "Urchin Disease Guide") {  # Urchin Diesease PDFs   -----
+        return(tags$iframe(style="height:600px; width:100%; scrolling=yes",
+                            src = "Handbook/Other_Guides/urchin_disease_guide.pdf"))
+      }
+      else if(input$Proto == "Other Guides" && input$other_guides == "PISCO UPC") {  # PISCO_UPC PDFs   -----
+        return(tags$iframe(style="height:600px; width:100%; scrolling=yes",
+                           src = "Handbook/Other_Guides/PISCO_UPC.pdf"))
+      }
+      else if(input$Proto == "Other Guides" && input$other_guides == "PISCO UPC (Algae Only)") {  # PISCO_UPC algae PDFs   -----
+        return(tags$iframe(style="height:600px; width:100%; scrolling=yes",
+                           src = "Handbook/Other_Guides/PISCO_2013_swath_inverts.pdf"))
+      }
+      else if(input$Proto == "Other Guides" && input$other_guides == "PISCO Swath Inverts") {  # PISCO_Swath PDFs   -----
+        return(tags$iframe(style="height:600px; width:100%; scrolling=yes",
+                           src = "Handbook/Other_Guides/PISCO_2013_swath_inverts.pdf"))
       }
     })
   }
@@ -18477,42 +18475,38 @@ server <- function(input, output, session) {
     return(dyn_ui)
   })
   
-  
   { # ........ Map_Servers ........   ----
-    
-    ProviderTile <- reactive({
-      if (input$maps_ProviderTiles_Leaflet == "Esri"){
-        return(providers$Esri)
-      }
-      else if (input$maps_ProviderTiles_Leaflet == "Ocean Base"){
-        return(providers$Esri.OceanBasemap)
-      }
-      else if (input$maps_ProviderTiles_Leaflet == "World Imagery"){
-        return(providers$Esri.WorldImagery)
-      }
-      else if (input$maps_ProviderTiles_Leaflet == "World Topography"){
-        return(providers$Esri.WorldTopoMap)
-      }
-      else if (input$maps_ProviderTiles_Leaflet == "National Geographic"){
-        return(providers$Esri.NatGeoWorldMap)
-      }
-    })
     
     { # Leaflet Maps     ----
       
       output$Leaflet <- renderLeaflet({
         leaflet() %>%
           setView(lng = -119.7277, lat = 33.76416, zoom = 9) %>%
-          addProviderTiles(ProviderTile()) %>%
+          addTiles(group = "OSM (default)") %>% 
+          addProviderTiles(providers$Esri, group = "ESRI") %>%
+          addProviderTiles(providers$Esri.OceanBasemap, group = "Ocean Base") %>%
+          addProviderTiles(providers$Esri.WorldImagery, group = "Imagery") %>%
+          addProviderTiles(providers$Esri.WorldTopoMap, group = "Topography") %>%
+          addProviderTiles(providers$Esri.NatGeoWorldMap, group = "Nat. Geo.") %>%
           addPolygons(data = marine, color = marine$Color, weight = 1,
-                      fillOpacity = 0.1, opacity = 0.25, label = marine$NAME)  %>%
+                      fillOpacity = 0.1, opacity = 0.25, label = marine$NAME, group = "MPAs")  %>%
           addPolygons(data = NPS_boundary, weight = 2, color = "green", fill = FALSE,
-                      label = "Channel Islands National Park Boundary") %>%
+                      label = "Channel Islands National Park Boundary", group = "Park Boundary") %>%
           addPolygons(data = CINMS_boundary, weight = 2, color = "blue", fill = FALSE,
-                      label = "Channel Islands National Marine Sanctuary Boundary") %>%
-          addPolylines(data = transects)  %>%
-          addMarkers(data = siteInfo2, label = paste(siteInfo2$IslandCode, siteInfo2$SiteName)) %>% 
-          addCircleMarkers(data = Buoys_List, label = Buoys_List$DC.description)
+                      label = "Channel Islands National Marine Sanctuary Boundary", group = "Sanctuary Boundary") %>%
+          addPolylines(data = transects, group = "Transects")  %>%
+          addMarkers(data = siteInfo2, label = paste(siteInfo2$IslandCode, siteInfo2$SiteName), group = "Site Markers") %>% 
+          addCircleMarkers(data = Buoys_List, label = Buoys_List$DC.description, group = "Buoy Stations") %>% 
+          addLayersControl(
+            baseGroups = c("OSM (default)", "ESRI", "Ocean Base", "Imagery", "Topography", "Nat. Geo."),
+            overlayGroups = c("MPAs", "Park Boundary", "Sanctuary Boundary", 
+                              "Transects", "Site Markers", "Buoy Stations"),
+            options = layersControlOptions(collapsed = TRUE)) %>%
+          addMeasure(position = "bottomleft",
+                     primaryLengthUnit = "meters",
+                     primaryAreaUnit = "sqmeters",
+                     activeColor = "#3D535D",
+                     completedColor = "#7D4479")
       })
     }
     
