@@ -18033,8 +18033,7 @@ server <- function(input, output, session) {
         filter(Alt_SurveyType == input$protoChoice)
     })
     
-    output$SurveyProtocols <- renderUI({ 
-      
+    output$SurveyProtocols <- renderUI({
       if (is.null(input$Proto))
         return(NULL)
       
@@ -18071,6 +18070,16 @@ server <- function(input, output, session) {
           tags$iframe(
             style="height:600px; width:100%; scrolling=yes",
             src = glue("Datasheets/{unique(Protocol_filter()$Datasheet)}")) 
+        })
+      }
+      else if(input$Proto == "Other Guides" && input$other_guides == "Santa Barbara Coastal LTER") {  # Datasheet_PDFs   -----
+        return({tags$iframe(style="height:600px; width:100%; scrolling=yes",
+                            src = "Handbook/Other_Guides/LTER FieldGuide 2015.pdf") 
+        })
+      }
+      else if(input$Proto == "Other Guides" && input$other_guides == "Urchin Disease Guide") {  # Datasheet_PDFs   -----
+        return({tags$iframe(style="height:600px; width:100%; scrolling=yes",
+                            src = "Handbook/Other_Guides/urchin_disease_guide.pdf") 
         })
       }
     })

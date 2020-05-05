@@ -93,7 +93,6 @@
   
 }
 
-
 { # .. 1m_DF  ----
   
   oneM_DF <- read_csv("oneM_Summary.csv")
@@ -458,7 +457,7 @@
       tags$hr())
   }
   
-  { # NPS Tags   ------
+  {  # NPS Tags   ------
     NPSreports_tagList <- tagList(  
       tags$h4("The latest annual report to have been published was the 2012 report. They are currently behind but expect new 
             reports to be published soon.",
