@@ -78,11 +78,15 @@ server <- function(input, output, session) {
                          conditionalPanel("input.oneM_FreeOrLock_Isl == 'Locked Scales' ||
                                           input.oneM_FreeOrLock_Isl == 'Free Scales'",
                                           plotOutput(outputId = "oneM_Plot_Isl1",
-                                                     height = 1000)),
+                                                     height = 800)),
                          conditionalPanel("input.oneM_FreeOrLock_Isl == 'Single Plot'", 
                                           plotOutput(outputId = "oneM_Plot_Isl2",
                                                      height = 500)),
                          tags$hr(),
+                         conditionalPanel("input.oneM_DataSummary_Isl == 'Site Means (by Island)' && input.oneM_Graph_Isl != 'Bar'",
+                                          fluidRow(
+                                            column(11, tags$h4("Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected"))),
+                                          tags$hr()),
                          fluidRow(conditionalPanel("input.oneM_Graph_Isl == 'Line' || (input.oneM_Graph_Isl == 'Bar' && 
                                                    input.oneM_DataSummary_Isl == 'Island Mean' && 
                                                    input.oneM_FreeOrLock_Isl != 'Single Plot')",
@@ -140,7 +144,7 @@ server <- function(input, output, session) {
       dyn_ui <- tabPanel("1 m Quadrats", value = 'oneM_TP',  
                          tags$hr(),
                          plotOutput(outputId = "oneM_Plot_MPA",
-                                    height = 850),
+                                    height = 750),
                          tags$hr(),
                          fluidRow(conditionalPanel("input.oneM_Graph_MPA == 'Line' || (input.oneM_Graph_MPA == 'Bar' && 
                                                    input.oneM_DataSummary_MPA == 'MPA Mean')",
@@ -780,7 +784,7 @@ server <- function(input, output, session) {
           y <- "Combined Densities"
         }
         else if(input$oneM_BarOptions_Isl == "dodge"){
-          y <- "Seperated Densities"
+          y <- "Site Densities"
         }
         else if(input$oneM_BarOptions_Isl == "fill"){
           y <- "Normalized Densities"
@@ -881,7 +885,8 @@ server <- function(input, output, session) {
               geom_errorbar(data = oneM_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
+              labs(title = oneM_FilterByIsl_Isl()$ScientificName, 
+                   subtitle = oneM_FilterByIsl_Isl()$CommonName,
                    color = "Common Name",
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
@@ -894,12 +899,13 @@ server <- function(input, output, session) {
                     legend.title = element_text(size = 14, colour = "black", face = "bold"),
                     legend.text = element_text(size = 13, colour = "black", face = "bold"),
                     plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16, face = "bold"),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"),
+                    panel.border = element_rect(fill = NA)) 
           })
         } 
         else if(input$oneM_Graph_Isl == "Line" && input$oneM_DataSummary_Isl == "Site Means (by Island)") {
@@ -926,19 +932,19 @@ server <- function(input, output, session) {
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-                labs(title = m$IslandName,
-                     color = "Site Name",
+                labs(color = "Site Name",
                      linetype ="Site Name",
-                     caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
                      x = NULL,
                      y = "Mean Density") +
-                scale_color_manual(values = SiteColor, breaks = as.character(m$SiteName)) +
-                scale_linetype_manual(values = SiteLine, breaks = as.character(m$SiteName)) +
+                facet_grid(rows = vars(IslandName)) +
+                scale_color_manual(values = SiteColor, breaks = as.character(m$SiteName), guide = guide_legend(ncol = 2)) +
+                scale_linetype_manual(values = SiteLine, breaks = as.character(m$SiteName), guide = guide_legend(ncol = 2)) +
                 theme_classic() +
                 theme(legend.position = "right",
                       legend.justification = c(0,0.5),
                       legend.background = element_rect(),
-                      legend.key.width = unit(1, "cm"),
+                      legend.key.width = unit(.5, "cm"),
+                      legend.spacing = unit(.1, "cm"),
                       legend.title = element_text(size = 14, colour = "black", face = "bold"),
                       legend.text = element_text(size = 12, colour = "black"),
                       plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
@@ -951,8 +957,8 @@ server <- function(input, output, session) {
             })
             
             do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
+                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)} - {unique(oneM_Filter_Isl()$CommonName)}"),
+                                          label_size = 20, label_fontface = "bold"
             ))
           })
         } 
@@ -1002,7 +1008,8 @@ server <- function(input, output, session) {
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"),
+                    panel.border = element_rect(fill = NA))
           })
         }
         else if(input$oneM_Graph_Isl == "Bar" && input$oneM_DataSummary_Isl == "Site Means (by Island)") {
@@ -1024,31 +1031,31 @@ server <- function(input, output, session) {
                                                    oneM_yValue_Isl(), max(m$MaxSumBar)))) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = c(0.01, 0),
                              limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365)) +
-                labs(title = m$IslandName,
-                     color = "Site Name",
-                     fill = "Site Name",
+                labs(fill = "Site Name",
                      x = "Year",
                      y = oneM_yLabel_Isl()) +
-                scale_fill_manual(values = SiteColor) +
+                facet_grid(rows = vars(IslandName)) +
+                scale_fill_manual(values = SiteColor, guide = guide_legend(ncol = 2)) +
                 theme_classic() +
                 theme(legend.position = "right",
                       legend.justification = c(0,0.5),
                       legend.background = element_rect(),
-                      legend.key.width = unit(1, "cm"),
+                      legend.key.width = unit(.5, "cm"),
                       legend.title = element_text(size = 14, colour = "black", face = "bold"),
                       legend.text = element_text(size = 12, colour = "black"),
                       plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
                       plot.subtitle = element_text(hjust = 0.5, size = 16),
                       plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.title.x = element_text(size = 16, face = "bold"),
+                      axis.title.y = element_text(size = 12, face = "bold"),
                       axis.text.y = element_text(size = 12, face = "bold"),
                       axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
                       strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
             })
             
             do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
+                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)} - {unique(oneM_Filter_Isl()$CommonName)}"),
+                                          label_size = 20, label_fontface = "bold"
             ))
           })
         } 
@@ -1088,7 +1095,8 @@ server <- function(input, output, session) {
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+                    strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"),
+                    panel.border = element_rect(fill = NA))
           })
         }
         else if(input$oneM_Graph_Isl == "Smooth Line" && input$oneM_DataSummary_Isl == "Site Means (by Island)") { 
@@ -1105,21 +1113,21 @@ server <- function(input, output, session) {
                 scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
                 geom_point(data = m, aes(x = Date, y = MeanDensity_sqm, color = SiteName),
                            size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Isl), inherit.aes = FALSE) +
-                geom_smooth(data = m, aes(x = Date, y = MeanDensity_sqm, color = SiteName),
-                            se = as.logical(input$oneM_SmoothSE_Isl),
-                            span = input$oneM_SmoothSlide_Isl) +
+                geom_smooth(data = m, aes(x = Date, y = MeanDensity_sqm, color = SiteName, linetype = SiteName),
+                            se = as.logical(input$oneM_SmoothSE_Isl), span = input$oneM_SmoothSlide_Isl) +
                 scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                              limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
                                         max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
                              expand = c(0.01, 0)) +
-                scale_y_continuous(limits = c(0, ifelse(input$oneM_FreeOrLock_Isl == "Locked Scales", 
-                                                        max(oneM_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm))),
-                                   expand = c(0.01, 0)) +
-                labs(title = glue("{unique(m$IslandName)}"), 
-                     color = "Site Name",
+                scale_y_continuous(expand = c(0.01, 0),
+                  limits = c(0, ifelse(input$oneM_FreeOrLock_Isl == "Locked Scales", 
+                                       max(oneM_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm)))) +
+                labs(color = "Site Name",
                      x = "Year",
                      y = expression("Mean Density (#/m"^"2"~")")) +
-                scale_color_manual(values = SiteColor) +
+                facet_grid(rows = vars(IslandName)) +
+                scale_color_manual(values = SiteColor, guide = guide_legend(ncol = 2)) +
+                scale_linetype_manual(values = SiteLine, guide = guide_legend(ncol = 2)) +
                 theme_classic() +
                 theme(legend.position = "right",
                       legend.justification = c(0,0.5),
@@ -1135,7 +1143,7 @@ server <- function(input, output, session) {
                       strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
             })
             do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)}"),
+                                          labels = glue("{unique(oneM_Filter_Isl()$ScientificName)} - {unique(oneM_Filter_Isl()$CommonName)}"),
                                           label_size = 20, label_fontface = "bold.italic"
             ))
           })
@@ -1168,8 +1176,9 @@ server <- function(input, output, session) {
               geom_errorbar(data = oneM_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   color = "Common Name",
+              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"),
+                   subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
+                   color = "Island Name",
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
               scale_color_manual(values = SpeciesColor) +
@@ -1180,7 +1189,7 @@ server <- function(input, output, session) {
                     legend.title = element_text(size = 14, colour = "black", face = "bold"),
                     legend.text = element_text(size = 13, colour = "black", face = "bold"),
                     plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16, face = "bold"),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold"),
@@ -1209,7 +1218,8 @@ server <- function(input, output, session) {
               geom_errorbar(data = oneM_Filter_Isl(), 
                             aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                             width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-              labs(title = oneM_Filter_Isl()$IslandName,
+              labs(title = oneM_Filter_Isl()$ScientificName,
+                   subtitle = oneM_Filter_Isl()$CommonName,
                    color = "Site Name",
                    linetype ="Site Name",
                    caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
@@ -1233,11 +1243,11 @@ server <- function(input, output, session) {
               theme(legend.position = "bottom",
                     legend.justification = c(0,0.5),
                     legend.background = element_rect(),
-                    legend.key.width = unit(1.5, "cm"),
+                    legend.key.width = unit(1, "cm"),
                     legend.title = element_text(size = 14, colour = "black", face = "bold"),
                     legend.text = element_text(size = 12, colour = "black"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16, face = "bold"),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold"),
@@ -1267,8 +1277,8 @@ server <- function(input, output, session) {
                            expand = c(0.01, 0)) +
               labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
-                   color = "Common Name",
-                   fill = "Common Name",
+                   color = "Island Name",
+                   fill = "Island Name",
                    x = "Year",
                    y = oneM_yLabel_Isl()) +
               scale_fill_manual(values = SpeciesColor) +
@@ -1279,7 +1289,7 @@ server <- function(input, output, session) {
                     legend.title = element_text(size = 14, colour = "black", face = "bold"),
                     legend.text = element_text(size = 13, colour = "black", face = "bold"),
                     plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16, face = "bold"),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold"),
@@ -1298,7 +1308,8 @@ server <- function(input, output, session) {
                            limits = c(min(as.Date(oneM_Filter_Isl()$Date))-365,
                                       max(as.Date(oneM_Filter_Isl()$Date))+365),
                            expand = c(0.01, 0)) +
-              labs(title = oneM_Filter_Isl()$IslandName,
+              labs(title = oneM_Filter_Isl()$ScientificName,
+                   subtitle = oneM_Filter_Isl()$CommonName,
                    color = "Site Name",
                    fill = "Site Name",
                    x = "Year",
@@ -1323,8 +1334,8 @@ server <- function(input, output, session) {
                     legend.key.width = unit(1, "cm"),
                     legend.title = element_text(size = 14, colour = "black", face = "bold"),
                     legend.text = element_text(size = 12, colour = "black"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16, face = "bold"),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold"),
@@ -1350,8 +1361,9 @@ server <- function(input, output, session) {
                            limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
                            expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
-                   color = "Common Name",
+              labs(title = oneM_FilterByIsl_Isl()$ScientificName,
+                   subtitle = oneM_FilterByIsl_Isl()$CommonName, 
+                   color = "Island Name",
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
               scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
@@ -1360,8 +1372,8 @@ server <- function(input, output, session) {
                     legend.background = element_rect(),
                     legend.title = element_text(size = 14, colour = "black", face = "bold"),
                     legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.title = element_text(hjust = 0.5, size = 22, face = "bold"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16, face = "bold"),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold"),
@@ -1379,7 +1391,7 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_Isl()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = oneM_Filter_Isl(), aes(x = Date, y = MeanDensity_sqm, color = CommonName), 
+              geom_point(data = oneM_Filter_Isl(), aes(x = Date, y = MeanDensity_sqm, color = SiteName), 
                          size = 2, alpha = as.numeric(input$oneM_SmoothPoint_Isl)) +
               geom_smooth(data = oneM_Filter_Isl(), aes(x= Date, y = MeanDensity_sqm, color = SiteName),
                           se = as.logical(input$oneM_SmoothSE_Isl), span = input$oneM_SmoothSlide_Isl) +
@@ -1387,18 +1399,19 @@ server <- function(input, output, session) {
                            limits = c(min(as.Date(oneM_Filter_Isl()$Date))-365, 
                                       max(as.Date(oneM_Filter_Isl()$Date))+365),
                            expand = c(0.01, 0)) +
-              labs(title = glue("{unique(oneM_Filter_Isl()$ScientificName)}"), 
-                   color = "Common Name",
+              labs(title = oneM_Filter_Isl()$ScientificName, 
+                   subtitle = oneM_Filter_Isl()$CommonName, 
+                   color = "Site Name",
                    x = "Year",
                    y = expression("Mean Density (#/m"^"2"~")")) +
-              scale_color_manual(values = SiteColor2, guide = guide_legend(nrow = 5)) +
+              scale_color_manual(values = SiteColor2, guide = guide_legend(ncol = 10)) +
               theme_classic() +
               theme(legend.position = "bottom",
                     legend.background = element_rect(),
                     legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                    legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                    legend.text = element_text(size = 12, colour = "black"),
                     plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16, face = "bold"),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold"),
@@ -1522,7 +1535,7 @@ server <- function(input, output, session) {
         if(input$oneM_FreeOrLock_MPA == "Free Scales"){
           return("free")
         }
-      }) # Facet Plot Axis Scale free or fixed 
+      }) # Free or fixed axis Scale 
       
       output$oneM_Plot_MPA <- renderPlot({
         if (is.null(input$oneM_Graph_MPA))
@@ -1568,7 +1581,8 @@ server <- function(input, output, session) {
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold", color = "black"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
+                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"),
+                    panel.border = element_rect(fill = NA))
           })
         }
         else if(input$oneM_Graph_MPA == "Line" && input$oneM_DataSummary_MPA == "Site Means (by MPA)") {
@@ -1679,7 +1693,8 @@ server <- function(input, output, session) {
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold", color = "black"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
+                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"),
+                    panel.border = element_rect(fill = NA))
           })
         }
         else if(input$oneM_Graph_MPA == "Bar" &&  input$oneM_DataSummary_MPA == "Site Means (by MPA)") {
@@ -1789,7 +1804,8 @@ server <- function(input, output, session) {
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold", color = "black"),
                     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"),
-                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"))
+                    strip.text = element_text(size = 12, colour = "Black", angle = 90, face = "bold"),
+                    panel.border = element_rect(fill = NA))
           })
         }
         else if(input$oneM_Graph_MPA == "Smooth Line" && input$oneM_DataSummary_MPA == "Site Means (by MPA)") {
@@ -18074,7 +18090,7 @@ server <- function(input, output, session) {
       }
       else if(input$Proto == "Other Guides" && input$other_guides == "PISCO UPC (Algae Only)") {  # PISCO_UPC algae PDFs   -----
         return(tags$iframe(style="height:600px; width:100%; scrolling=yes",
-                           src = "Handbook/Other_Guides/PISCO_2013_swath_inverts.pdf"))
+                           src = "Handbook/Other_Guides/PISCO_UPC_algae.pdf"))
       }
       else if(input$Proto == "Other Guides" && input$other_guides == "PISCO Swath Inverts") {  # PISCO_Swath PDFs   -----
         return(tags$iframe(style="height:600px; width:100%; scrolling=yes",
