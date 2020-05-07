@@ -146,6 +146,10 @@ server <- function(input, output, session) {
                          plotOutput(outputId = "oneM_Plot_MPA",
                                     height = 750),
                          tags$hr(),
+                         conditionalPanel("input.oneM_DataSummary_MPA == 'Site Means (by MPA)' && input.oneM_Graph_MPA != 'Bar'",
+                                          fluidRow(
+                                            column(11, tags$h4("Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected"))),
+                                          tags$hr()),
                          fluidRow(conditionalPanel("input.oneM_Graph_MPA == 'Line' || (input.oneM_Graph_MPA == 'Bar' && 
                                                    input.oneM_DataSummary_MPA == 'MPA Mean')",
                                                    column(3, radioButtons(inputId = "oneM_EB_MPA",
@@ -499,7 +503,7 @@ server <- function(input, output, session) {
                        lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(oneM_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
-               y = expression("Mean Density (#/m"^"2"~")")) +
+               y = "Mean Density") +
           scale_color_manual(values = SpeciesColor) +
           theme_classic() +
           theme(legend.position = "bottom",
@@ -545,7 +549,7 @@ server <- function(input, output, session) {
                  lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                  } and has a mean depth of {round(mean(oneM_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
-               y = expression("Mean Density (#/m"^"2"~")")) +
+               y = "Mean Density") +
           scale_fill_manual(values = SpeciesColor) +
           theme_classic() +
           theme(legend.position = "bottom",
@@ -889,7 +893,7 @@ server <- function(input, output, session) {
                    subtitle = oneM_FilterByIsl_Isl()$CommonName,
                    color = "Common Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               facet_grid(rows = vars(IslandName), scales = oneM_AxisScale_Isl()) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
@@ -1081,7 +1085,7 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               facet_grid(rows = vars(IslandName), scales = oneM_AxisScale_Isl()) +
               scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
               theme_classic() +
@@ -1123,8 +1127,9 @@ server <- function(input, output, session) {
                   limits = c(0, ifelse(input$oneM_FreeOrLock_Isl == "Locked Scales", 
                                        max(oneM_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm)))) +
                 labs(color = "Site Name",
+                     linetype = "Site Name",
                      x = "Year",
-                     y = expression("Mean Density (#/m"^"2"~")")) +
+                     y = "Mean Density") +
                 facet_grid(rows = vars(IslandName)) +
                 scale_color_manual(values = SiteColor, guide = guide_legend(ncol = 2)) +
                 scale_linetype_manual(values = SiteLine, guide = guide_legend(ncol = 2)) +
@@ -1144,7 +1149,7 @@ server <- function(input, output, session) {
             })
             do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
                                           labels = glue("{unique(oneM_Filter_Isl()$ScientificName)} - {unique(oneM_Filter_Isl()$CommonName)}"),
-                                          label_size = 20, label_fontface = "bold.italic"
+                                          label_size = 20, label_fontface = "bold"
             ))
           })
         }
@@ -1180,7 +1185,7 @@ server <- function(input, output, session) {
                    subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
                    color = "Island Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "right",
@@ -1365,7 +1370,7 @@ server <- function(input, output, session) {
                    subtitle = oneM_FilterByIsl_Isl()$CommonName, 
                    color = "Island Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
               theme_classic() +
               theme(legend.position = "right",
@@ -1403,7 +1408,7 @@ server <- function(input, output, session) {
                    subtitle = oneM_Filter_Isl()$CommonName, 
                    color = "Site Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values = SiteColor2, guide = guide_legend(ncol = 10)) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -1566,7 +1571,7 @@ server <- function(input, output, session) {
                    color = "Reserve Status",
                    linetype = "Reserve Status",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values=c(Inside = "green3", Outside = "red3")) +
               scale_linetype_manual(values = c(Inside = "dashed", Outside = "solid")) +
               facet_grid(rows = vars(IslandName), scales = oneM_AxisScale_MPA()) +
@@ -1609,12 +1614,11 @@ server <- function(input, output, session) {
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$oneM_EB_MPA)) +
-                labs(title = m$IslandName,
-                     color = "Site Name",
+                labs(color = "Site Name",
                      linetype = "Site Name",
-                     caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
                      x = "Year",
                      y = "Mean Density") +
+                facet_grid(rows = vars(IslandName)) +
                 scale_color_manual(values = SiteColor, breaks = as.character(m$SiteName)) +
                 scale_linetype_manual(values = SiteLine, breaks = as.character(m$SiteName)) +
                 theme_classic() +
@@ -1634,9 +1638,9 @@ server <- function(input, output, session) {
             })
             
             do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_MPA()$ScientificName)}"),
+                                          labels = glue("{unique(oneM_Filter_MPA()$ScientificName)} - {unique(oneM_Filter_MPA()$CommonName)}"),
                                           label_size = 20,
-                                          label_fontface = "bold.italic"
+                                          label_fontface = "bold"
             ))
           })
         }
@@ -1679,7 +1683,7 @@ server <- function(input, output, session) {
                    color = "Reserve Status",
                    linetype = "Reserve Status",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_fill_manual(values = c(Inside = "green3", Outside = "red3")) +
               facet_grid(rows = vars(IslandName), scales = oneM_AxisScale_MPA()) +
               theme_classic() +
@@ -1734,10 +1738,10 @@ server <- function(input, output, session) {
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
                              expand = c(0.01, 0)) +
-                labs(title = m$IslandName,
-                     fill = "Outside",
+                labs(fill = "Outside",
                      x = "Year",
                      y = "Mean Density") +
+                facet_grid(rows = vars(IslandName)) +
                 scale_fill_manual(values = SiteColor) +
                 scale_color_manual(values = SiteColor) +
                 theme_classic() +
@@ -1757,9 +1761,9 @@ server <- function(input, output, session) {
             })
             
             do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_MPA()$ScientificName)}"),
+                                          labels = glue("{unique(oneM_Filter_MPA()$ScientificName)} - {unique(oneM_Filter_MPA()$CommonName)}"),
                                           label_size = 20,
-                                          label_fontface = "bold.italic"
+                                          label_fontface = "bold"
             ))
           })
         } 
@@ -1789,7 +1793,7 @@ server <- function(input, output, session) {
                    color = "Reserve Status",
                    linetype = "Reserve Status",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values=c(Inside = "green3", Outside = "red3")) +
               scale_linetype_manual(values = c(Inside = "dashed", Outside = "solid")) +
               facet_grid(rows = vars(IslandName), scales = oneM_AxisScale_MPA()) +
@@ -1828,13 +1832,14 @@ server <- function(input, output, session) {
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
                              expand = c(0.01, 0)) +
-                scale_y_continuous(limits = c(0, max(oneM_Filter_MPA()$MaxSum)), expand = c(0.01, 0)) +
-                labs(title = m$IslandName,
-                     color = "Site Name",
+                scale_y_continuous(expand = c(0.01, 0),
+                  limits = c(0, ifelse(input$oneM_FreeOrLock_MPA == "Locked Scales", 
+                                       max(oneM_Filter_MPA()$MaxSum), max(m$MeanDensity_sqm)))) +
+                labs(color = "Site Name",
                      linetype = "Site Name",
-                     caption = "Dashed lines are inside SMRs, dotted lines are in SMCAs, and solid lines are unprotected",
                      x = "Year",
                      y = "Mean Density") +
+                facet_grid(rows = vars(IslandName)) +
                 scale_color_manual(values = SiteColor) +
                 scale_linetype_manual(values = SiteLine) +
                 theme_classic() +
@@ -1854,9 +1859,9 @@ server <- function(input, output, session) {
             })
             
             do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v',
-                                          labels = glue("{unique(oneM_Filter_MPA()$ScientificName)}"),
+                                          labels = glue("{unique(oneM_Filter_MPA()$ScientificName)} - {unique(oneM_Filter_MPA()$CommonName)}"),
                                           label_size = 20,
-                                          label_fontface = "bold.italic"
+                                          label_fontface = "bold"
             ))
           })
         }
@@ -2002,7 +2007,7 @@ server <- function(input, output, session) {
                                 ymax = MeanDensity_sqm*input$oneM_Y_Slide_Two + StandardError*input$oneM_Y_Slide_Two),
                             width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Two)) + 
               scale_y_continuous(sec.axis = sec_axis(~./input$oneM_Y_Slide_Two, 
-                                                     name = glue("{unique(oneM_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(oneM_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(oneM_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(oneM_Filter_Two_One()$Date))-365, 
                                       max(as.Date(oneM_Filter_Two_One()$Date))+365),
@@ -2017,7 +2022,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(oneM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(oneM_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(oneM_Filter_Two_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(oneM_Filter_Two_One()$CommonName)} Mean Density')) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -2057,7 +2062,7 @@ server <- function(input, output, session) {
                                 ymax = MeanDensity_sqm*input$oneM_Y_Slide_Two + StandardError*input$oneM_Y_Slide_Two),
                             width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Two)) + 
               scale_y_continuous(sec.axis = sec_axis(~./input$oneM_Y_Slide_Two, 
-                                                     name = glue("{unique(oneM_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(oneM_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(oneM_Filter_Two_One()$Date),
                            limits = c(min(as.Date(oneM_Filter_Two_One()$Date))-365,
                                       max(as.Date(oneM_Filter_Two_One()$Date))+365),
@@ -2072,7 +2077,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(oneM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(oneM_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_fill_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -2108,7 +2113,7 @@ server <- function(input, output, session) {
                          aes(x = Date, y = MeanDensity_sqm*input$oneM_Y_Slide_Two, color = CommonName),
                          size = 1, alpha = as.numeric(input$oneM_SmoothPoint_Two)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$oneM_Y_Slide_Two, 
-                                                     name = glue("{unique(oneM_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(oneM_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(oneM_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(oneM_Filter_Two_One()$Date))-365, 
                                       max(as.Date(oneM_Filter_Two_One()$Date))+365),
@@ -2123,7 +2128,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(oneM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(oneM_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(oneM_Filter_Two_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(oneM_Filter_Two_One()$CommonName)} Mean Density')) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -2749,7 +2754,7 @@ server <- function(input, output, session) {
                        lubridate::month(round(mean(month(fiveM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(fiveM_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
-               y = expression("Mean Density (#/m"^"2"~")")) +
+               y = "Mean Density") +
           scale_color_manual(values = SpeciesColor) +
           theme_classic() +
           theme(legend.position = "bottom",
@@ -2795,7 +2800,7 @@ server <- function(input, output, session) {
                  lubridate::month(round(mean(month(fiveM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                  } and has a mean depth of {round(mean(fiveM_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
-               y = expression("Mean Density (#/m"^"2"~")")) +
+               y = "Mean Density") +
           scale_fill_manual(values = SpeciesColor) +
           theme_classic() +
           theme(legend.position = "bottom",
@@ -3138,7 +3143,7 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(fiveM_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               facet_grid(rows = vars(IslandName), scales = fiveM_AxisScale_Isl()) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
@@ -3328,7 +3333,7 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(fiveM_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               facet_grid(rows = vars(IslandName), scales = fiveM_AxisScale_Isl()) +
               scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
               theme_classic() +
@@ -3372,7 +3377,7 @@ server <- function(input, output, session) {
                 labs(title = glue("{unique(m$IslandName)}"), 
                      color = "Site Name",
                      x = "Year",
-                     y = expression("Mean Density (#/m"^"2"~")")) +
+                     y = "Mean Density") +
                 scale_color_manual(values = SiteColor) +
                 theme_classic() +
                 theme(legend.position = "right",
@@ -3425,7 +3430,7 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(fiveM_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "right",
@@ -3607,7 +3612,7 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(fiveM_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
               theme_classic() +
               theme(legend.position = "right",
@@ -3644,7 +3649,7 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(fiveM_Filter_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values = SiteColor2, guide = guide_legend(nrow = 5)) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -3807,7 +3812,7 @@ server <- function(input, output, session) {
                    color = "Reserve Status",
                    linetype = "Reserve Status",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values=c(Inside = "green3", Outside = "red3")) +
               scale_linetype_manual(values = c(Inside = "dashed", Outside = "solid")) +
               facet_grid(rows = vars(IslandName), scales = fiveM_AxisScale_MPA()) +
@@ -3919,7 +3924,7 @@ server <- function(input, output, session) {
                    color = "Reserve Status",
                    linetype = "Reserve Status",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_fill_manual(values = c(Inside = "green3", Outside = "red3")) +
               facet_grid(rows = vars(IslandName), scales = fiveM_AxisScale_MPA()) +
               theme_classic() +
@@ -4028,7 +4033,7 @@ server <- function(input, output, session) {
                    color = "Reserve Status",
                    linetype = "Reserve Status",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values=c(Inside = "green3", Outside = "red3")) +
               scale_linetype_manual(values = c(Inside = "dashed", Outside = "solid")) +
               facet_grid(rows = vars(IslandName), scales = fiveM_AxisScale_MPA()) +
@@ -4269,7 +4274,7 @@ server <- function(input, output, session) {
                                 ymax = MeanDensity_sqm*input$fiveM_Y_Slide_Two + StandardError*input$fiveM_Y_Slide_Two),
                             width = 0, color = "black", alpha = as.numeric(input$fiveM_EB_Two)) + 
               scale_y_continuous(sec.axis = sec_axis(~./input$fiveM_Y_Slide_Two, 
-                                                     name = glue("{unique(fiveM_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(fiveM_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(fiveM_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(fiveM_Filter_Two_One()$Date))-365, 
                                       max(as.Date(fiveM_Filter_Two_One()$Date))+365),
@@ -4284,7 +4289,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(fiveM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(fiveM_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(fiveM_Filter_Two_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(fiveM_Filter_Two_One()$CommonName)} Mean Density')) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -4324,7 +4329,7 @@ server <- function(input, output, session) {
                                 ymax = MeanDensity_sqm*input$fiveM_Y_Slide_Two + StandardError*input$fiveM_Y_Slide_Two),
                             width = 0, color = "black", alpha = as.numeric(input$fiveM_EB_Two)) + 
               scale_y_continuous(sec.axis = sec_axis(~./input$fiveM_Y_Slide_Two, 
-                                                     name = glue("{unique(fiveM_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(fiveM_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(fiveM_Filter_Two_One()$Date),
                            limits = c(min(as.Date(fiveM_Filter_Two_One()$Date))-365,
                                       max(as.Date(fiveM_Filter_Two_One()$Date))+365),
@@ -4339,7 +4344,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(fiveM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(fiveM_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_fill_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -4375,7 +4380,7 @@ server <- function(input, output, session) {
                          aes(x = Date, y = MeanDensity_sqm*input$fiveM_Y_Slide_Two, color = CommonName),
                          size = 1, alpha = as.numeric(input$fiveM_SmoothPoint_Two)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$fiveM_Y_Slide_Two, 
-                                                     name = glue("{unique(fiveM_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(fiveM_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(fiveM_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(fiveM_Filter_Two_One()$Date))-365, 
                                       max(as.Date(fiveM_Filter_Two_One()$Date))+365),
@@ -4390,7 +4395,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(fiveM_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(fiveM_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(fiveM_Filter_Two_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(fiveM_Filter_Two_One()$CommonName)} Mean Density')) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -5040,7 +5045,7 @@ server <- function(input, output, session) {
                        lubridate::month(round(mean(month(bands_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(bands_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
-               y = expression("Mean Density (#/m"^"2"~")")) +
+               y = "Mean Density") +
           scale_color_manual(values = SpeciesColor) +
           theme_classic() +
           theme(legend.position = "bottom",
@@ -5086,7 +5091,7 @@ server <- function(input, output, session) {
                  lubridate::month(round(mean(month(bands_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                  } and has a mean depth of {round(mean(bands_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
-               y = expression("Mean Density (#/m"^"2"~")")) +
+               y = "Mean Density") +
           scale_fill_manual(values = SpeciesColor) +
           theme_classic() +
           theme(legend.position = "bottom",
@@ -5430,7 +5435,7 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(bands_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               facet_grid(rows = vars(IslandName), scales = bands_AxisScale_Isl()) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
@@ -5620,7 +5625,7 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(bands_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               facet_grid(rows = vars(IslandName), scales = bands_AxisScale_Isl()) +
               scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
               theme_classic() +
@@ -5664,7 +5669,7 @@ server <- function(input, output, session) {
                 labs(title = glue("{unique(m$IslandName)}"), 
                      color = "Site Name",
                      x = "Year",
-                     y = expression("Mean Density (#/m"^"2"~")")) +
+                     y = "Mean Density") +
                 scale_color_manual(values = SiteColor) +
                 theme_classic() +
                 theme(legend.position = "right",
@@ -5717,7 +5722,7 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(bands_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "right",
@@ -5899,7 +5904,7 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(bands_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
               theme_classic() +
               theme(legend.position = "right",
@@ -5936,7 +5941,7 @@ server <- function(input, output, session) {
               labs(title = glue("{unique(bands_Filter_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values = SiteColor2, guide = guide_legend(nrow = 5)) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -6099,7 +6104,7 @@ server <- function(input, output, session) {
                    color = "Reserve Status",
                    linetype = "Reserve Status",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values = c(Inside = "green3", Outside = "red3")) +
               scale_linetype_manual(values = c(Inside = "dashed", Outside = "solid")) +
               facet_grid(rows = vars(IslandName), scales = bands_AxisScale_MPA()) +
@@ -6211,7 +6216,7 @@ server <- function(input, output, session) {
                    color = "Reserve Status",
                    linetype = "Reserve Status",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_fill_manual(values = c(Inside = "green3", Outside = "red3")) +
               facet_grid(rows = vars(IslandName), scales = bands_AxisScale_MPA()) +
               theme_classic() +
@@ -6320,7 +6325,7 @@ server <- function(input, output, session) {
                    color = "Reserve Status",
                    linetype = "Reserve Status",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values=c(Inside = "green3", Outside = "red3")) +
               scale_linetype_manual(values = c(Inside = "dashed", Outside = "solid")) +
               facet_grid(rows = vars(IslandName), scales = bands_AxisScale_MPA()) +
@@ -6561,7 +6566,7 @@ server <- function(input, output, session) {
                                 ymax = MeanDensity_sqm*input$bands_Y_Slide_Two + StandardError*input$bands_Y_Slide_Two),
                             width = 0, color = "black", alpha = as.numeric(input$bands_EB_Two)) + 
               scale_y_continuous(sec.axis = sec_axis(~./input$bands_Y_Slide_Two, 
-                                                     name = glue("{unique(bands_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(bands_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(bands_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(bands_Filter_Two_One()$Date))-365, 
                                       max(as.Date(bands_Filter_Two_One()$Date))+365),
@@ -6576,7 +6581,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(bands_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(bands_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(bands_Filter_Two_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(bands_Filter_Two_One()$CommonName)} Mean Density')) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -6616,7 +6621,7 @@ server <- function(input, output, session) {
                                 ymax = MeanDensity_sqm*input$bands_Y_Slide_Two + StandardError*input$bands_Y_Slide_Two),
                             width = 0, color = "black", alpha = as.numeric(input$bands_EB_Two)) + 
               scale_y_continuous(sec.axis = sec_axis(~./input$bands_Y_Slide_Two, 
-                                                     name = glue("{unique(bands_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(bands_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(bands_Filter_Two_One()$Date),
                            limits = c(min(as.Date(bands_Filter_Two_One()$Date))-365,
                                       max(as.Date(bands_Filter_Two_One()$Date))+365),
@@ -6631,7 +6636,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(bands_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(bands_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_fill_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -6667,7 +6672,7 @@ server <- function(input, output, session) {
                          aes(x = Date, y = MeanDensity_sqm*input$bands_Y_Slide_Two, color = CommonName),
                          size = 1, alpha = as.numeric(input$bands_SmoothPoint_Two)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$bands_Y_Slide_Two, 
-                                                     name = glue("{unique(bands_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(bands_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(bands_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(bands_Filter_Two_One()$Date))-365, 
                                       max(as.Date(bands_Filter_Two_One()$Date))+365),
@@ -6682,7 +6687,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(bands_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(bands_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(bands_Filter_Two_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(bands_Filter_Two_One()$CommonName)} Mean Density')) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -7242,7 +7247,7 @@ server <- function(input, output, session) {
                                 ymax = MeanDensity_sqm*input$core_Y_Slide_Two + StandardError*input$core_Y_Slide_Two),
                             width = 2, color = "black", alpha = as.numeric(input$core_EB_Two)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Two, 
-                                                     name = glue("{unique(core_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(core_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(core_Filter_Two_One()$Date))-365, 
                                       max(as.Date(core_Filter_Two_One()$Date))+365),
@@ -7257,7 +7262,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(core_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(core_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(core_Filter_Two_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(core_Filter_Two_One()$CommonName)} Mean Density')) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -7297,7 +7302,7 @@ server <- function(input, output, session) {
                                 ymax = MeanDensity_sqm*input$core_Y_Slide_Two + StandardError*input$core_Y_Slide_Two),
                             width = 2, color = "black", alpha = as.numeric(input$core_EB_Two)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Two, 
-                                                     name = glue("{unique(core_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(core_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_Two_One()$Date),
                            limits = c(min(as.Date(core_Filter_Two_One()$Date))-365,
                                       max(as.Date(core_Filter_Two_One()$Date))+365),
@@ -7312,7 +7317,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(core_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(core_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_fill_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -7350,7 +7355,7 @@ server <- function(input, output, session) {
                          aes(x = Date, y = MeanDensity_sqm * input$core_Y_Slide_Two, color = CommonName),
                          size = 1, alpha = as.numeric(input$core_SmoothPoint_Two)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Two, 
-                                                     name = glue("{unique(core_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(core_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(core_Filter_Two_One()$Date))-365, 
                                       max(as.Date(core_Filter_Two_One()$Date))+365),
@@ -7363,7 +7368,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(core_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(core_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(core_Filter_Two_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(core_Filter_Two_One()$CommonName)} Mean Density')) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -7546,7 +7551,7 @@ server <- function(input, output, session) {
                                 ymax = Island_Mean_Density * input$core_Y_Slide_Isl + IslandSE * input$core_Y_Slide_Isl),
                             width = 0, color = "black", alpha = as.numeric(input$core_EB_Isl)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Isl, 
-                                                     name = glue("{unique(core_Filter_Isl_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(core_Filter_Isl_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%Y", breaks = core_Filter_Isl_One()$IslandDate, 
                            limits = c(min(as.Date(core_Filter_Isl_One()$IslandDate))-365,
                                       max(as.Date(core_Filter_Isl_One()$IslandDate))+365),
@@ -7555,7 +7560,7 @@ server <- function(input, output, session) {
                    subtitle = glue("{unique(core_Filter_Isl_One()$IslandName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -7596,7 +7601,7 @@ server <- function(input, output, session) {
                                 ymax = Island_Mean_Density * input$core_Y_Slide_Isl + IslandSE * input$core_Y_Slide_Isl),
                             width = 0, color = "black", alpha = as.numeric(input$core_EB_Isl)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Isl, 
-                                                     name = glue("{unique(core_Filter_Isl_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(core_Filter_Isl_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%Y", breaks = core_Filter_Isl_One()$IslandDate, 
                            limits = c(min(as.Date(core_Filter_Isl_One()$IslandDate))-365, 
                                       max(as.Date(core_Filter_Isl_One()$IslandDate))+365),
@@ -7643,7 +7648,7 @@ server <- function(input, output, session) {
                          aes(x = IslandDate, y = Island_Mean_Density* input$core_Y_Slide_Isl, color = CommonName), 
                          size = 2, alpha = as.numeric(input$core_SmoothPoint_Isl)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_Isl, 
-                                                     name = glue("{unique(core_Filter_Isl_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(core_Filter_Isl_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(core_Filter_Isl_One()$IslandDate))-365, 
                                       max(as.Date(core_Filter_Isl_One()$IslandDate))+365),
@@ -7652,7 +7657,7 @@ server <- function(input, output, session) {
                    subtitle = glue("{unique(core_Filter_Isl_One()$IslandName)}"), 
                    color = "Common Name",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values = SpeciesColor, guide = guide_legend(nrow = 5)) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -7779,7 +7784,7 @@ server <- function(input, output, session) {
                                 ymax = MPA_Mean * input$core_Y_Slide_MPA + MPA_SE * input$core_Y_Slide_MPA),
                             width = 0, color = "black", alpha = as.numeric(input$core_EB_MPA)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_MPA, 
-                                                     name = glue("{unique(core_Filter_MPA_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(core_Filter_MPA_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%Y", breaks = core_Filter_MPA_One()$MPA_Date, 
                            limits = c(min(as.Date(core_Filter_MPA_One()$MPA_Date))-365,
                                       max(as.Date(core_Filter_MPA_One()$MPA_Date))+365),
@@ -7789,7 +7794,7 @@ server <- function(input, output, session) {
                    color = "Common Name",
                    linetype = "Reserve Status",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 1)) +
               scale_linetype_manual(values = c("Inside" = "dashed", "Outside" = "solid"), 
                                     guide = guide_legend(order = 2)) +
@@ -7833,7 +7838,7 @@ server <- function(input, output, session) {
                                 ymax = MPA_Mean * input$core_Y_Slide_MPA + MPA_SE * input$core_Y_Slide_MPA),
                             width = 0, color = "black", alpha = as.numeric(input$core_EB_MPA)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_MPA, 
-                                                     name = glue("{unique(core_Filter_MPA_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(core_Filter_MPA_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%Y", breaks = core_Filter_MPA_One()$MPA_Date, 
                            limits = c(min(as.Date(core_Filter_MPA_One()$MPA_Date))-365, 
                                       max(as.Date(core_Filter_MPA_One()$MPA_Date))+365),
@@ -7884,7 +7889,7 @@ server <- function(input, output, session) {
                          aes(x = MPA_Date, y = MPA_Mean* input$core_Y_Slide_MPA, color = CommonName), 
                          size = 2, alpha = as.numeric(input$core_SmoothPoint_MPA)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$core_Y_Slide_MPA, 
-                                                     name = glue("{unique(core_Filter_MPA_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(core_Filter_MPA_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(core_Filter_MPA_One()$MPA_Date))-365, 
                                       max(as.Date(core_Filter_MPA_One()$MPA_Date))+365),
@@ -7894,7 +7899,7 @@ server <- function(input, output, session) {
                    color = "Common Name",
                    linetype = "Reserve Status",
                    x = "Year",
-                   y = expression("Mean Density (#/m"^"2"~")")) +
+                   y = "Mean Density") +
               scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 1)) +
               scale_linetype_manual(values = c("Inside" = "dashed", "Outside" = "solid"), 
                                     guide = guide_legend(order = 2)) +
@@ -9923,7 +9928,7 @@ server <- function(input, output, session) {
                                 ymax = MeanDensity_sqm*input$rpcs_Y_Slide_Two + StandardError*input$rpcs_Y_Slide_Two),
                             width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Two)) + 
               scale_y_continuous(sec.axis = sec_axis(~./input$rpcs_Y_Slide_Two, 
-                                                     name = glue("{unique(rpcs_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(rpcs_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(rpcs_Filter_Two_One()$Date))-365, 
                                       max(as.Date(rpcs_Filter_Two_One()$Date))+365),
@@ -9938,7 +9943,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(rpcs_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(rpcs_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(rpcs_Filter_Two_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(rpcs_Filter_Two_One()$CommonName)} Mean Density')) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -9978,7 +9983,7 @@ server <- function(input, output, session) {
                                 ymax = MeanDensity_sqm*input$rpcs_Y_Slide_Two + StandardError*input$rpcs_Y_Slide_Two),
                             width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Two)) + 
               scale_y_continuous(sec.axis = sec_axis(~./input$rpcs_Y_Slide_Two, 
-                                                     name = glue("{unique(rpcs_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(rpcs_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_Two_One()$Date),
                            limits = c(min(as.Date(rpcs_Filter_Two_One()$Date))-365,
                                       max(as.Date(rpcs_Filter_Two_One()$Date))+365),
@@ -10029,7 +10034,7 @@ server <- function(input, output, session) {
                          aes(x = Date, y = MeanDensity_sqm*input$rpcs_Y_Slide_Two, color = CommonName),
                          size = 1, alpha = as.numeric(input$rpcs_SmoothPoint_Two)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$rpcs_Y_Slide_Two, 
-                                                     name = glue("{unique(rpcs_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(rpcs_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(rpcs_Filter_Two_One()$Date))-365, 
                                       max(as.Date(rpcs_Filter_Two_One()$Date))+365),
@@ -10044,7 +10049,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(rpcs_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(rpcs_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(rpcs_Filter_Two_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(rpcs_Filter_Two_One()$CommonName)} Mean Density')) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -12915,7 +12920,7 @@ server <- function(input, output, session) {
                                 ymax = MeanSize*input$NHSF_Y_Slide_Two + StandardError*input$NHSF_Y_Slide_Two),
                             width = 0, color = "black", alpha = as.numeric(input$NHSF_EB_Two)) + 
               scale_y_continuous(sec.axis = sec_axis(~./input$NHSF_Y_Slide_Two, 
-                                                     name = glue("{unique(NHSF_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(NHSF_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(NHSF_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(NHSF_Filter_Two_One()$Date))-365, 
                                       max(as.Date(NHSF_Filter_Two_One()$Date))+365),
@@ -12930,7 +12935,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(NHSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(NHSF_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(NHSF_Filter_Two_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(NHSF_Filter_Two_One()$CommonName)} Mean Density')) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -12970,7 +12975,7 @@ server <- function(input, output, session) {
                                 ymax = MeanSize*input$NHSF_Y_Slide_Two + StandardError*input$NHSF_Y_Slide_Two),
                             width = 0, color = "black", alpha = as.numeric(input$NHSF_EB_Two)) + 
               scale_y_continuous(sec.axis = sec_axis(~./input$NHSF_Y_Slide_Two, 
-                                                     name = glue("{unique(NHSF_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(NHSF_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(NHSF_Filter_Two_One()$Date),
                            limits = c(min(as.Date(NHSF_Filter_Two_One()$Date))-365,
                                       max(as.Date(NHSF_Filter_Two_One()$Date))+365),
@@ -13021,7 +13026,7 @@ server <- function(input, output, session) {
                          aes(x = Date, y = MeanSize*input$NHSF_Y_Slide_Two, color = CommonName),
                          size = 1, alpha = as.numeric(input$NHSF_SmoothPoint_Two)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$NHSF_Y_Slide_Two, 
-                                                     name = glue("{unique(NHSF_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(NHSF_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(NHSF_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(NHSF_Filter_Two_One()$Date))-365, 
                                       max(as.Date(NHSF_Filter_Two_One()$Date))+365),
@@ -13036,7 +13041,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(NHSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(NHSF_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(NHSF_Filter_Two_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(NHSF_Filter_Two_One()$CommonName)} Mean Density')) +
               scale_color_manual(values = SpeciesColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -15904,7 +15909,7 @@ server <- function(input, output, session) {
                                 ymax = MeanSize*input$FSF_Y_Slide_Two + StandardError*input$FSF_Y_Slide_Two),
                             width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Two)) + 
               scale_y_continuous(sec.axis = sec_axis(~./input$FSF_Y_Slide_Two, 
-                                                     name = glue("{unique(FSF_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(FSF_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(FSF_Filter_Two_One()$Date))-365, 
                                       max(as.Date(FSF_Filter_Two_One()$Date))+365),
@@ -15919,7 +15924,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(FSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(FSF_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(FSF_Filter_Two_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(FSF_Filter_Two_One()$CommonName)} Mean Density')) +
               scale_color_manual(values = FishColor) +
               theme_classic() +
               theme(legend.position = "bottom",
@@ -15959,7 +15964,7 @@ server <- function(input, output, session) {
                                 ymax = MeanSize*input$FSF_Y_Slide_Two + StandardError*input$FSF_Y_Slide_Two),
                             width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Two)) + 
               scale_y_continuous(sec.axis = sec_axis(~./input$FSF_Y_Slide_Two, 
-                                                     name = glue("{unique(FSF_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(FSF_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_Two_One()$Date),
                            limits = c(min(as.Date(FSF_Filter_Two_One()$Date))-365,
                                       max(as.Date(FSF_Filter_Two_One()$Date))+365),
@@ -16008,7 +16013,7 @@ server <- function(input, output, session) {
                          aes(x = Date, y = MeanSize*input$FSF_Y_Slide_Two, color = CommonName),
                          size = 1, alpha = as.numeric(input$FSF_SmoothPoint_Two)) +
               scale_y_continuous(sec.axis = sec_axis(~./input$FSF_Y_Slide_Two, 
-                                                     name = glue("{unique(FSF_Filter_Two_Two()$CommonName)} per square meter"))) +
+                                                     name = glue("{unique(FSF_Filter_Two_Two()$CommonName)} Mean Density"))) +
               scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(FSF_Filter_Two_One()$Date))-365, 
                                       max(as.Date(FSF_Filter_Two_One()$Date))+365),
@@ -16023,7 +16028,7 @@ server <- function(input, output, session) {
                      lubridate::month(round(mean(month(FSF_Filter_Two_One()$Date)), 0), label = TRUE, abbr = FALSE)
                      } and has a mean depth of {round(mean(FSF_Filter_Two_One()$MeanDepth), 2)} ft"),
                    x = "Year",
-                   y = glue('{unique(FSF_Filter_Two_One()$CommonName)} per square meter')) +
+                   y = glue('{unique(FSF_Filter_Two_One()$CommonName)} Mean Density')) +
               scale_color_manual(values = FishColor) +
               theme_classic() +
               theme(legend.position = "bottom",
