@@ -111,10 +111,10 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
       ),
       # ...... All Species ----
       conditionalPanel(condition ="input.tabselected=='oneM_TP' && input.oneM_allORone=='All Species'",
-                       selectInput(inputId = "oneM_SiteNameAll",
+                       selectInput(inputId = "oneM_SiteName_All",
                                    label = "Choose a Site:",
                                    choices = SiteNames),
-                       radioButtons(inputId = "oneM_GraphAll",
+                       radioButtons(inputId = "oneM_Graph_All",
                                     label = "Choose a graph:",
                                     choices = c("Line", "Bar"))
       ),

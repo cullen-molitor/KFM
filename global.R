@@ -31,6 +31,7 @@
   library(ncdf4)
   library(rnoaa)
   # library(ggthemes)
+  library(feather)
 }
 
 { # .. SiteInfo_DF   ----
@@ -63,6 +64,31 @@
   
   visitDates <- read_csv("VisitDates.csv")
   visitDates$SurveyType <- factor(visitDates$SurveyType, levels = Survey_Levels)
+  
+  # visitDates <- visitDates %>% 
+  #   group_by(SurveyYear, SiteNumber) %>% 
+  #   distinct(Date, .keep_all = T) %>% 
+  #   select(SiteNumber, SiteName, IslandName, SurveyYear, Date, Day_of_Week, Month) %>% 
+  #   ungroup() %>% 
+  #   write_csv("Visit_Dates_Filtered.csv")
+  
+  # visitDates2 <- visitDates %>%
+  #   group_by(SurveyYear) %>% 
+  #   group_by(grp = cumsum(c(TRUE, diff(Date) > 1)), add = TRUE) %>%
+  #   mutate(cons = as.integer(Date - first(Date))) %>%
+  #   ungroup %>%
+  #   select(-grp)
+  
+  # runchecker <- function(data, days){
+  #   data %>% arrange(Date) %>%
+  #     group_by(SurveyYear, SiteNumber) %>%
+  #     mutate(diff = c(0, diff(Date)),
+  #            periodID = 1 + cumsum(diff > days)) %>%
+  #     group_by(SurveyYear, periodID) %>%
+  #     summarise(days = last(Date) - first(Date))
+  # }
+  # visitDates2 <- runchecker(visitDates, 1)
+  # visitDates <- data.table::rleid(visitDates)
 }
 
 { # .. Species_Info    ----
