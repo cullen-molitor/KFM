@@ -1,8 +1,10 @@
+
+
 library(ggplot2)
 `%||%` <- ggplot2:::`%||%`
 ggname <- ggplot2:::ggname
 
-GeomBoxplot <- ggproto("GeomBoxplot", Geom,
+GeomBoxplot <- ggproto("GeomBoxplot", Geom, # geom_boxplot ----
                        setup_data = function(data, params) {
                          data$width <- data$width %||%
                            params$width %||% (resolution(data$x, FALSE) * 0.9)
@@ -102,7 +104,7 @@ GeomBoxplot <- ggproto("GeomBoxplot", Geom,
                        required_aes = c("x", "lower", "upper", "middle", "ymin", "ymax")
 )
 
-GeomCrossbar <- ggproto("GeomCrossbar", Geom,
+GeomCrossbar <- ggproto("GeomCrossbar", Geom, # geom_crossbar ----
                         setup_data = function(data, params) {
                           GeomErrorbar$setup_data(data, params)
                         },
@@ -169,7 +171,7 @@ GeomCrossbar <- ggproto("GeomCrossbar", Geom,
                         }
 )
 
-GeomPolygon <- ggproto("GeomPolygon", Geom,
+GeomPolygon <- ggproto("GeomPolygon", Geom, # geom_polygon  ----
                        draw_panel = function(data, panel_scales, coord) {
                          n <- nrow(data)
                          if (n == 1) return(zeroGrob())
@@ -208,7 +210,7 @@ GeomPolygon <- ggproto("GeomPolygon", Geom,
                        
                        draw_key = draw_key_polygon
 )
-
+ # assinging namespaces ----
 
 assignInNamespace("GeomBoxplot", GeomBoxplot, "ggplot2")
 assignInNamespace("GeomCrossbar", GeomCrossbar, "ggplot2")

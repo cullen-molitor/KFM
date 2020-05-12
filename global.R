@@ -35,6 +35,7 @@
 }
 
 source("boxplot.R")
+source("smooth.R")
 
 { # .. SiteInfo_DF   ----
   siteInfo1 <- read_csv("Site_info.csv")
