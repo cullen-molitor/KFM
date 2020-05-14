@@ -7,29 +7,29 @@
   library(shiny) 
   library(lubridate)
   library(glue)
-  # library(plyr)
   library(ggridges)
   library(tidyverse)
-  # library(grid)
-  # library(gridExtra)
-  # library(png)
-  # library(rmarkdown)
   library(shinydashboard)
   library(shinyWidgets)
-  # library(plotrix)
   library(splitstackshape)
-  # library(zoo)
-  # library(reshape)
   library(RColorBrewer)
   library(measurements)
   library(sf)
-  # library(rsconnect)
   library(leaflet)
   library(DT)
   library(ggnewscale)
   library(cowplot)
   library(ncdf4)
   library(rnoaa)
+  # library(plyr)
+  # library(grid)
+  # library(gridExtra)
+  # library(png)
+  # library(rmarkdown)
+  # library(plotrix)
+  # library(zoo)
+  # library(reshape)
+  # library(rsconnect)
   # library(ggthemes)
 }
 
@@ -396,11 +396,10 @@
                 Anacapa Island. Keyhole lies within the Anacapa Island SMCA which allows for the take of CA spiny lobster 
                 and pelagic finfish. Keyhole will appear as a dotted line rather than solid or dashed.",
               tags$br(), tags$br(),
-              "To view all sites that as inside an MPA vs outside an MPA please visit the 'One Species by Island' option.
+              "To compare all KFM sites inside vs outside an MPA please visit the 'One Species by Island' option.
                 Please note that different sites were made into MPAs at different times and currently those graphs only 
                 reflect their current MPA status. Use caution as some sites have been inside MPAs since KFM's inception, while 
-                others (most that are in MPAs today) were designated in 2003. In the future it is intended to make this more clear
-                under that option.",
+                others (most that are in MPAs today) were designated in 2003.",
               tags$br(), tags$br(),
               "For a video describing California’s MPA network please visit:",
               tags$br(), tags$br(),

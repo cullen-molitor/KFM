@@ -37,7 +37,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                    selected = "Bat Star"),
                        radioButtons(inputId = "oneM_Graph_One",
                                     label = "Choose a graph:",
-                                    choices = c("Line", "Bar", "Smooth Line", 'Boxplot')),
+                                    choices = c("Line", "Bar", "Smooth Line", 'Boxplot', "Jitter")),
                        radioButtons(inputId = "oneM_DataSummary_One",
                                     label = "Choose a data Summary:",
                                     choices = c("One species at one site" , "One species with island average")),
@@ -111,10 +111,10 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
       ),
       # ...... All Species ----
       conditionalPanel(condition ="input.tabselected=='oneM_TP' && input.oneM_allORone=='All Species'",
-                       selectInput(inputId = "oneM_SiteNameAll",
+                       selectInput(inputId = "oneM_SiteName_All",
                                    label = "Choose a Site:",
                                    choices = SiteNames),
-                       radioButtons(inputId = "oneM_GraphAll",
+                       radioButtons(inputId = "oneM_Graph_All",
                                     label = "Choose a graph:",
                                     choices = c("Line", "Bar"))
       ),
