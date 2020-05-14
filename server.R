@@ -15,33 +15,34 @@ server <- function(input, output, session) {
                          tags$hr(),
                          fluidRow(
                            conditionalPanel("input.oneM_Graph_One == 'Line' || input.oneM_Graph_One == 'Bar'",
-                                            column(3, radioButtons(inputId = "oneM_EB_one",
+                                            column(2, radioButtons(inputId = "oneM_EB_one",
                                                                    label = "Show error bars?",
                                                                    choices = c("Yes" = 1, "No" = 0),
                                                                    inline = TRUE))),
                            conditionalPanel("input.oneM_Graph_One == 'Bar'",
-                                            column(3, radioButtons(inputId = "oneM_Bar_Text_One",
+                                            column(2, radioButtons(inputId = "oneM_Bar_Text_One",
                                                                    label = "Show density value?",
                                                                    choices = c("Yes" = 1, "No" = 0), selected = 0,
                                                                    inline = TRUE))),
-                           conditionalPanel("input.oneM_GraphOptions_One == 'With ONI' ||
-                                             input.oneM_GraphOptions_One == 'With PDO (NOAA)' ||
-                                             input.oneM_GraphOptions_One == 'With PDO (UW)'",
+                           conditionalPanel("input.oneM_Graph_One == 'Smooth Line'",
+                                            column(2, radioButtons(inputId = "oneM_SmoothSE_One",
+                                                                   label = "Show the standard error?",
+                                                                   choices = c("Yes" = TRUE, "No" = FALSE),
+                                                                   inline = TRUE, selected = FALSE))),
+                           conditionalPanel("input.oneM_Graph_One == 'Smooth Line' || input.oneM_Graph_One == 'Boxplot' || 
+                                            input.oneM_Graph_One == 'Jitter'",
+                                            column(2, radioButtons(inputId = "oneM_SmoothPoint_One",
+                                                                   label = "Show the mean values?",
+                                                                   choices = c("Yes" = 1, "No" = 0),
+                                                                   inline = TRUE))),
+                           conditionalPanel("input.oneM_GraphOptions_One != 'With No Index'",
                                             column(6, imageOutput(outputId = "oneM_ONIpdoPIC_One",
                                                                   height = 75)))),
                          conditionalPanel("input.oneM_Graph_One == 'Smooth Line'",
                                           sliderInput(inputId = "oneM_SmoothSlide_One",
                                                       label = "Span: Controls the amount of smoothing for the loess smoother. 
                                                       Smaller numbers produce wigglier lines, larger numbers produce smoother lines.",
-                                                      min = 0, max = 1, step = .05, value = .5, width = "100%"),
-                                          fluidRow(column(3, radioButtons(inputId = "oneM_SmoothSE_One",
-                                                                          label = "Show the standard error?",
-                                                                          choices = c("Yes" = TRUE, "No" = FALSE),
-                                                                          inline = TRUE)),
-                                                   column(3, radioButtons(inputId = "oneM_SmoothPoint_One",
-                                                                          label = "Show the mean values?",
-                                                                          choices = c("Yes" = 1, "No" = 0),
-                                                                          inline = TRUE)))),
+                                                      min = 0, max = 1, step = .05, value = .5, width = "100%")),
                          conditionalPanel("input.oneM_GraphOptions_One == 'With ONI'",
                                           tags$hr(),
                                           ONI_tagList),
@@ -263,6 +264,7 @@ server <- function(input, output, session) {
     
     { # oneM_Server_One_Species   ----
       
+      # filtered summary table
       oneM_Filter_One <- reactive({ 
         oneM_DF %>%
           filter(SiteName == input$oneM_SiteName_One,
@@ -270,16 +272,18 @@ server <- function(input, output, session) {
           select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
                  StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
                  Species, SiteNumber, IslandCode, SiteCode, IslandSE) 
-      }) # filtered summary table
+      }) 
       
+      # filtered raw table
       oneM_RawFilter_One <- reactive({ 
         oneM_DFRaw %>%
           filter(SiteName == input$oneM_SiteName_One,
                  CommonName == input$oneM_SpeciesName_One) %>% 
           group_by(SurveyYear) %>% 
           mutate(Mean = mean(Count))
-      }) # filtered raw table
+      }) 
       
+      # filtered Species classification table
       oneM_SpeciesClass_One <- reactive({ 
         SpeciesName %>%
           filter(CommonName == input$oneM_SpeciesName_One) %>%
@@ -287,16 +291,18 @@ server <- function(input, output, session) {
                  Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
           pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
           select(Rank, Name)
-      }) # filtered Species classification table
+      }) 
       
+      # filtered Species Description table
       oneM_SpeciesDescription_One <- reactive({
         SpeciesName %>%
           filter(CommonName == input$oneM_SpeciesName_One) %>%
           select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
           pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
           select(Category, Information)
-      }) # filtered Species Description table  
+      }) 
       
+      # 1st Small species photo above plot
       output$oneM_TopPhoto_One <- renderImage({
         
         if (input$oneM_allORone =='One Species by Site') {
@@ -318,18 +324,21 @@ server <- function(input, output, session) {
         else if (input$oneM_allORone == 'All Species') {
           return(list(src = glue("www/1mQuads.jpg"), contentType = "image/jpg", width = 210, height = 210))
         }
-      }, deleteFile = FALSE) # 1st Small species photo above plot
+      }, deleteFile = FALSE) 
       
+      # 2nd Small species photo above plot
       output$oneM_TopPhoto_Two <- renderImage({
         list(src = glue("www/Indicator_Species/{unique(oneM_Filter_Two_Two()$Species)}.jpg"),
              contentType = "image/jpg", width = 210, height = 210)
-      }, deleteFile = FALSE) # 2nd Small species photo above plot
+      }, deleteFile = FALSE) 
       
+      # Large species photo below plot
       output$oneM_LargeSpPhoto_One <- renderImage({
         list(src = glue("www/Indicator_Species/{unique(oneM_Filter_One()$Species)}.jpg"),
              contentType = "image/jpg", width = 400, height = 400)
-      }, deleteFile = FALSE) # Large species photo below plot
+      }, deleteFile = FALSE)
       
+      # Small Site photo above plot
       output$oneM_TopSitePhoto_One <- renderImage({
         
         if (input$oneM_allORone =='One Species by Site') {
@@ -352,8 +361,9 @@ server <- function(input, output, session) {
           return(list(src = glue("www/Sat_Imagery/{unique(oneM_Filter_All()$SiteCode)}.png"),
                       contentType = "image/png", width = 430, height = 210))
         }
-      }, deleteFile = FALSE) # Small Site photo above plot
+      }, deleteFile = FALSE) 
       
+      # Large Site photo below plot
       output$oneM_LargeSitePhoto_One <- renderImage({
         if (input$oneM_allORone =='One Species by Site') {
           return(list(src = glue("www/Sat_Imagery/{unique(oneM_Filter_One()$SiteCode)}.png"),
@@ -376,8 +386,9 @@ server <- function(input, output, session) {
                       contentType = "image/png", width = 1250, height = 625))
         }
         
-      }, deleteFile = FALSE) # Large Site photo below plot
+      }, deleteFile = FALSE) 
       
+      # Species Classification data table
       output$oneM_DToutClass_One <- renderDT({
         datatable(oneM_SpeciesClass_One(), 
                   options = list(
@@ -396,8 +407,9 @@ server <- function(input, output, session) {
                       backgroundColor = 'white',
                       backgroundPosition = 'center'
           )
-      }) # Species Classification data table
+      }) 
       
+      # Species Description data table
       output$oneM_DToutDesc_One <- renderDT({
         datatable(oneM_SpeciesDescription_One(), 
                   options = list(
@@ -416,8 +428,9 @@ server <- function(input, output, session) {
                       backgroundColor = 'white',
                       backgroundPosition = 'center'
           )
-      }) # Species Description data table
+      }) 
       
+      # ONI layer toggle (changes alpha value)
       oneM_alphaONI_one <- reactive({
         if(input$oneM_GraphOptions_One == "With No Index"){
           return(0)
@@ -431,8 +444,9 @@ server <- function(input, output, session) {
         else if(input$oneM_GraphOptions_One == "With PDO (UW)"){
           return(0)
         }
-      }) # ONI layer toggle (changes alpha value)
+      }) 
       
+      # PDO NOAA layer toggle (changes alpha value)
       oneM_alphaPDO_NOAA_one <- reactive({
         if(input$oneM_GraphOptions_One == "With No Index"){
           return(0)
@@ -447,8 +461,9 @@ server <- function(input, output, session) {
         if(input$oneM_GraphOptions_One == "With PDO (UW)"){
           return(0)
         }
-      }) # PDO NOAA layer toggle (changes alpha value)
+      }) 
       
+      # PDO UW layer toggle (changes alpha value)
       oneM_alphaPDO_UW_one <- reactive({
         if(input$oneM_GraphOptions_One == "With No Index"){
           return(0)
@@ -463,8 +478,9 @@ server <- function(input, output, session) {
         if(input$oneM_GraphOptions_One == "With PDO (UW)"){
           return(1)
         }
-      }) # PDO UW layer toggle (changes alpha value)
+      }) 
       
+      # ONI/PDO scale photo
       output$oneM_ONIpdoPIC_One <- renderImage({
         if(input$oneM_GraphOptions_One == 'With ONI'){
           return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
@@ -475,197 +491,206 @@ server <- function(input, output, session) {
         if(input$oneM_GraphOptions_One == 'With PDO (UW)'){
           return(list(src = "www/PDO_UW.png", contentType = "image/png", width = 340, height = 75))
         }
-      }, deleteFile = FALSE) # ONI/PDO scale photo
+      }, deleteFile = FALSE) 
       
-      oneM_LinePlot_One <- reactive({
-        ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = ANOM), 
-                    position = "identity", alpha = as.numeric(oneM_alphaONI_one()), show.legend = FALSE) +
-          geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
-                    position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_one()), show.legend = FALSE) +
-          geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
-                    position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_one()), show.legend = FALSE) +
-          scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-          geom_line(data = oneM_Filter_One(),
-                    aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName), 
-                    size = 1) +
-          geom_errorbar(data = oneM_Filter_One(),
-                        aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
-                        width = 0, color = "black", alpha = as.numeric(input$oneM_EB_one)) +
-          scale_x_date(date_labels = "%b %Y", breaks = unique(oneM_Filter_One()$Date),
-                       limits = c(min(as.Date(oneM_Filter_One()$Date))-365, max(as.Date(oneM_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
-          labs(title = glue("{unique(oneM_Filter_One()$ScientificName)}"),
-               subtitle = glue("{unique(oneM_Filter_One()$IslandName)} {unique(oneM_Filter_One()$SiteName)}"),
-               color = "Common Name",
-               fill = "Oceanic Nino \nIndex Gradient",
-               caption = glue("{oneM_Filter_One()$SiteName} is typically surveyed in {
-                       lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
-                       } and has a mean depth of {round(mean(oneM_Filter_One()$MeanDepth), 2)} ft"),
-               x = "Year",
-               y = "Mean Density") +
-          scale_color_manual(values = SpeciesColor) +
-          theme_classic() +
-          theme(legend.position = "bottom",
-                legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                legend.text = element_text(size = 14, vjust = .5),
-                plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                plot.subtitle = element_text(hjust = 0.5, size = 18),
-                plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                axis.title = element_text(size = 16, face = "bold"),
-                axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
-                axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
-      }) # Line Plot
+      # Line toggle (changes alpha value)
+      oneM_Line_Alpha_One <- reactive({
+        if (input$oneM_Graph_One == "Line"){return(1)}else{0}
+      })
       
-      oneM_BarPlot_One <- reactive({
+      # Bar toggle (changes alpha value)
+      oneM_Bar_Alpha_One <- reactive({
+        if (input$oneM_Graph_One == "Bar"){return(1)}else{0}
+      })
+      
+      # Smooth Line toggle (changes alpha value)
+      oneM_Smooth_Alpha_One <- reactive({
+        if (input$oneM_Graph_One == "Smooth Line"){return(1)}else{0}
+      })
+      
+      # Smooth Line SE ribbon toggle (changes alpha value)
+      oneM_Smooth_Ribbon_Alpha_One <- reactive({
+        if (input$oneM_Graph_One == "Smooth Line"){return(.4)}else{0}
+      })
+      
+      # Boxplot toggle (changes alpha value)
+      oneM_Boxplot_Alpha_One <- reactive({
+        if (input$oneM_Graph_One == "Boxplot"){return(1)}else{0}
+      })
+      
+      # Jitter toggle (changes alpha value)
+      oneM_Jitter_Alpha_One <- reactive({
+        if (input$oneM_Graph_One == "Jitter"){return(1)}else{0}
+      })
+      
+      # Point toggle (changes alpha value)
+      oneM_Point_Alpha_One <- reactive({
+        if (input$oneM_Graph_One == "Smooth Line" || input$oneM_Graph_One == "Boxplot" || input$oneM_Graph_One == "Jitter")
+          {return(input$oneM_SmoothPoint_One)}else{0}
+      }) 
+
+      
+      
+      # Line Island Mean toggle (changes alpha value)
+      oneM_Line_Isl_Alpha_One <- reactive({
+        if (input$oneM_Graph_One == "Line" && input$oneM_DataSummary_One == "One species with island average")
+        {return(1)}else{0}
+      })
+      
+      # Bar Island Mean toggle (changes alpha value)
+      oneM_Bar_Isl_Alpha_One <- reactive({
+        if (input$oneM_Graph_One == "Bar" && input$oneM_DataSummary_One == "One species with island average")
+        {return(1)}else {0}
+      })
+      
+      # Smooth Island Mean Line toggle (changes alpha value)
+      oneM_Smooth_Isl_Alpha_One <- reactive({
+        if (input$oneM_Graph_One == "Smooth Line" && input$oneM_DataSummary_One == "One species with island average")
+          {return(1)} else {0}
+      })
+      
+      # Smooth Island Mean Line SE ribbon toggle (changes alpha value)
+      oneM_Smooth_Isl_Ribbon_Alpha_One <- reactive({
+        if (input$oneM_Graph_One == "Smooth Line" && input$oneM_DataSummary_One == "One species with island average")
+        {return(0.4)}else {0}
+      })
+      
+      # Boxplot Island Mean toggle (changes alpha value)
+      oneM_Boxplot_Isl_Alpha_One <- reactive({
+        if (input$oneM_Graph_One == "Boxplot" && input$oneM_DataSummary_One == "One species with island average")
+        {return(1)}else{0}
+      })
+      
+      # Error bar island average toggle (changes alpha value)
+      oneM_EB_Isl_Alpha_One <- reactive({
+        if (input$oneM_EB_one == 1 && input$oneM_DataSummary_One == "One species with island average")
+          {return(1)}else{0}
+      })
+      
+      # Plot
+      oneM_Plot_Reactive_One <- reactive({ 
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
-                    position = "identity", alpha = as.numeric(oneM_alphaONI_one()), show.legend = FALSE) +
-          geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
-                    position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_one()), show.legend = FALSE) +
-          geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
-                    position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_one()), show.legend = FALSE) +
-          scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
+          geom_rect(
+            data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = ANOM), 
+            position = "identity", alpha = as.numeric(oneM_alphaONI_one()), show.legend = FALSE) +
+          geom_rect(
+            data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+            position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_one()), show.legend = FALSE) +
+          geom_rect(
+            data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
+            position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_one()), show.legend = FALSE) +
+          scale_fill_gradient2(
+            high = "red3", mid = "white", low = "blue3", midpoint = 0) +
           new_scale_fill() +
-          geom_col(data = oneM_Filter_One(), aes(x = Date - ifelse(input$oneM_DataSummary_One == "One species at one site", 0, 50),
-                                                 y = MeanDensity_sqm, fill = CommonName), 
-                   position = "dodge", width = ifelse(input$oneM_DataSummary_One == "One species at one site", 250, 100)) +
-          geom_errorbar(data = oneM_Filter_One(),
-                        aes(x = Date - ifelse(input$oneM_DataSummary_One == "One species at one site", 0, 50), 
-                            ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
-                        width = 0, color = "black", alpha = as.numeric(input$oneM_EB_one)) +
-          geom_text(data = oneM_Filter_One(),
-                    aes(x = Date - ifelse(input$oneM_DataSummary_One == "One species at one site", 0, 50),
-                        y = MeanDensity_sqm, label = round(MeanDensity_sqm, digits = 2)),
-                    vjust = -.2, hjust = .5, alpha = as.numeric(input$oneM_Bar_Text_One)) +
-          scale_x_date(date_labels = "%b %Y", breaks = unique(oneM_Filter_One()$Date),
-                       limits = c(min(as.Date(oneM_Filter_One()$Date))-365,  max(as.Date(oneM_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
-          labs(title = glue("{unique(oneM_Filter_One()$ScientificName)}"),
-               subtitle = glue("{unique(oneM_Filter_One()$IslandName)} {unique(oneM_Filter_One()$SiteName)}"),
-               color = "Common Name",
-               fill = "Common Name",
-               caption = glue("{oneM_Filter_One()$SiteName} is typically surveyed in {
-                 lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
-                 } and has a mean depth of {round(mean(oneM_Filter_One()$MeanDepth), 2)} ft"),
-               x = "Year",
-               y = "Mean Density") +
-          scale_fill_manual(values = SpeciesColor) +
-          theme_classic() +
-          theme(legend.position = "bottom",
-                legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                legend.text = element_text(size = 14, vjust = .5),
-                plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                plot.subtitle = element_text(hjust = 0.5, size = 18),
-                plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                axis.title = element_text(size = 16, face = "bold"),
-                axis.text.y = element_text(size = 12, face = "bold", color = "black"),
-                axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
-      }) # Bar Plot
-      
-      oneM_SmoothPlot_One <- reactive({
-        ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
-                    position = "identity", alpha = as.numeric(oneM_alphaONI_one()), show.legend = FALSE) +
-          geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
-                    position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_one()), show.legend = FALSE) +
-          geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
-                    position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_one()), show.legend = FALSE) +
-          scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-          stat_smooth(data = oneM_Filter_One(), 
-                      aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName), 
-                      size = 1, span = input$oneM_SmoothSlide_One, se = as.logical(input$oneM_SmoothSE_One)) +
-          scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 1)) +
-          geom_point(data = oneM_Filter_One(), aes(x = Date, y = MeanDensity_sqm, color = CommonName), 
-                     size = 2, alpha = as.numeric(input$oneM_SmoothPoint_One)) +
-          scale_x_date(date_labels = "%b %Y", breaks = unique(oneM_Filter_One()$Date), 
-                       limits = c(min(as.Date(oneM_Filter_One()$Date))-365, 
-                                  max(as.Date(oneM_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
-          labs(title = glue("{unique(oneM_Filter_One()$ScientificName)}"), 
-               subtitle = glue("{unique(oneM_Filter_One()$IslandName)} {unique(oneM_Filter_One()$SiteName)}"),
-               color = "Common Name",
-               caption = glue("{oneM_Filter_One()$SiteName} is typically surveyed in {
+          geom_col(
+            data = oneM_Filter_One(), alpha = as.numeric(oneM_Bar_Alpha_One()),
+            aes(x = Date - ifelse(input$oneM_DataSummary_One == "One species at one site", 0, 50),
+                y = MeanDensity_sqm, fill = CommonName), 
+            position = "dodge", width = ifelse(input$oneM_DataSummary_One == "One species at one site", 250, 100)) +
+          scale_fill_manual(
+            values = SpeciesColor) +
+          geom_text(
+            data = oneM_Filter_One(),
+            aes(x = Date - ifelse(input$oneM_DataSummary_One == "One species at one site", 0, 50),
+                y = MeanDensity_sqm, label = round(MeanDensity_sqm, digits = 2)),
+            vjust = -.2, hjust = .5, alpha = ifelse(input$oneM_Graph_One == "Bar", as.numeric(input$oneM_Bar_Text_One), 0)) +
+          geom_line(
+            data = oneM_Filter_One(), size = 1, alpha = as.numeric(oneM_Line_Alpha_One()),
+            aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName)) +
+          geom_errorbar(
+            data = oneM_Filter_One(), width = 0, color = "black",
+            aes(x = Date - ifelse(input$oneM_Graph_One == "Bar" && input$oneM_DataSummary_One == "One species with island average", 50, 0),
+                ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
+            alpha = ifelse(input$oneM_Graph_One == "Line" || input$oneM_Graph_One == "Bar",
+                           as.numeric(input$oneM_EB_one), 0)) +
+          geom_smooth(
+            data = oneM_Filter_One(), alpha = as.numeric(oneM_Smooth_Alpha_One()),
+            aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName), 
+            size = 1, span = input$oneM_SmoothSlide_One, se = FALSE) +
+          geom_smooth(
+            data = oneM_Filter_One(), alpha = as.numeric(oneM_Smooth_Ribbon_Alpha_One()),
+            aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName), 
+            size = 1, span = input$oneM_SmoothSlide_One, se = as.logical(input$oneM_SmoothSE_One)) +
+          geom_boxplot(
+            data = oneM_RawFilter_One(), alpha = as.numeric(oneM_Boxplot_Alpha_One()),
+            aes(x = Date, y = Count, group = SurveyYear, color = CommonName),
+            show.legend = ifelse(input$oneM_Graph_One == "Boxplot", TRUE, FALSE)) +
+          geom_jitter(
+            data = oneM_RawFilter_One(), alpha = as.numeric(oneM_Jitter_Alpha_One()),
+            aes(x = Date, y = Count, group = SurveyYear, color = CommonName)) +
+          scale_x_date(
+            date_labels = "%b %Y", breaks = unique(oneM_Filter_One()$Date),
+            limits = c(min(as.Date(oneM_Filter_One()$Date))-365, max(as.Date(oneM_Filter_One()$Date))+365),
+            expand = expansion(mult = c(0.01, .01))) +
+          scale_y_continuous(
+            expand = expansion(mult = c(0, .1)),
+            limits = 
+              c(0, ifelse(input$oneM_Graph_One == "Boxplot" || input$oneM_Graph_One == "Jitter", max(oneM_RawFilter_One()$Count),
+                          ifelse(input$oneM_Graph_One != "Boxplot" && input$oneM_Graph_One != "Jitter" && 
+                                   input$oneM_DataSummary_One != "One species with island average",  
+                                 max(oneM_Filter_One()$MeanDensity_sqm + oneM_Filter_One()$StandardError),
+                                 pmax(max(oneM_Filter_One()$MeanDensity_sqm) + max(oneM_Filter_One()$StandardError), 
+                                      max(oneM_Filter_One()$Island_Mean_Density) + max(oneM_Filter_One()$IslandSE)))))) +
+          labs(
+            title = glue("{unique(oneM_Filter_One()$ScientificName)}"),
+            subtitle = glue("{unique(oneM_Filter_One()$IslandName)} {unique(oneM_Filter_One()$SiteName)}"),
+            color = "Common Name",
+            fill = "Common Name",
+            caption = glue("{oneM_Filter_One()$SiteName} is typically surveyed in {
                        lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(oneM_Filter_One()$MeanDepth), 2)} ft"),
-               x = "Year", y = "Smoothed Conditional Mean Values") +
+            x = "Year",
+            y = ifelse(input$oneM_Graph_One == "Boxplot" || input$oneM_Graph_One == "Jitter", "Count by Quadrat", "Mean Density")) +
+          geom_point(
+            data = oneM_Filter_One(), size = 3, aes(x = Date, y = MeanDensity_sqm, color = CommonName), 
+            alpha = ifelse(input$oneM_Graph_One == "Smooth Line", as.numeric(input$oneM_SmoothPoint_One), 0), 
+            show.legend = FALSE) +
+          scale_color_manual(values = SpeciesColor) +
+          new_scale_color() +
+          geom_point(data = oneM_Filter_One(), aes(x = Date, y = MeanDensity_sqm, color = SiteName), size = 3,
+                     alpha = ifelse(input$oneM_Graph_One == "Boxplot" || input$oneM_Graph_One == "Jitter", as.numeric(input$oneM_SmoothPoint_One), 0),
+                     show.legend = ifelse(input$oneM_Graph_One == "Boxplot" || input$oneM_Graph_One == "Jitter" &&
+                                            as.numeric(input$oneM_SmoothPoint_One) == 1, TRUE, FALSE)) +
+          scale_color_manual(values = "black") +
+          labs(color = "Site Average") + 
           theme_classic() +
-          theme(legend.position = "bottom",
-                legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                legend.text = element_text(size = 14, vjust = .5),
-                plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                plot.subtitle = element_text(hjust = 0.5, size = 18),
-                plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                axis.title = element_text(size = 16, face = "bold"),
-                axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
-                axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
-      }) # Smooth Line Plot
+          theme(
+            legend.position = "bottom",
+            legend.title = element_text(size = 14, vjust = .5, face = "bold"),
+            legend.text = element_text(size = 14, vjust = .5),
+            plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+            plot.subtitle = element_text(hjust = 0.5, size = 18),
+            plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+            axis.title = element_text(size = 16, face = "bold"),
+            axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
+            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
+      }) 
       
-      oneM_BoxPlot_One <- reactive({
-        ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd,ymin = 0, ymax = Inf, fill = ANOM), 
-                    position = "identity", alpha = as.numeric(oneM_alphaONI_one()), show.legend = FALSE) +
-          geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
-                    position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_one()), show.legend = FALSE) +
-          geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
-                    position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_one()), show.legend = FALSE) +
-          scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-          geom_boxplot(data = oneM_RawFilter_One(), aes(x = Date, y = Count, group = SurveyYear, color = CommonName)) +
-          scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 1)) +
-          geom_point(data = oneM_RawFilter_One(), aes(x = Date, y = Mean),
-                     size = 2, color = "black") +
-          scale_x_date(date_labels = "%b %Y", breaks = unique(oneM_RawFilter_One()$Date), 
-                       limits = c(min(as.Date(oneM_RawFilter_One()$Date))-365, max(as.Date(oneM_RawFilter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
-          labs(title = glue("{unique(oneM_RawFilter_One()$ScientificName)}"), 
-               subtitle = glue("{unique(oneM_RawFilter_One()$IslandName)} {unique(oneM_RawFilter_One()$SiteName)}"),
-               color = "Common Name",
-               caption = glue("{oneM_RawFilter_One()$SiteName} is typically surveyed in {
-                       lubridate::month(round(mean(month(oneM_RawFilter_One()$Date)), 0), label = TRUE, abbr = FALSE)
-                       } and has a mean depth of {round(mean(oneM_RawFilter_One()$MeanDepth), 2)} ft"),
-               x = "Year",
-               y = "Count per Quadrat") +
-          theme_classic() +
-          theme(legend.position = "bottom",
-                legend.title = element_text(size = 14, vjust = .5, face = "bold"),
-                legend.text = element_text(size = 14, vjust = .5),
-                plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                plot.subtitle = element_text(hjust = 0.5, size = 18),
-                plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                axis.title = element_text(size = 16, face = "bold"),
-                axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
-                axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black")) 
-      }) # Boxplot Plot
-      
+      # Main Plot Output
       output$oneM_Plot_One <- renderPlot({
         
         if (is.null(input$oneM_Graph_One))
           return(NULL) 
         
-        else if(input$oneM_Graph_One == "Line" && input$oneM_DataSummary_One == "One species at one site")
+        else if(input$oneM_DataSummary_One == "One species at one site") # || input$oneM_DataSummary_One == "One species with island average")
         {
-          p <- oneM_LinePlot_One()
+          p <- oneM_Plot_Reactive_One()
         } 
         else if(input$oneM_Graph_One == "Line" && input$oneM_DataSummary_One == "One species with island average")
         {
-          p <- oneM_LinePlot_One() +
+          p <- oneM_Plot_Reactive_One() +
             new_scale_color() +
-            geom_line(data = oneM_Filter_One(),
-                      aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName),
-                      size = 1) +
+            geom_line(data = oneM_Filter_One(), size = 1,
+                      aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName)) +
             geom_errorbar(data = oneM_Filter_One(),
-                          aes(x = Date, ymin = Island_Mean_Density - IslandSE,ymax = Island_Mean_Density + IslandSE),
+                          aes(x = Date, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                           width = 0, color = "black", alpha = as.numeric(input$oneM_EB_one)) +
             labs(color = "Island Average") +
             scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2))
         }
-        else if(input$oneM_Graph_One == "Bar" && input$oneM_DataSummary_One == "One species at one site") 
+        else if(input$oneM_Graph_One == "Bar" && input$oneM_DataSummary_One == "One species with island average")
         {
-          p <- oneM_BarPlot_One()
-        }
-        else if(input$oneM_Graph_One == "Bar" && input$oneM_DataSummary_One == "One species with island average") 
-        {
-          p <- oneM_BarPlot_One() +
+          p <- oneM_Plot_Reactive_One() +
             new_scale_fill() +
             geom_col(data = oneM_Filter_One(),
                      aes(x = Date + 50, y = Island_Mean_Density, fill = IslandName),
@@ -676,45 +701,54 @@ server <- function(input, output, session) {
                           width = 0, color = "black", alpha = as.numeric(input$oneM_EB_one)) +
             scale_fill_manual(values = SpeciesColor, guide = guide_legend(order = 2)) +
             labs(fill = "Island Mean")
-        } 
-        else if(input$oneM_Graph_One == "Smooth Line" && input$oneM_DataSummary_One == "One species at one site")
-        {
-          p <- oneM_SmoothPlot_One()
         }
         else if(input$oneM_Graph_One == "Smooth Line" && input$oneM_DataSummary_One == "One species with island average")
         {
-          p <- oneM_SmoothPlot_One() +
-            new_scale_color() +
-            stat_smooth(data = oneM_Filter_One(), 
-                        aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName), 
-                        size = 1,
-                        span = input$oneM_SmoothSlide_One,
-                        se = as.logical(input$oneM_SmoothSE_One)) +
-            geom_point(data = oneM_Filter_One(), aes(x = Date, y = Island_Mean_Density, color = IslandName), 
-                       size = 2, alpha = as.numeric(input$oneM_SmoothPoint_One)) +
-            labs(color = "Island Average") +
-            scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2)) 
-        }
-        else if(input$oneM_Graph_One == "Boxplot" && input$oneM_DataSummary_One == "One species at one site")
-        {
-          p <- oneM_BoxPlot_One()  
+        p <- oneM_Plot_Reactive_One() +
+          new_scale_color() +
+          stat_smooth(data = oneM_Filter_One(), alpha = 1,
+                      aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName),
+                      size = 1, span = input$oneM_SmoothSlide_One, se = FALSE) +
+          stat_smooth(data = oneM_Filter_One(),
+                      aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName),
+                      size = 1, span = input$oneM_SmoothSlide_One, se = as.logical(input$oneM_SmoothSE_One)) +
+          geom_point(data = oneM_Filter_One(), aes(x = Date, y = Island_Mean_Density, color = IslandName),
+                     size = 3, alpha = as.numeric(input$oneM_SmoothPoint_One)) +
+          labs(color = "Island Average") +
+          scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2))
         }
         else if(input$oneM_Graph_One == "Boxplot" && input$oneM_DataSummary_One == "One species with island average")
         {
-          p <- oneM_BoxPlot_One() +
+          p <- oneM_Plot_Reactive_One() +
             new_scale_color() +
-            geom_point(data = oneM_Filter_One(), aes(x = Date, y = Island_Mean_Density, color = IslandName), 
-                       size = 2) +
+            geom_point(data = oneM_Filter_One(), aes(x = Date, y = Island_Mean_Density, color = IslandName),
+                       size = 3, alpha = as.numeric(input$oneM_SmoothPoint_One)) +
             labs(color = "Island Average") +
-            scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2)) 
+            scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2))
+        }
+        else if(input$oneM_Graph_One == "Jitter" && input$oneM_DataSummary_One == "One species with island average")
+        {
+          p <- oneM_Plot_Reactive_One() +
+            # new_scale_color() +
+            # geom_point(data = oneM_Filter_One(), aes(x = Date, y = MeanDensity_sqm, color = SiteName),
+            #            size = 3, alpha = as.numeric(input$oneM_SmoothPoint_One)) +
+            # scale_color_manual(values = "black") +
+            # labs(color = "Site Average") +
+            new_scale_color() +
+            geom_point(data = oneM_Filter_One(), aes(x = Date, y = Island_Mean_Density, color = IslandName),
+                       size = 3, alpha = as.numeric(input$oneM_SmoothPoint_One)) +
+            labs(color = "Island Average") +
+            scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2))
         }
         return(p)
-      }) # Main Plot 
+      })  
       
+      # Boxplot drawing/explanation
       output$oneM_BoxplotDescription_One <- renderImage({
         list(src = glue("www/Boxplot_Description.jpg"), contentType = "image/jpg", width = 550, height = 400)
-      }, deleteFile = FALSE) # Boxplot drawing/explanation
+      }, deleteFile = FALSE) 
       
+      # Filtered data table output
       output$oneM_DToutData_One <- renderDT({
         datatable(oneM_Filter_One(),
                   extensions = c('Buttons', 'ColReorder'),
@@ -738,7 +772,7 @@ server <- function(input, output, session) {
                       color = "black",
                       backgroundColor = 'white'
           )
-      }) # Filtered data table output
+      }) 
       
     }
     
@@ -885,7 +919,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = oneM_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
@@ -929,10 +963,10 @@ server <- function(input, output, session) {
                           size = 1) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$oneM_FreeOrLock_Isl == "Locked Scales", 
                                                         max(oneM_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
@@ -988,11 +1022,11 @@ server <- function(input, output, session) {
               geom_errorbar(data = oneM_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%b %Y", date_breaks = "1 year", 
                            limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
                    color = "Common Name",
@@ -1033,7 +1067,7 @@ server <- function(input, output, session) {
                          position = input$oneM_BarOptions_Isl, width = 280) +
                 coord_cartesian(ylim = c(0, ifelse(input$oneM_FreeOrLock_Isl == "Locked Scales", 
                                                    oneM_yValue_Isl(), max(m$MaxSumBar)))) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = c(0.01, 0),
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = expansion(mult = c(0.01, .01)),
                              limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365)) +
                 labs(fill = "Site Name",
                      x = "Year",
@@ -1081,7 +1115,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -1122,8 +1156,8 @@ server <- function(input, output, session) {
                 scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                              limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
                                         max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                             expand = c(0.01, 0)) +
-                scale_y_continuous(expand = c(0.01, 0),
+                             expand = expansion(mult = c(0.01, .01))) +
+                scale_y_continuous(expand = expansion(mult = c(0.01, .01)),
                   limits = c(0, ifelse(input$oneM_FreeOrLock_Isl == "Locked Scales", 
                                        max(oneM_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm)))) +
                 labs(color = "Site Name",
@@ -1177,7 +1211,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", breaks = oneM_FilterByIsl_Isl()$IslandDate, 
                            limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = oneM_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
@@ -1218,8 +1252,8 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = "1 year",
                            limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              scale_y_continuous(limits = c(0, max(oneM_Filter_Isl()$MaxSum)), expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
+              scale_y_continuous(limits = c(0, max(oneM_Filter_Isl()$MaxSum)), expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = oneM_Filter_Isl(), 
                             aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                             width = 0, color = "black", alpha = as.numeric(input$oneM_EB_Isl)) +
@@ -1275,11 +1309,11 @@ server <- function(input, output, session) {
                        aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
                        position = input$oneM_BarOptions_Isl,
                        width = 280) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%Y", breaks = oneM_FilterByIsl_Isl()$IslandDate, 
                            limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(oneM_FilterByIsl_Isl()$CommonName)}"),
                    color = "Island Name",
@@ -1312,7 +1346,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = "1 year",
                            limits = c(min(as.Date(oneM_Filter_Isl()$Date))-365,
                                       max(as.Date(oneM_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = oneM_Filter_Isl()$ScientificName,
                    subtitle = oneM_Filter_Isl()$CommonName,
                    color = "Site Name",
@@ -1365,7 +1399,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(oneM_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = oneM_FilterByIsl_Isl()$ScientificName,
                    subtitle = oneM_FilterByIsl_Isl()$CommonName, 
                    color = "Island Name",
@@ -1403,7 +1437,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(oneM_Filter_Isl()$Date))-365, 
                                       max(as.Date(oneM_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = oneM_Filter_Isl()$ScientificName, 
                    subtitle = oneM_Filter_Isl()$CommonName, 
                    color = "Site Name",
@@ -1562,7 +1596,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(oneM_Filter_MPA()$MPA_Date)), 
                                       max(as.Date(oneM_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = oneM_Filter_MPA(), 
                             aes(x = MPA_Date, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
                             width = 0, color = "black", alpha = as.numeric(input$oneM_EB_MPA)) +
@@ -1607,10 +1641,10 @@ server <- function(input, output, session) {
                           size = 1) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date)), max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$oneM_FreeOrLock_MPA == "Locked Scales", 
                                                         max(oneM_Filter_MPA()$MaxSum), max(m$MeanDensity_sqm))), 
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$oneM_EB_MPA)) +
@@ -1673,11 +1707,11 @@ server <- function(input, output, session) {
               geom_errorbar(data = oneM_Outside_MPA(), 
                             aes(x = MPA_Date + 60, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
                             width = 0, color = "black", alpha = as.numeric(input$oneM_EB_MPA)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(oneM_Filter_MPA()$MPA_Date)) - 150, 
                                       max(as.Date(oneM_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(oneM_Filter_MPA()$ScientificName)}"),
                    subtitle = glue("{unique(oneM_Filter_MPA()$CommonName)}"),
                    color = "Reserve Status",
@@ -1734,10 +1768,10 @@ server <- function(input, output, session) {
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_y_continuous(limits = c(0, ifelse(input$oneM_FreeOrLock_MPA == "Locked Scales", 
                                                         max(oneM_Filter_MPA()$MaxSumBar), max(m$MeanDensity_sqm))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 labs(fill = "Outside",
                      x = "Year",
                      y = "Mean Density") +
@@ -1787,7 +1821,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(oneM_Filter_MPA()$MPA_Date)), 
                                       max(as.Date(oneM_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(oneM_Filter_MPA()$ScientificName)}"),
                    subtitle = glue("{unique(oneM_Filter_MPA()$CommonName)}"),
                    color = "Reserve Status",
@@ -1831,8 +1865,8 @@ server <- function(input, output, session) {
                             span = input$oneM_SmoothSlide_MPA) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
-                scale_y_continuous(expand = c(0.01, 0),
+                             expand = expansion(mult = c(0.01, .01))) +
+                scale_y_continuous(expand = expansion(mult = c(0.01, .01)),
                   limits = c(0, ifelse(input$oneM_FreeOrLock_MPA == "Locked Scales", 
                                        max(oneM_Filter_MPA()$MaxSum), max(m$MeanDensity_sqm)))) +
                 labs(color = "Site Name",
@@ -2011,7 +2045,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(oneM_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(oneM_Filter_Two_One()$Date))-365, 
                                       max(as.Date(oneM_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(oneM_Filter_Two_One()$ScientificName)
                               } and {unique(oneM_Filter_Two_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(oneM_Filter_Two_One()$IslandName)} {unique(oneM_Filter_Two_One()$SiteName)}"),
@@ -2066,7 +2100,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(oneM_Filter_Two_One()$Date),
                            limits = c(min(as.Date(oneM_Filter_Two_One()$Date))-365,
                                       max(as.Date(oneM_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(oneM_Filter_Two_One()$ScientificName)
                               } and {unique(oneM_Filter_Two_Two()$ScientificName)}"),
                    subtitle = glue("{unique(oneM_Filter_Two_One()$IslandName)} {unique(oneM_Filter_Two_One()$SiteName)}"),
@@ -2117,7 +2151,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(oneM_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(oneM_Filter_Two_One()$Date))-365, 
                                       max(as.Date(oneM_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(oneM_Filter_Two_One()$ScientificName)
                               } and {unique(oneM_Filter_Two_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(oneM_Filter_Two_One()$IslandName)} {unique(oneM_Filter_Two_One()$SiteName)}"),
@@ -2199,98 +2233,55 @@ server <- function(input, output, session) {
       
       oneM_Filter_All <- reactive({
         oneM_DF %>%
-          filter(SiteName == input$oneM_SiteNameAll) %>%
+          filter(SiteName == input$oneM_SiteName_All) %>%
           drop_na()
       })
       
-      output$oneM_Plot_All <- renderPlot({
-        if (is.null(input$oneM_GraphAll))
-          return(NULL)
-        
-        if (input$oneM_GraphAll == "Line") {
-          return({
-            out <- by(data = oneM_Filter_All(), INDICES = oneM_Filter_All()$CommonName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() + 
-                geom_line(data = m, 
-                          aes(Date, MeanDensity_sqm, group = CommonName, colour = CommonName, linetype = SiteName),
-                          size = 1) +
-                scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
-                             expand = c(0.01, 0)) +
-                geom_errorbar(data = m, 
-                              aes(x = Date, ymin = MeanDensity_sqm - StandardError,
-                                  ymax = MeanDensity_sqm + StandardError),
-                              width = 0.25,
-                              color = "black") +
-                labs(title = m$ScientificName, 
-                     subtitle = glue("{m$IslandName} {m$SiteName}"),
-                     color = "Common Name",
-                     x = "Year",
-                     y = "Mean Density") +
-                scale_color_manual(values = SpeciesColor) +
-                scale_linetype_manual(values = SiteLine, guide = FALSE) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-              
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v'))
-          })
-        } 
-        else if (input$oneM_GraphAll == "Bar") {
-          return({
-            out <- by(data = oneM_Filter_All(), INDICES = oneM_Filter_All()$CommonName, FUN = function(m) {
-              m <- droplevels(m)
-              m <- ggplot() + 
-                geom_col(data = m, 
-                         aes(x = Date, y = MeanDensity_sqm, group = CommonName, fill = CommonName, linetype = SiteName),
-                         width = 250) +
-                geom_text(data = m, 
-                          aes(x = Date, y = MeanDensity_sqm, label = round(MeanDensity_sqm, digits = 2)),
-                          position = position_dodge(1),
-                          vjust = -.2,
-                          hjust = .5,
-                          angle = 0) +
-                scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
-                             expand = c(0.01, 0)) +
-                scale_y_continuous(expand = c(0.1, 0)) +
-                labs(title = m$ScientificName, 
-                     subtitle = glue("{m$IslandName} {m$SiteName}"),
-                     color = "Common Name",
-                     x = "Year",
-                     y = "Mean Density") +
-                scale_fill_manual(values = SpeciesColor) +
-                scale_linetype_manual(values = SiteLine, guide = FALSE) +
-                theme_classic() +
-                theme(legend.position = "right",
-                      legend.justification = c(0,0.5),
-                      legend.background = element_rect(),
-                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                      plot.subtitle = element_text(hjust = 0.5, size = 16),
-                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                      axis.title = element_text(size = 16, face = "bold"),
-                      axis.text.y = element_text(size = 12, face = "bold"),
-                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-              
-            })
-            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v'))
-          })
-        } 
+      oneM_line_alpha <- reactive({
+        if (input$oneM_Graph_All == "Line"){return(1)}else{return(0)}
       })
       
+      oneM_bar_alpha <- reactive({
+        if (input$oneM_Graph_All == "Bar"){return(1)}else{return(0)}
+      })
+      
+      output$oneM_Plot_All <- renderPlot({
+        out <- by(data = oneM_Filter_All(), INDICES = oneM_Filter_All()$CommonName, FUN = function(m) {
+          m <- droplevels(m)
+          m <- ggplot() + 
+            geom_line(data = m, size = 1, alpha = oneM_line_alpha(),
+                      aes(x = Date, y = MeanDensity_sqm, group = CommonName, colour = CommonName, linetype = SiteName)) +
+            geom_col(data = m, width = 250, alpha =  oneM_bar_alpha(),
+                     aes(x = Date, y = MeanDensity_sqm, group = CommonName, fill = CommonName)) +
+            scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
+                         expand = expansion(mult = c(0.01, .01))) +
+            geom_errorbar(data = m, aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
+                          width = 0.25, color = "black") +
+            labs(title = m$ScientificName, 
+                 subtitle = glue("{m$IslandName} {m$SiteName}"),
+                 color = "Common Name",
+                 fill = "Common Name",
+                 x = "Year",
+                 y = "Mean Density") +
+            scale_color_manual(values = SpeciesColor) +
+            scale_fill_manual(values = SpeciesColor) +
+            scale_linetype_manual(values = SiteLine, guide = FALSE) +
+            theme_classic() +
+            theme(legend.position = "right",
+                  legend.justification = c(0,0.5),
+                  legend.background = element_rect(),
+                  legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                  legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                  plot.subtitle = element_text(hjust = 0.5, size = 16),
+                  plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                  axis.title = element_text(size = 16, face = "bold"),
+                  axis.text.y = element_text(size = 12, face = "bold"),
+                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                  strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+        })
+        do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v'))
+      })
     }
     
   }
@@ -2745,7 +2736,7 @@ server <- function(input, output, session) {
                         width = 0, color = "black", alpha = as.numeric(input$fiveM_EB_one)) +
           scale_x_date(date_labels = "%b %Y", breaks = unique(fiveM_Filter_One()$Date),
                        limits = c(min(as.Date(fiveM_Filter_One()$Date))-365, max(as.Date(fiveM_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(fiveM_Filter_One()$ScientificName)}"),
                subtitle = glue("{unique(fiveM_Filter_One()$IslandName)} {unique(fiveM_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -2791,7 +2782,7 @@ server <- function(input, output, session) {
                     vjust = -.2, hjust = .5, alpha = as.numeric(input$fiveM_Bar_Text_One)) +
           scale_x_date(date_labels = "%b %Y", breaks = unique(fiveM_Filter_One()$Date),
                        limits = c(min(as.Date(fiveM_Filter_One()$Date))-365,  max(as.Date(fiveM_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(fiveM_Filter_One()$ScientificName)}"),
                subtitle = glue("{unique(fiveM_Filter_One()$IslandName)} {unique(fiveM_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -2832,7 +2823,7 @@ server <- function(input, output, session) {
           scale_x_date(date_labels = "%b %Y", breaks = unique(fiveM_Filter_One()$Date), 
                        limits = c(min(as.Date(fiveM_Filter_One()$Date))-365, 
                                   max(as.Date(fiveM_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(fiveM_Filter_One()$ScientificName)}"), 
                subtitle = glue("{unique(fiveM_Filter_One()$IslandName)} {unique(fiveM_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -2867,7 +2858,7 @@ server <- function(input, output, session) {
                      size = 2, color = "black") +
           scale_x_date(date_labels = "%b %Y", breaks = unique(fiveM_RawFilter_One()$Date), 
                        limits = c(min(as.Date(fiveM_RawFilter_One()$Date))-365, max(as.Date(fiveM_RawFilter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(fiveM_RawFilter_One()$ScientificName)}"), 
                subtitle = glue("{unique(fiveM_RawFilter_One()$IslandName)} {unique(fiveM_RawFilter_One()$SiteName)}"),
                color = "Common Name",
@@ -3136,7 +3127,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = fiveM_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$fiveM_EB_Isl)) +
@@ -3178,10 +3169,10 @@ server <- function(input, output, session) {
                           size = 1) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$fiveM_FreeOrLock_Isl == "Locked Scales", 
                                                         max(fiveM_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$fiveM_EB_Isl)) +
@@ -3237,11 +3228,11 @@ server <- function(input, output, session) {
               geom_errorbar(data = fiveM_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$fiveM_EB_Isl)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%b %Y", date_breaks = "1 year", 
                            limits = c(min(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(fiveM_FilterByIsl_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(fiveM_FilterByIsl_Isl()$CommonName)}"),
                    color = "Common Name",
@@ -3281,7 +3272,7 @@ server <- function(input, output, session) {
                          position = input$fiveM_BarOptions_Isl, width = 280) +
                 coord_cartesian(ylim = c(0, ifelse(input$fiveM_FreeOrLock_Isl == "Locked Scales", 
                                                    fiveM_yValue_Isl(), max(m$MaxSumBar)))) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = c(0.01, 0),
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = expansion(mult = c(0.01, .01)),
                              limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365)) +
                 labs(title = m$IslandName,
                      color = "Site Name",
@@ -3329,7 +3320,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(fiveM_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -3370,10 +3361,10 @@ server <- function(input, output, session) {
                 scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                              limits = c(min(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))-365, 
                                         max(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))+365),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$fiveM_FreeOrLock_Isl == "Locked Scales", 
                                                         max(fiveM_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 labs(title = glue("{unique(m$IslandName)}"), 
                      color = "Site Name",
                      x = "Year",
@@ -3423,7 +3414,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", breaks = fiveM_FilterByIsl_Isl()$IslandDate, 
                            limits = c(min(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = fiveM_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$fiveM_EB_Isl)) +
@@ -3463,8 +3454,8 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = "1 year",
                            limits = c(min(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              scale_y_continuous(limits = c(0, max(fiveM_Filter_Isl()$MaxSum)), expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
+              scale_y_continuous(limits = c(0, max(fiveM_Filter_Isl()$MaxSum)), expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = fiveM_Filter_Isl(), 
                             aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                             width = 0, color = "black", alpha = as.numeric(input$fiveM_EB_Isl)) +
@@ -3519,11 +3510,11 @@ server <- function(input, output, session) {
                        aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
                        position = input$fiveM_BarOptions_Isl,
                        width = 280) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%Y", breaks = fiveM_FilterByIsl_Isl()$IslandDate, 
                            limits = c(min(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(fiveM_FilterByIsl_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(fiveM_FilterByIsl_Isl()$CommonName)}"),
                    color = "Common Name",
@@ -3556,7 +3547,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = "1 year",
                            limits = c(min(as.Date(fiveM_Filter_Isl()$Date))-365,
                                       max(as.Date(fiveM_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = fiveM_Filter_Isl()$IslandName,
                    color = "Site Name",
                    fill = "Site Name",
@@ -3608,7 +3599,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(fiveM_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(fiveM_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -3645,7 +3636,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(fiveM_Filter_Isl()$Date))-365, 
                                       max(as.Date(fiveM_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(fiveM_Filter_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -3803,7 +3794,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(fiveM_Filter_MPA()$MPA_Date)), 
                                       max(as.Date(fiveM_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = fiveM_Filter_MPA(), 
                             aes(x = MPA_Date, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
                             width = 0, color = "black", alpha = as.numeric(input$fiveM_EB_MPA)) +
@@ -3847,10 +3838,10 @@ server <- function(input, output, session) {
                           size = 1) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date)), max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$fiveM_FreeOrLock_MPA == "Locked Scales", 
                                                         max(fiveM_Filter_MPA()$MaxSum), max(m$MeanDensity_sqm))), 
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$fiveM_EB_MPA)) +
@@ -3914,11 +3905,11 @@ server <- function(input, output, session) {
               geom_errorbar(data = fiveM_Outside_MPA(), 
                             aes(x = MPA_Date + 60, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
                             width = 0, color = "black", alpha = as.numeric(input$fiveM_EB_MPA)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(fiveM_Filter_MPA()$MPA_Date)) - 150, 
                                       max(as.Date(fiveM_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(fiveM_Filter_MPA()$ScientificName)}"),
                    subtitle = glue("{unique(fiveM_Filter_MPA()$CommonName)}"),
                    color = "Reserve Status",
@@ -3974,10 +3965,10 @@ server <- function(input, output, session) {
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_y_continuous(limits = c(0, ifelse(input$fiveM_FreeOrLock_MPA == "Locked Scales", 
                                                         max(fiveM_Filter_MPA()$MaxSumBar), max(m$MeanDensity_sqm))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 labs(title = m$IslandName,
                      fill = "Outside",
                      x = "Year",
@@ -4027,7 +4018,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(fiveM_Filter_MPA()$MPA_Date)), 
                                       max(as.Date(fiveM_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(fiveM_Filter_MPA()$ScientificName)}"),
                    subtitle = glue("{unique(fiveM_Filter_MPA()$CommonName)}"),
                    color = "Reserve Status",
@@ -4070,8 +4061,8 @@ server <- function(input, output, session) {
                             span = input$fiveM_SmoothSlide_MPA) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
-                scale_y_continuous(limits = c(0, max(fiveM_Filter_MPA()$MaxSum)), expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
+                scale_y_continuous(limits = c(0, max(fiveM_Filter_MPA()$MaxSum)), expand = expansion(mult = c(0.01, .01))) +
                 labs(title = m$IslandName,
                      color = "Site Name",
                      linetype = "Site Name",
@@ -4278,7 +4269,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(fiveM_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(fiveM_Filter_Two_One()$Date))-365, 
                                       max(as.Date(fiveM_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(fiveM_Filter_Two_One()$ScientificName)
                               } and {unique(fiveM_Filter_Two_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(fiveM_Filter_Two_One()$IslandName)} {unique(fiveM_Filter_Two_One()$SiteName)}"),
@@ -4333,7 +4324,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(fiveM_Filter_Two_One()$Date),
                            limits = c(min(as.Date(fiveM_Filter_Two_One()$Date))-365,
                                       max(as.Date(fiveM_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(fiveM_Filter_Two_One()$ScientificName)
                               } and {unique(fiveM_Filter_Two_Two()$ScientificName)}"),
                    subtitle = glue("{unique(fiveM_Filter_Two_One()$IslandName)} {unique(fiveM_Filter_Two_One()$SiteName)}"),
@@ -4384,7 +4375,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(fiveM_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(fiveM_Filter_Two_One()$Date))-365, 
                                       max(as.Date(fiveM_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(fiveM_Filter_Two_One()$ScientificName)
                               } and {unique(fiveM_Filter_Two_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(fiveM_Filter_Two_One()$IslandName)} {unique(fiveM_Filter_Two_One()$SiteName)}"),
@@ -4483,7 +4474,7 @@ server <- function(input, output, session) {
                           aes(Date, MeanDensity_sqm, group = CommonName, colour = CommonName, linetype = SiteName),
                           size = 1) +
                 scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanDensity_sqm - StandardError,
                                   ymax = MeanDensity_sqm + StandardError),
@@ -4529,8 +4520,8 @@ server <- function(input, output, session) {
                           hjust = .5,
                           angle = 0) +
                 scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
-                             expand = c(0.01, 0)) +
-                scale_y_continuous(expand = c(0.1, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
+                scale_y_continuous(expand = expansion(mult = c(0, .1))) +
                 labs(title = m$ScientificName, 
                      subtitle = glue("{m$IslandName} {m$SiteName}"),
                      color = "Common Name",
@@ -5036,7 +5027,7 @@ server <- function(input, output, session) {
                         width = 0, color = "black", alpha = as.numeric(input$bands_EB_one)) +
           scale_x_date(date_labels = "%b %Y", breaks = unique(bands_Filter_One()$Date),
                        limits = c(min(as.Date(bands_Filter_One()$Date))-365, max(as.Date(bands_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(bands_Filter_One()$ScientificName)}"),
                subtitle = glue("{unique(bands_Filter_One()$IslandName)} {unique(bands_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -5082,7 +5073,7 @@ server <- function(input, output, session) {
                     vjust = -.2, hjust = .5, alpha = as.numeric(input$bands_Bar_Text_One)) +
           scale_x_date(date_labels = "%b %Y", breaks = unique(bands_Filter_One()$Date),
                        limits = c(min(as.Date(bands_Filter_One()$Date))-365,  max(as.Date(bands_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(bands_Filter_One()$ScientificName)}"),
                subtitle = glue("{unique(bands_Filter_One()$IslandName)} {unique(bands_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -5123,7 +5114,7 @@ server <- function(input, output, session) {
           scale_x_date(date_labels = "%b %Y", breaks = unique(bands_Filter_One()$Date), 
                        limits = c(min(as.Date(bands_Filter_One()$Date))-365, 
                                   max(as.Date(bands_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(bands_Filter_One()$ScientificName)}"), 
                subtitle = glue("{unique(bands_Filter_One()$IslandName)} {unique(bands_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -5159,7 +5150,7 @@ server <- function(input, output, session) {
                      size = 2, color = "black") +
           scale_x_date(date_labels = "%b %Y", breaks = unique(bands_RawFilter_One()$Date), 
                        limits = c(min(as.Date(bands_RawFilter_One()$Date))-365, max(as.Date(bands_RawFilter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(bands_RawFilter_One()$ScientificName)}"), 
                subtitle = glue("{unique(bands_RawFilter_One()$IslandName)} {unique(bands_RawFilter_One()$SiteName)}"),
                color = "Common Name",
@@ -5428,7 +5419,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(bands_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(bands_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = bands_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$bands_EB_Isl)) +
@@ -5470,10 +5461,10 @@ server <- function(input, output, session) {
                           size = 1) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$bands_FreeOrLock_Isl == "Locked Scales", 
                                                         max(bands_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$bands_EB_Isl)) +
@@ -5529,11 +5520,11 @@ server <- function(input, output, session) {
               geom_errorbar(data = bands_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$bands_EB_Isl)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%b %Y", date_breaks = "1 year", 
                            limits = c(min(as.Date(bands_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(bands_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(bands_FilterByIsl_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(bands_FilterByIsl_Isl()$CommonName)}"),
                    color = "Common Name",
@@ -5573,7 +5564,7 @@ server <- function(input, output, session) {
                          position = input$bands_BarOptions_Isl, width = 280) +
                 coord_cartesian(ylim = c(0, ifelse(input$bands_FreeOrLock_Isl == "Locked Scales", 
                                                    bands_yValue_Isl(), max(m$MaxSumBar)))) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = c(0.01, 0),
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = expansion(mult = c(0.01, .01)),
                              limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365)) +
                 labs(title = m$IslandName,
                      color = "Site Name",
@@ -5621,7 +5612,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(bands_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(bands_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(bands_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -5662,10 +5653,10 @@ server <- function(input, output, session) {
                 scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                              limits = c(min(as.Date(bands_FilterByIsl_Isl()$IslandDate))-365, 
                                         max(as.Date(bands_FilterByIsl_Isl()$IslandDate))+365),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$bands_FreeOrLock_Isl == "Locked Scales", 
                                                         max(bands_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 labs(title = glue("{unique(m$IslandName)}"), 
                      color = "Site Name",
                      x = "Year",
@@ -5715,7 +5706,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", breaks = bands_FilterByIsl_Isl()$IslandDate, 
                            limits = c(min(as.Date(bands_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(bands_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = bands_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$bands_EB_Isl)) +
@@ -5755,8 +5746,8 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = "1 year",
                            limits = c(min(as.Date(bands_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(bands_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              scale_y_continuous(limits = c(0, max(bands_Filter_Isl()$MaxSum)), expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
+              scale_y_continuous(limits = c(0, max(bands_Filter_Isl()$MaxSum)), expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = bands_Filter_Isl(), 
                             aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                             width = 0, color = "black", alpha = as.numeric(input$bands_EB_Isl)) +
@@ -5811,11 +5802,11 @@ server <- function(input, output, session) {
                        aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
                        position = input$bands_BarOptions_Isl,
                        width = 280) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%Y", breaks = bands_FilterByIsl_Isl()$IslandDate, 
                            limits = c(min(as.Date(bands_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(bands_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(bands_FilterByIsl_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(bands_FilterByIsl_Isl()$CommonName)}"),
                    color = "Common Name",
@@ -5848,7 +5839,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = "1 year",
                            limits = c(min(as.Date(bands_Filter_Isl()$Date))-365,
                                       max(as.Date(bands_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = bands_Filter_Isl()$IslandName,
                    color = "Site Name",
                    fill = "Site Name",
@@ -5900,7 +5891,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(bands_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(bands_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(bands_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -5937,7 +5928,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(bands_Filter_Isl()$Date))-365, 
                                       max(as.Date(bands_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(bands_Filter_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -6095,7 +6086,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(bands_Filter_MPA()$MPA_Date)), 
                                       max(as.Date(bands_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = bands_Filter_MPA(), 
                             aes(x = MPA_Date, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
                             width = 0, color = "black", alpha = as.numeric(input$bands_EB_MPA)) +
@@ -6139,10 +6130,10 @@ server <- function(input, output, session) {
                           size = 1) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date)), max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$bands_FreeOrLock_MPA == "Locked Scales", 
                                                         max(bands_Filter_MPA()$MaxSum), max(m$MeanDensity_sqm))), 
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$bands_EB_MPA)) +
@@ -6206,11 +6197,11 @@ server <- function(input, output, session) {
               geom_errorbar(data = bands_Outside_MPA(), 
                             aes(x = MPA_Date + 60, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
                             width = 0, color = "black", alpha = as.numeric(input$bands_EB_MPA)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(bands_Filter_MPA()$MPA_Date)) - 150, 
                                       max(as.Date(bands_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(bands_Filter_MPA()$ScientificName)}"),
                    subtitle = glue("{unique(bands_Filter_MPA()$CommonName)}"),
                    color = "Reserve Status",
@@ -6266,10 +6257,10 @@ server <- function(input, output, session) {
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_y_continuous(limits = c(0, ifelse(input$bands_FreeOrLock_MPA == "Locked Scales", 
                                                         max(bands_Filter_MPA()$MaxSumBar), max(m$MeanDensity_sqm))),
-                                   expand = c(0.1, 0)) +
+                                   expand = expansion(mult = c(0, .1))) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 labs(title = m$IslandName,
                      fill = "Outside",
                      x = "Year",
@@ -6319,7 +6310,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(bands_Filter_MPA()$MPA_Date)), 
                                       max(as.Date(bands_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(bands_Filter_MPA()$ScientificName)}"),
                    subtitle = glue("{unique(bands_Filter_MPA()$CommonName)}"),
                    color = "Reserve Status",
@@ -6362,8 +6353,8 @@ server <- function(input, output, session) {
                             span = input$bands_SmoothSlide_MPA) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
-                scale_y_continuous(limits = c(0, max(bands_Filter_MPA()$MaxSum)), expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
+                scale_y_continuous(limits = c(0, max(bands_Filter_MPA()$MaxSum)), expand = expansion(mult = c(0.01, .01))) +
                 labs(title = m$IslandName,
                      color = "Site Name",
                      linetype = "Site Name",
@@ -6570,7 +6561,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(bands_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(bands_Filter_Two_One()$Date))-365, 
                                       max(as.Date(bands_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(bands_Filter_Two_One()$ScientificName)
                               } and {unique(bands_Filter_Two_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(bands_Filter_Two_One()$IslandName)} {unique(bands_Filter_Two_One()$SiteName)}"),
@@ -6625,7 +6616,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(bands_Filter_Two_One()$Date),
                            limits = c(min(as.Date(bands_Filter_Two_One()$Date))-365,
                                       max(as.Date(bands_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(bands_Filter_Two_One()$ScientificName)
                               } and {unique(bands_Filter_Two_Two()$ScientificName)}"),
                    subtitle = glue("{unique(bands_Filter_Two_One()$IslandName)} {unique(bands_Filter_Two_One()$SiteName)}"),
@@ -6676,7 +6667,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(bands_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(bands_Filter_Two_One()$Date))-365, 
                                       max(as.Date(bands_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(bands_Filter_Two_One()$ScientificName)
                               } and {unique(bands_Filter_Two_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(bands_Filter_Two_One()$IslandName)} {unique(bands_Filter_Two_One()$SiteName)}"),
@@ -6775,7 +6766,7 @@ server <- function(input, output, session) {
                           aes(Date, MeanDensity_sqm, group = CommonName, colour = CommonName, linetype = SiteName),
                           size = 1) +
                 scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanDensity_sqm - StandardError,
                                   ymax = MeanDensity_sqm + StandardError),
@@ -6821,8 +6812,8 @@ server <- function(input, output, session) {
                           hjust = .5,
                           angle = 0) +
                 scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
-                             expand = c(0.01, 0)) +
-                scale_y_continuous(expand = c(0.1, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
+                scale_y_continuous(expand = expansion(mult = c(0, .1))) +
                 labs(title = m$ScientificName, 
                      subtitle = glue("{m$IslandName} {m$SiteName}"),
                      color = "Common Name",
@@ -7251,7 +7242,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(core_Filter_Two_One()$Date))-365, 
                                       max(as.Date(core_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(core_Filter_Two_One()$ScientificName)
                               } and {unique(core_Filter_Two_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(core_Filter_Two_One()$IslandName)} {unique(core_Filter_Two_One()$SiteName)}"),
@@ -7306,7 +7297,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_Two_One()$Date),
                            limits = c(min(as.Date(core_Filter_Two_One()$Date))-365,
                                       max(as.Date(core_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(core_Filter_Two_One()$ScientificName)
                               } and {unique(core_Filter_Two_Two()$ScientificName)}"),
                    subtitle = glue("{unique(core_Filter_Two_One()$IslandName)} {unique(core_Filter_Two_One()$SiteName)}"),
@@ -7359,7 +7350,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(core_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(core_Filter_Two_One()$Date))-365, 
                                       max(as.Date(core_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(core_Filter_Two_One()$ScientificName)
                               } and {unique(core_Filter_Two_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(core_Filter_Two_One()$IslandName)} {unique(core_Filter_Two_One()$SiteName)}"),
@@ -7555,7 +7546,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", breaks = core_Filter_Isl_One()$IslandDate, 
                            limits = c(min(as.Date(core_Filter_Isl_One()$IslandDate))-365,
                                       max(as.Date(core_Filter_Isl_One()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(core_Filter_Isl_One()$ScientificName)} and {unique(core_Filter_Isl_Two()$ScientificName)}"),
                    subtitle = glue("{unique(core_Filter_Isl_One()$IslandName)}"), 
                    color = "Common Name",
@@ -7605,7 +7596,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", breaks = core_Filter_Isl_One()$IslandDate, 
                            limits = c(min(as.Date(core_Filter_Isl_One()$IslandDate))-365, 
                                       max(as.Date(core_Filter_Isl_One()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(core_Filter_Isl_One()$ScientificName)} and {unique(core_Filter_Isl_Two()$ScientificName)}"),
                    subtitle = glue("{unique(core_Filter_Isl_One()$IslandName)}"),
                    color = "Common Name",
@@ -7652,7 +7643,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(core_Filter_Isl_One()$IslandDate))-365, 
                                       max(as.Date(core_Filter_Isl_One()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(core_Filter_Isl_One()$ScientificName)} and {unique(core_Filter_Isl_Two()$ScientificName)}"),
                    subtitle = glue("{unique(core_Filter_Isl_One()$IslandName)}"), 
                    color = "Common Name",
@@ -7788,7 +7779,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", breaks = core_Filter_MPA_One()$MPA_Date, 
                            limits = c(min(as.Date(core_Filter_MPA_One()$MPA_Date))-365,
                                       max(as.Date(core_Filter_MPA_One()$MPA_Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(core_Filter_MPA_One()$ScientificName)} and {unique(core_Filter_MPA_Two()$ScientificName)}"),
                    subtitle = glue("{unique(core_Filter_MPA_One()$MPA_Name)}"), 
                    color = "Common Name",
@@ -7842,7 +7833,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", breaks = core_Filter_MPA_One()$MPA_Date, 
                            limits = c(min(as.Date(core_Filter_MPA_One()$MPA_Date))-365, 
                                       max(as.Date(core_Filter_MPA_One()$MPA_Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               facet_grid(rows = vars(ReserveStatus), scales = "fixed") +
               labs(title = glue("{unique(core_Filter_MPA_One()$ScientificName)} and {unique(core_Filter_MPA_Two()$ScientificName)}"),
                    subtitle = glue("{unique(core_Filter_MPA_One()$MPA_Name)}"),
@@ -7893,7 +7884,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(core_Filter_MPA_One()$MPA_Date))-365, 
                                       max(as.Date(core_Filter_MPA_One()$MPA_Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(core_Filter_MPA_One()$ScientificName)} and {unique(core_Filter_MPA_Two()$ScientificName)}"),
                    subtitle = glue("{unique(core_Filter_MPA_One()$IslandName)}"), 
                    color = "Common Name",
@@ -8398,7 +8389,7 @@ server <- function(input, output, session) {
                         width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_one)) +
           scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_One()$Date),
                        limits = c(min(as.Date(rpcs_Filter_One()$Date))-365, max(as.Date(rpcs_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(rpcs_Filter_One()$ScientificName)}"),
                subtitle = glue("{unique(rpcs_Filter_One()$IslandName)} {unique(rpcs_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -8444,7 +8435,7 @@ server <- function(input, output, session) {
                     vjust = -.2, hjust = .5, alpha = as.numeric(input$rpcs_Bar_Text_One)) +
           scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_One()$Date),
                        limits = c(min(as.Date(rpcs_Filter_One()$Date))-365,  max(as.Date(rpcs_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(rpcs_Filter_One()$ScientificName)}"),
                subtitle = glue("{unique(rpcs_Filter_One()$IslandName)} {unique(rpcs_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -8485,7 +8476,7 @@ server <- function(input, output, session) {
           scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_One()$Date), 
                        limits = c(min(as.Date(rpcs_Filter_One()$Date))-365, 
                                   max(as.Date(rpcs_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(rpcs_Filter_One()$ScientificName)}"), 
                subtitle = glue("{unique(rpcs_Filter_One()$IslandName)} {unique(rpcs_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -8521,7 +8512,7 @@ server <- function(input, output, session) {
                      size = 2, color = "black") +
           scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_RawFilter_One()$Date), 
                        limits = c(min(as.Date(rpcs_RawFilter_One()$Date))-365, max(as.Date(rpcs_RawFilter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(rpcs_RawFilter_One()$ScientificName)}"), 
                subtitle = glue("{unique(rpcs_RawFilter_One()$IslandName)} {unique(rpcs_RawFilter_One()$SiteName)}"),
                color = "Common Name",
@@ -8790,7 +8781,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = rpcs_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Isl)) +
@@ -8832,10 +8823,10 @@ server <- function(input, output, session) {
                           size = 1) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$rpcs_FreeOrLock_Isl == "Locked Scales", 
                                                         max(rpcs_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Isl)) +
@@ -8891,11 +8882,11 @@ server <- function(input, output, session) {
               geom_errorbar(data = rpcs_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Isl)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%b %Y", date_breaks = "1 year", 
                            limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(rpcs_FilterByIsl_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(rpcs_FilterByIsl_Isl()$CommonName)}"),
                    color = "Common Name",
@@ -8935,7 +8926,7 @@ server <- function(input, output, session) {
                          position = input$rpcs_BarOptions_Isl, width = 280) +
                 coord_cartesian(ylim = c(0, ifelse(input$rpcs_FreeOrLock_Isl == "Locked Scales", 
                                                    rpcs_yValue_Isl(), max(m$MaxSumBar)))) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = c(0.01, 0),
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = expansion(mult = c(0.01, .01)),
                              limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365)) +
                 labs(title = m$IslandName,
                      color = "Site Name",
@@ -8983,7 +8974,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(rpcs_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -9024,10 +9015,10 @@ server <- function(input, output, session) {
                 scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                              limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365, 
                                         max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$rpcs_FreeOrLock_Isl == "Locked Scales", 
                                                         max(rpcs_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 labs(title = glue("{unique(m$IslandName)}"), 
                      color = "Site Name",
                      x = "Year",
@@ -9077,7 +9068,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", breaks = rpcs_FilterByIsl_Isl()$IslandDate, 
                            limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = rpcs_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Isl)) +
@@ -9117,8 +9108,8 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = "1 year",
                            limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              scale_y_continuous(limits = c(0, max(rpcs_Filter_Isl()$MaxSum)), expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
+              scale_y_continuous(limits = c(0, max(rpcs_Filter_Isl()$MaxSum)), expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = rpcs_Filter_Isl(), 
                             aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                             width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_Isl)) +
@@ -9173,11 +9164,11 @@ server <- function(input, output, session) {
                        aes(x = IslandDate, y = Island_Mean_Density, fill = IslandName),
                        position = input$rpcs_BarOptions_Isl,
                        width = 280) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%Y", breaks = rpcs_FilterByIsl_Isl()$IslandDate, 
                            limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(rpcs_FilterByIsl_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(rpcs_FilterByIsl_Isl()$CommonName)}"),
                    color = "Common Name",
@@ -9210,7 +9201,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = "1 year",
                            limits = c(min(as.Date(rpcs_Filter_Isl()$Date))-365,
                                       max(as.Date(rpcs_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = rpcs_Filter_Isl()$IslandName,
                    color = "Site Name",
                    fill = "Site Name",
@@ -9262,7 +9253,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(rpcs_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(rpcs_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -9299,7 +9290,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(rpcs_Filter_Isl()$Date))-365, 
                                       max(as.Date(rpcs_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(rpcs_Filter_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -9457,7 +9448,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(rpcs_Filter_MPA()$MPA_Date)), 
                                       max(as.Date(rpcs_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = rpcs_Filter_MPA(), 
                             aes(x = MPA_Date, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
                             width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_MPA)) +
@@ -9501,10 +9492,10 @@ server <- function(input, output, session) {
                           size = 1) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date)), max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$rpcs_FreeOrLock_MPA == "Locked Scales", 
                                                         max(rpcs_Filter_MPA()$MaxSum), max(m$MeanDensity_sqm))), 
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_MPA)) +
@@ -9568,11 +9559,11 @@ server <- function(input, output, session) {
               geom_errorbar(data = rpcs_Outside_MPA(), 
                             aes(x = MPA_Date + 60, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
                             width = 0, color = "black", alpha = as.numeric(input$rpcs_EB_MPA)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(rpcs_Filter_MPA()$MPA_Date)) - 150, 
                                       max(as.Date(rpcs_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(rpcs_Filter_MPA()$ScientificName)}"),
                    subtitle = glue("{unique(rpcs_Filter_MPA()$CommonName)}"),
                    color = "Reserve Status",
@@ -9628,10 +9619,10 @@ server <- function(input, output, session) {
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_y_continuous(limits = c(0, ifelse(input$rpcs_FreeOrLock_MPA == "Locked Scales", 
                                                         max(rpcs_Filter_MPA()$MaxSumBar), max(m$MeanDensity_sqm))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 labs(title = m$IslandName,
                      fill = "Outside",
                      x = "Year",
@@ -9681,7 +9672,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(rpcs_Filter_MPA()$MPA_Date)), 
                                       max(as.Date(rpcs_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(rpcs_Filter_MPA()$ScientificName)}"),
                    subtitle = glue("{unique(rpcs_Filter_MPA()$CommonName)}"),
                    color = "Reserve Status",
@@ -9724,8 +9715,8 @@ server <- function(input, output, session) {
                             span = input$rpcs_SmoothSlide_MPA) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
-                scale_y_continuous(limits = c(0, max(rpcs_Filter_MPA()$MaxSum)), expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
+                scale_y_continuous(limits = c(0, max(rpcs_Filter_MPA()$MaxSum)), expand = expansion(mult = c(0.01, .01))) +
                 labs(title = m$IslandName,
                      color = "Site Name",
                      linetype = "Site Name",
@@ -9932,7 +9923,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(rpcs_Filter_Two_One()$Date))-365, 
                                       max(as.Date(rpcs_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(rpcs_Filter_Two_One()$ScientificName)
                               } and {unique(rpcs_Filter_Two_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(rpcs_Filter_Two_One()$IslandName)} {unique(rpcs_Filter_Two_One()$SiteName)}"),
@@ -9987,7 +9978,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_Two_One()$Date),
                            limits = c(min(as.Date(rpcs_Filter_Two_One()$Date))-365,
                                       max(as.Date(rpcs_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(rpcs_Filter_Two_One()$ScientificName)
                               } and {unique(rpcs_Filter_Two_Two()$ScientificName)}"),
                    subtitle = glue("{unique(rpcs_Filter_Two_One()$IslandName)} {unique(rpcs_Filter_Two_One()$SiteName)}"),
@@ -10038,7 +10029,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(rpcs_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(rpcs_Filter_Two_One()$Date))-365, 
                                       max(as.Date(rpcs_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(rpcs_Filter_Two_One()$ScientificName)
                               } and {unique(rpcs_Filter_Two_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(rpcs_Filter_Two_One()$IslandName)} {unique(rpcs_Filter_Two_One()$SiteName)}"),
@@ -10137,7 +10128,7 @@ server <- function(input, output, session) {
                           aes(Date, MeanDensity_sqm, group = CommonName, colour = CommonName, linetype = SiteName),
                           size = 1) +
                 scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanDensity_sqm - StandardError,
                                   ymax = MeanDensity_sqm + StandardError),
@@ -10183,8 +10174,8 @@ server <- function(input, output, session) {
                           hjust = .5,
                           angle = 0) +
                 scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
-                             expand = c(0.01, 0)) +
-                scale_y_continuous(expand = c(0.1, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
+                scale_y_continuous(expand = expansion(mult = c(0, .1))) +
                 labs(title = m$ScientificName, 
                      subtitle = glue("{m$IslandName} {m$SiteName}"),
                      color = "Common Name",
@@ -10779,7 +10770,7 @@ server <- function(input, output, session) {
                          aes(x = Date, y = mean(Size_mm), group = SurveyYear)) +
               geom_text(data = NHSF_RawFilter_One(), size = 4, fontface = "plain",
                         aes(x = Date, y = -1, group = Date, label = paste(' n = \n', NHSF_RawFilter_One()$TotalCount))) +
-              scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_One()$Date), expand = c(0.01, 0),
+              scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_One()$Date), expand = expansion(mult = c(0.01, .01)),
                            limits = c(min(NHSF_RawFilter_One()$Date) - 150, max(NHSF_RawFilter_One()$Date) + 150)) +
               labs(title = glue("{unique(NHSF_RawFilter_One()$ScientificName)}"),
                    subtitle= glue("{unique(NHSF_RawFilter_One()$IslandName)} {unique(NHSF_RawFilter_One()$SiteName)}"), 
@@ -10818,7 +10809,7 @@ server <- function(input, output, session) {
                          aes(x = Date, y = mean(Size_mm), group = SurveyYear)) +
               geom_text(data = NHSF_RawFilter_One(), aes(x = Date, y = -1, group = Date, 
                                                          label = paste(' n = \n', NHSF_RawFilter_One()$TotalCount)), size = 4) +
-              scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_One()$Date), expand = c(0.01, 0),
+              scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_One()$Date), expand = expansion(mult = c(0.01, .01)),
                            limits = c(min(NHSF_RawFilter_One()$Date) - 150, max(NHSF_RawFilter_One()$Date) + 150)) +
               labs(title = glue("{unique(NHSF_RawFilter_One()$ScientificName)}"),
                    subtitle= glue("{unique(NHSF_RawFilter_One()$IslandName)} {unique(NHSF_RawFilter_One()$SiteName)}"), 
@@ -11011,7 +11002,7 @@ server <- function(input, output, session) {
                            aes(x = Date, y = Size_mm, group = SurveyYear, color = CommonName)) +
               geom_point(data = NHSF_RawFilter_Isl(), size = 1, color = "black",
                          aes(x = Date, y = MeanSize, group = SurveyYear)) +
-              scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_Isl()$Date), expand = c(0.01, 0),
+              scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_Isl()$Date), expand = expansion(mult = c(0.01, .01)),
                            limits = c(min(NHSF_RawFilter_Isl()$Date) - 150, max(NHSF_RawFilter_Isl()$Date) + 150)) +
               labs(title = glue("{unique(NHSF_RawFilter_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(NHSF_RawFilter_Isl()$CommonName)}"), 
@@ -11050,7 +11041,7 @@ server <- function(input, output, session) {
                           aes(x = Date, y = Size_mm, group = SurveyYear, fill = CommonName)) +
               geom_point(data = NHSF_RawFilter_Isl(), size = 1, color = "black",
                          aes(x = Date, y = MeanSize, group = SurveyYear)) +
-              scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_Isl()$Date), expand = c(0.01, 0),
+              scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_Isl()$Date), expand = expansion(mult = c(0.01, .01)),
                            limits = c(min(NHSF_RawFilter_Isl()$Date) - 150, max(NHSF_RawFilter_Isl()$Date) + 150)) +
               labs(title = glue("{unique(NHSF_RawFilter_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(NHSF_RawFilter_Isl()$CommonName)}"),
@@ -11179,7 +11170,7 @@ server <- function(input, output, session) {
                            aes(x = Date, y = Size_mm, group = SurveyYear, color = CommonName)) +
               geom_point(data = NHSF_RawFilter_MPA(), size = 1, color = "black",
                          aes(x = Date, y = MeanSize, group = SurveyYear, color = CommonName)) +
-              scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_MPA()$Date), expand = c(0.01, 0),
+              scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_MPA()$Date), expand = expansion(mult = c(0.01, .01)),
                            limits = c(min(NHSF_RawFilter_MPA()$Date) - 150, max(NHSF_RawFilter_MPA()$Date) + 150)) +
               labs(title = glue("{unique(NHSF_RawFilter_MPA()$ScientificName)}"),
                    subtitle = NHSF_RawFilter_MPA()$MPA_Name, 
@@ -11217,7 +11208,7 @@ server <- function(input, output, session) {
                           aes(x = Date, y = Size_mm, group = SurveyYear, fill = CommonName)) +
               geom_point(data = NHSF_RawFilter_MPA(), size = 1, color = "black",
                          aes(x = Date, y = MeanSize, group = SurveyYear)) +
-              scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_MPA()$Date), expand = c(0.01, 0),
+              scale_x_date(date_labels = "%Y", breaks = unique(NHSF_RawFilter_MPA()$Date), expand = expansion(mult = c(0.01, .01)),
                            limits = c(min(NHSF_RawFilter_MPA()$Date) - 150, max(NHSF_RawFilter_MPA()$Date) + 150)) +
               labs(title = glue("{unique(NHSF_RawFilter_MPA()$ScientificName)}"),
                    subtitle = NHSF_RawFilter_MPA()$MPA_Name,
@@ -11440,7 +11431,7 @@ server <- function(input, output, session) {
                         width = 0, color = "black", alpha = as.numeric(input$NHSF_EB_one)) +
           scale_x_date(date_labels = "%b %Y", breaks = unique(NHSF_Filter_One()$Date),
                        limits = c(min(as.Date(NHSF_Filter_One()$Date))-365, max(as.Date(NHSF_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(NHSF_Filter_One()$ScientificName)}"),
                subtitle = glue("{unique(NHSF_Filter_One()$IslandName)} {unique(NHSF_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -11486,7 +11477,7 @@ server <- function(input, output, session) {
                     vjust = -.2, hjust = .5, alpha = as.numeric(input$NHSF_Bar_Text_One)) +
           scale_x_date(date_labels = "%b %Y", breaks = unique(NHSF_Filter_One()$Date),
                        limits = c(min(as.Date(NHSF_Filter_One()$Date))-365,  max(as.Date(NHSF_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(NHSF_Filter_One()$ScientificName)}"),
                subtitle = glue("{unique(NHSF_Filter_One()$IslandName)} {unique(NHSF_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -11527,7 +11518,7 @@ server <- function(input, output, session) {
           scale_x_date(date_labels = "%b %Y", breaks = unique(NHSF_Filter_One()$Date), 
                        limits = c(min(as.Date(NHSF_Filter_One()$Date))-365, 
                                   max(as.Date(NHSF_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(NHSF_Filter_One()$ScientificName)}"), 
                subtitle = glue("{unique(NHSF_Filter_One()$IslandName)} {unique(NHSF_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -11782,7 +11773,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = NHSF_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean - IslandSE, ymax = Island_Mean + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$NHSF_EB_Isl)) +
@@ -11824,10 +11815,10 @@ server <- function(input, output, session) {
                           size = 1) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$NHSF_FreeOrLock_Isl == "Locked Scales", 
                                                         max(NHSF_Filter_Isl()$MaxSum), max(m$MeanSize))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$NHSF_EB_Isl)) +
@@ -11883,11 +11874,11 @@ server <- function(input, output, session) {
               geom_errorbar(data = NHSF_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean - IslandSE, ymax = Island_Mean + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$NHSF_EB_Isl)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%b %Y", date_breaks = "1 year", 
                            limits = c(min(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(NHSF_FilterByIsl_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(NHSF_FilterByIsl_Isl()$CommonName)}"),
                    color = "Common Name",
@@ -11927,7 +11918,7 @@ server <- function(input, output, session) {
                          position = input$NHSF_BarOptions_Isl, width = 280) +
                 coord_cartesian(ylim = c(0, ifelse(input$NHSF_FreeOrLock_Isl == "Locked Scales", 
                                                    NHSF_yValue_Isl(), max(m$MaxSumBar)))) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = c(0.01, 0),
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = expansion(mult = c(0.01, .01)),
                              limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365)) +
                 labs(title = m$IslandName,
                      color = "Site Name",
@@ -11975,7 +11966,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(NHSF_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -12016,10 +12007,10 @@ server <- function(input, output, session) {
                 scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                              limits = c(min(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))-365, 
                                         max(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))+365),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$NHSF_FreeOrLock_Isl == "Locked Scales", 
                                                         max(NHSF_Filter_Isl()$MaxSum), max(m$MeanSize))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 labs(title = glue("{unique(m$IslandName)}"), 
                      color = "Site Name",
                      x = "Year",
@@ -12069,7 +12060,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", breaks = NHSF_FilterByIsl_Isl()$IslandDate, 
                            limits = c(min(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = NHSF_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean - IslandSE, ymax = Island_Mean + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$NHSF_EB_Isl)) +
@@ -12109,8 +12100,8 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = "1 year",
                            limits = c(min(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              scale_y_continuous(limits = c(0, max(NHSF_Filter_Isl()$MaxSum)), expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
+              scale_y_continuous(limits = c(0, max(NHSF_Filter_Isl()$MaxSum)), expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = NHSF_Filter_Isl(), 
                             aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
                             width = 0, color = "black", alpha = as.numeric(input$NHSF_EB_Isl)) +
@@ -12165,11 +12156,11 @@ server <- function(input, output, session) {
                        aes(x = IslandDate, y = Island_Mean, fill = IslandName),
                        position = input$NHSF_BarOptions_Isl,
                        width = 280) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%Y", breaks = NHSF_FilterByIsl_Isl()$IslandDate, 
                            limits = c(min(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(NHSF_FilterByIsl_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(NHSF_FilterByIsl_Isl()$CommonName)}"),
                    color = "Common Name",
@@ -12202,7 +12193,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = "1 year",
                            limits = c(min(as.Date(NHSF_Filter_Isl()$Date))-365,
                                       max(as.Date(NHSF_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = NHSF_Filter_Isl()$IslandName,
                    color = "Site Name",
                    fill = "Site Name",
@@ -12254,7 +12245,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(NHSF_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(NHSF_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -12291,7 +12282,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(NHSF_Filter_Isl()$Date))-365, 
                                       max(as.Date(NHSF_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(NHSF_Filter_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -12449,7 +12440,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(NHSF_Filter_MPA()$MPA_Date)), 
                                       max(as.Date(NHSF_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = NHSF_Filter_MPA(), 
                             aes(x = MPA_Date, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
                             width = 0, color = "black", alpha = as.numeric(input$NHSF_EB_MPA)) +
@@ -12493,10 +12484,10 @@ server <- function(input, output, session) {
                           size = 1) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date)), max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$NHSF_FreeOrLock_MPA == "Locked Scales", 
                                                         max(NHSF_Filter_MPA()$MaxSum), max(m$MeanSize))), 
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$NHSF_EB_MPA)) +
@@ -12560,11 +12551,11 @@ server <- function(input, output, session) {
               geom_errorbar(data = NHSF_Outside_MPA(), 
                             aes(x = MPA_Date + 60, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
                             width = 0, color = "black", alpha = as.numeric(input$NHSF_EB_MPA)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(NHSF_Filter_MPA()$MPA_Date)) - 150, 
                                       max(as.Date(NHSF_Filter_MPA()$MPA_Date)) + 360),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(NHSF_Filter_MPA()$ScientificName)}"),
                    subtitle = NHSF_Filter_MPA()$CommonName,
                    color = "Reserve Status",
@@ -12620,10 +12611,10 @@ server <- function(input, output, session) {
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_y_continuous(limits = c(0, ifelse(input$NHSF_FreeOrLock_MPA == "Locked Scales", 
                                                         max(NHSF_Filter_MPA()$MaxSumBar), max(m$MeanSize))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 labs(title = m$MPA_Name,
                      fill = "Outside",
                      x = "Year",
@@ -12673,7 +12664,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(NHSF_Filter_MPA()$MPA_Date)), 
                                       max(as.Date(NHSF_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(NHSF_Filter_MPA()$ScientificName)}"),
                    subtitle = NHSF_Filter_MPA()$CommonName,
                    color = "Reserve Status",
@@ -12716,8 +12707,8 @@ server <- function(input, output, session) {
                             span = input$NHSF_SmoothSlide_MPA) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
-                scale_y_continuous(limits = c(0, max(NHSF_Filter_MPA()$MaxSum)), expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
+                scale_y_continuous(limits = c(0, max(NHSF_Filter_MPA()$MaxSum)), expand = expansion(mult = c(0.01, .01))) +
                 labs(title = m$MPA_Name,
                      color = "Site Name",
                      linetype = "Site Name",
@@ -12924,7 +12915,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(NHSF_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(NHSF_Filter_Two_One()$Date))-365, 
                                       max(as.Date(NHSF_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(NHSF_Filter_Two_One()$ScientificName)
                               } and {unique(NHSF_Filter_Two_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(NHSF_Filter_Two_One()$IslandName)} {unique(NHSF_Filter_Two_One()$SiteName)}"),
@@ -12979,7 +12970,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(NHSF_Filter_Two_One()$Date),
                            limits = c(min(as.Date(NHSF_Filter_Two_One()$Date))-365,
                                       max(as.Date(NHSF_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(NHSF_Filter_Two_One()$ScientificName)
                               } and {unique(NHSF_Filter_Two_Two()$ScientificName)}"),
                    subtitle = glue("{unique(NHSF_Filter_Two_One()$IslandName)} {unique(NHSF_Filter_Two_One()$SiteName)}"),
@@ -13030,7 +13021,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(NHSF_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(NHSF_Filter_Two_One()$Date))-365, 
                                       max(as.Date(NHSF_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(NHSF_Filter_Two_One()$ScientificName)
                               } and {unique(NHSF_Filter_Two_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(NHSF_Filter_Two_One()$IslandName)} {unique(NHSF_Filter_Two_One()$SiteName)}"),
@@ -13129,7 +13120,7 @@ server <- function(input, output, session) {
                           aes(Date, MeanSize, group = CommonName, colour = CommonName, linetype = SiteName),
                           size = 1) +
                 scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanSize - StandardError,
                                   ymax = MeanSize + StandardError),
@@ -13175,8 +13166,8 @@ server <- function(input, output, session) {
                           hjust = .5,
                           angle = 0) +
                 scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
-                             expand = c(0.01, 0)) +
-                scale_y_continuous(expand = c(0.1, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
+                scale_y_continuous(expand = expansion(mult = c(0, .1))) +
                 labs(title = m$ScientificName, 
                      subtitle = glue("{m$IslandName} {m$SiteName}"),
                      color = "Common Name",
@@ -13772,7 +13763,7 @@ server <- function(input, output, session) {
                          aes(x = Date, y = MeanSize, group = SurveyYear)) +
               geom_text(data = FSF_RawFilter_One(), size = 4, fontface = "plain",
                         aes(x = Date, y = -1, group = Date, label = paste(' n = \n', FSF_RawFilter_One()$TotalCount))) +
-              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_One()$Date), expand = c(0.01, 0),
+              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_One()$Date), expand = expansion(mult = c(0.01, .01)),
                            limits = c(min(FSF_RawFilter_One()$Date) - 150, max(FSF_RawFilter_One()$Date) + 150)) +
               labs(title = glue("{unique(FSF_RawFilter_One()$ScientificName)}"),
                    subtitle= glue("{unique(FSF_RawFilter_One()$IslandName)} {unique(FSF_RawFilter_One()$SiteName)}"), 
@@ -13811,7 +13802,7 @@ server <- function(input, output, session) {
                          aes(x = Date, y = MeanSize, group = SurveyYear)) +
               geom_text(data = FSF_RawFilter_One(), aes(x = Date, y = -1, group = Date, 
                                                         label = paste(' n = \n', FSF_RawFilter_One()$TotalCount)), size = 4) +
-              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_One()$Date), expand = c(0.01, 0),
+              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_One()$Date), expand = expansion(mult = c(0.01, .01)),
                            limits = c(min(FSF_RawFilter_One()$Date) - 150, max(FSF_RawFilter_One()$Date) + 150)) +
               labs(title = glue("{unique(FSF_RawFilter_One()$ScientificName)}"),
                    subtitle= glue("{unique(FSF_RawFilter_One()$IslandName)} {unique(FSF_RawFilter_One()$SiteName)}"), 
@@ -14002,7 +13993,7 @@ server <- function(input, output, session) {
                            aes(x = Date, y = Size_cm, group = SurveyYear, color = CommonName)) +
               geom_point(data = FSF_RawFilter_Isl(), size = 1, color = "black",
                          aes(x = Date, y = MeanSize, group = SurveyYear)) +
-              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_Isl()$Date), expand = c(0.01, 0),
+              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_Isl()$Date), expand = expansion(mult = c(0.01, .01)),
                            limits = c(min(FSF_RawFilter_Isl()$Date) - 150, max(FSF_RawFilter_Isl()$Date) + 150)) +
               labs(title = glue("{unique(FSF_RawFilter_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(FSF_RawFilter_Isl()$CommonName)}"), 
@@ -14041,7 +14032,7 @@ server <- function(input, output, session) {
                           aes(x = Date, y = Size_cm, group = SurveyYear, fill = CommonName)) +
               geom_point(data = FSF_RawFilter_Isl(), size = 1, color = "black",
                          aes(x = Date, y = MeanSize, group = SurveyYear)) +
-              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_Isl()$Date), expand = c(0.01, 0),
+              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_Isl()$Date), expand = expansion(mult = c(0.01, .01)),
                            limits = c(min(FSF_RawFilter_Isl()$Date) - 150, max(FSF_RawFilter_Isl()$Date) + 150)) +
               labs(title = glue("{unique(FSF_RawFilter_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(FSF_RawFilter_Isl()$CommonName)}"),
@@ -14170,7 +14161,7 @@ server <- function(input, output, session) {
               geom_boxplot(data = FSF_RawFilter_MPA(), position = "dodge2", width = 175,
                            aes(x = Date, y = Size_cm, group = interaction(SurveyYear, ReserveStatus),
                                fill = ReserveStatus)) +
-              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_MPA()$Date), expand = c(0.01, 0),
+              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_MPA()$Date), expand = expansion(mult = c(0.01, .01)),
                            limits = c(min(FSF_RawFilter_MPA()$Date) - 150, max(FSF_RawFilter_MPA()$Date) + 150)) +
               labs(title = FSF_RawFilter_MPA()$ScientificName,
                    subtitle = FSF_RawFilter_MPA()$MPA_Name,
@@ -14209,7 +14200,7 @@ server <- function(input, output, session) {
               geom_violin(data = FSF_RawFilter_MPA(),
                           aes(x = Date, y = Size_cm, group = interaction(SurveyYear, ReserveStatus),
                               fill = ReserveStatus)) +
-              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_MPA()$Date), expand = c(0.01, 0),
+              scale_x_date(date_labels = "%Y", breaks = unique(FSF_RawFilter_MPA()$Date), expand = expansion(mult = c(0.01, .01)),
                            limits = c(min(FSF_RawFilter_MPA()$Date) - 150, max(FSF_RawFilter_MPA()$Date) + 150)) +
               labs(title = glue("{unique(FSF_RawFilter_MPA()$ScientificName)}"),
                    subtitle = FSF_RawFilter_MPA()$MPA_Name,
@@ -14433,7 +14424,7 @@ server <- function(input, output, session) {
                         width = 0, color = "black", alpha = as.numeric(input$FSF_EB_one)) +
           scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_One()$Date),
                        limits = c(min(as.Date(FSF_Filter_One()$Date))-365, max(as.Date(FSF_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(FSF_Filter_One()$ScientificName)}"),
                subtitle = glue("{unique(FSF_Filter_One()$IslandName)} {unique(FSF_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -14479,7 +14470,7 @@ server <- function(input, output, session) {
                     vjust = -.2, hjust = .5, alpha = as.numeric(input$FSF_Bar_Text_One)) +
           scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_One()$Date),
                        limits = c(min(as.Date(FSF_Filter_One()$Date))-365,  max(as.Date(FSF_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(FSF_Filter_One()$ScientificName)}"),
                subtitle = glue("{unique(FSF_Filter_One()$IslandName)} {unique(FSF_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -14520,7 +14511,7 @@ server <- function(input, output, session) {
           scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_One()$Date), 
                        limits = c(min(as.Date(FSF_Filter_One()$Date))-365, 
                                   max(as.Date(FSF_Filter_One()$Date))+365),
-                       expand = c(0.01, 0)) +
+                       expand = expansion(mult = c(0.01, .01))) +
           labs(title = glue("{unique(FSF_Filter_One()$ScientificName)}"), 
                subtitle = glue("{unique(FSF_Filter_One()$IslandName)} {unique(FSF_Filter_One()$SiteName)}"),
                color = "Common Name",
@@ -14774,7 +14765,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = FSF_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean - IslandSE, ymax = Island_Mean + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Isl)) +
@@ -14816,10 +14807,10 @@ server <- function(input, output, session) {
                           size = 1) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$FSF_FreeOrLock_Isl == "Locked Scales", 
                                                         max(FSF_Filter_Isl()$MaxSum), max(m$MeanSize))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Isl)) +
@@ -14873,11 +14864,11 @@ server <- function(input, output, session) {
               geom_errorbar(data = FSF_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean - IslandSE, ymax = Island_Mean + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Isl)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%b %Y", date_breaks = "1 year", 
                            limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(FSF_FilterByIsl_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(FSF_FilterByIsl_Isl()$CommonName)}"),
                    color = "Common Name",
@@ -14917,7 +14908,7 @@ server <- function(input, output, session) {
                          position = input$FSF_BarOptions_Isl, width = 280) +
                 coord_cartesian(ylim = c(0, ifelse(input$FSF_FreeOrLock_Isl == "Locked Scales", 
                                                    FSF_yValue_Isl(), max(m$MaxSumBar)))) +
-                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = c(0.01, 0),
+                scale_x_date(date_labels = "%Y", breaks = unique(m$Date), expand = expansion(mult = c(0.01, .01)),
                              limits = c(min(as.Date(m$Date))-365, max(as.Date(m$Date))+365)) +
                 labs(title = m$IslandName,
                      color = "Site Name",
@@ -14964,7 +14955,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(FSF_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -15005,10 +14996,10 @@ server <- function(input, output, session) {
                 scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                              limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365, 
                                         max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$FSF_FreeOrLock_Isl == "Locked Scales", 
                                                         max(FSF_Filter_Isl()$MaxSum), max(m$MeanSize))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 labs(title = glue("{unique(m$IslandName)}"), 
                      color = "Site Name",
                      x = "Year",
@@ -15058,7 +15049,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", breaks = FSF_FilterByIsl_Isl()$IslandDate, 
                            limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = FSF_FilterByIsl_Isl(), 
                             aes(x = IslandDate, ymin = Island_Mean - IslandSE, ymax = Island_Mean + IslandSE),
                             width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Isl)) +
@@ -15098,8 +15089,8 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = "1 year",
                            limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365,
                                       max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
-              scale_y_continuous(limits = c(0, max(FSF_Filter_Isl()$MaxSum)), expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
+              scale_y_continuous(limits = c(0, max(FSF_Filter_Isl()$MaxSum)), expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = FSF_Filter_Isl(), 
                             aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
                             width = 0, color = "black", alpha = as.numeric(input$FSF_EB_Isl)) +
@@ -15154,11 +15145,11 @@ server <- function(input, output, session) {
                        aes(x = IslandDate, y = Island_Mean, fill = IslandName),
                        position = input$FSF_BarOptions_Isl,
                        width = 280) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%Y", breaks = FSF_FilterByIsl_Isl()$IslandDate, 
                            limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(FSF_FilterByIsl_Isl()$ScientificName)}"),
                    subtitle = glue("{unique(FSF_FilterByIsl_Isl()$CommonName)}"),
                    color = "Common Name",
@@ -15191,7 +15182,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = "1 year",
                            limits = c(min(as.Date(FSF_Filter_Isl()$Date))-365,
                                       max(as.Date(FSF_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = FSF_Filter_Isl()$IslandName,
                    color = "Site Name",
                    fill = "Site Name",
@@ -15243,7 +15234,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(FSF_FilterByIsl_Isl()$IslandDate))-365, 
                                       max(as.Date(FSF_FilterByIsl_Isl()$IslandDate))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(FSF_FilterByIsl_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -15280,7 +15271,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(FSF_Filter_Isl()$Date))-365, 
                                       max(as.Date(FSF_Filter_Isl()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(FSF_Filter_Isl()$ScientificName)}"), 
                    color = "Common Name",
                    x = "Year",
@@ -15438,7 +15429,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(FSF_Filter_MPA()$MPA_Date)), 
                                       max(as.Date(FSF_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               geom_errorbar(data = FSF_Filter_MPA(), 
                             aes(x = MPA_Date, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
                             width = 0, color = "black", alpha = as.numeric(input$FSF_EB_MPA)) +
@@ -15482,10 +15473,10 @@ server <- function(input, output, session) {
                           size = 1) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date)), max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(limits = c(0, ifelse(input$FSF_FreeOrLock_MPA == "Locked Scales", 
                                                         max(FSF_Filter_MPA()$MaxSum), max(m$MeanSize))), 
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, 
                               aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError),
                               width = 0, color = "black", alpha = as.numeric(input$FSF_EB_MPA)) +
@@ -15549,11 +15540,11 @@ server <- function(input, output, session) {
               geom_errorbar(data = FSF_Outside_MPA(), 
                             aes(x = MPA_Date + 60, ymin = MPA_Mean - MPA_SE, ymax = MPA_Mean + MPA_SE),
                             width = 0, color = "black", alpha = as.numeric(input$FSF_EB_MPA)) +
-              scale_y_continuous(expand = c(0.1, 0)) +
+              scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(FSF_Filter_MPA()$MPA_Date)) - 150, 
                                       max(as.Date(FSF_Filter_MPA()$MPA_Date)) + 360),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(FSF_Filter_MPA()$ScientificName)}"),
                    subtitle = FSF_Filter_MPA()$CommonName,
                    color = "Reserve Status",
@@ -15609,10 +15600,10 @@ server <- function(input, output, session) {
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_y_continuous(limits = c(0, ifelse(input$FSF_FreeOrLock_MPA == "Locked Scales", 
                                                         max(FSF_Filter_MPA()$MaxSumBar), max(m$MeanSize))),
-                                   expand = c(0.01, 0)) +
+                                   expand = expansion(mult = c(0.01, .01))) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date), 
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 labs(title = m$MPA_Name,
                      fill = "Outside",
                      x = "Year",
@@ -15662,7 +15653,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(FSF_Filter_MPA()$MPA_Date)), 
                                       max(as.Date(FSF_Filter_MPA()$MPA_Date))),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(FSF_Filter_MPA()$ScientificName)}"),
                    subtitle = FSF_Filter_MPA()$CommonName,
                    color = "Reserve Status",
@@ -15705,8 +15696,8 @@ server <- function(input, output, session) {
                             span = input$FSF_SmoothSlide_MPA) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
-                             expand = c(0.01, 0)) +
-                scale_y_continuous(limits = c(0, max(FSF_Filter_MPA()$MaxSum)), expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
+                scale_y_continuous(limits = c(0, max(FSF_Filter_MPA()$MaxSum)), expand = expansion(mult = c(0.01, .01))) +
                 labs(title = m$MPA_Name,
                      color = "Site Name",
                      linetype = "Site Name",
@@ -15913,7 +15904,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(FSF_Filter_Two_One()$Date))-365, 
                                       max(as.Date(FSF_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(FSF_Filter_Two_One()$ScientificName)
                               } and {unique(FSF_Filter_Two_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(FSF_Filter_Two_One()$IslandName)} {unique(FSF_Filter_Two_One()$SiteName)}"),
@@ -15968,7 +15959,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_Two_One()$Date),
                            limits = c(min(as.Date(FSF_Filter_Two_One()$Date))-365,
                                       max(as.Date(FSF_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(FSF_Filter_Two_One()$ScientificName)
                               } and {unique(FSF_Filter_Two_Two()$ScientificName)}"),
                    subtitle = glue("{unique(FSF_Filter_Two_One()$IslandName)} {unique(FSF_Filter_Two_One()$SiteName)}"),
@@ -16017,7 +16008,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", breaks = unique(FSF_Filter_Two_One()$Date), 
                            limits = c(min(as.Date(FSF_Filter_Two_One()$Date))-365, 
                                       max(as.Date(FSF_Filter_Two_One()$Date))+365),
-                           expand = c(0.01, 0)) +
+                           expand = expansion(mult = c(0.01, .01))) +
               labs(title = glue("{unique(FSF_Filter_Two_One()$ScientificName)
                               } and {unique(FSF_Filter_Two_Two()$ScientificName)}"), 
                    subtitle = glue("{unique(FSF_Filter_Two_One()$IslandName)} {unique(FSF_Filter_Two_One()$SiteName)}"),
@@ -16115,7 +16106,7 @@ server <- function(input, output, session) {
                 geom_line(data = m, size = 1,
                           aes(Date, MeanSize, group = CommonName, color = CommonName, linetype = SiteName)) +
                 scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
-                             expand = c(0.01, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
                 geom_errorbar(data = m, width = 0.25,color = "black",
                               aes(x = Date, ymin = MeanSize - StandardError, ymax = MeanSize + StandardError)) +
                 labs(title = m$ScientificName, 
@@ -16154,8 +16145,8 @@ server <- function(input, output, session) {
                           aes(x = Date, y = MeanSize, label = round(MeanSize, digits = 2)),
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
-                             expand = c(0.01, 0)) +
-                scale_y_continuous(expand = c(0.1, 0)) +
+                             expand = expansion(mult = c(0.01, .01))) +
+                scale_y_continuous(expand = expansion(mult = c(0, .1))) +
                 labs(title = m$ScientificName, 
                      subtitle = glue("{m$IslandName} {m$SiteName}"),
                      color = "Common Name",
@@ -16439,7 +16430,7 @@ server <- function(input, output, session) {
                       group = Date, label = paste(' N = \n', RDFC_Filter_One()$Observers))) +
         scale_x_date(date_labels = "%b %Y", breaks = unique(RDFC_Filter_One()$Date),
                      limits = c(min(as.Date(RDFC_Filter_One()$Date))-365, max(as.Date(RDFC_Filter_One()$Date))+365),
-                     expand = c(0.01, 0)) +
+                     expand = expansion(mult = c(0.01, .01))) +
         labs(title = glue("{unique(RDFC_Filter_One()$ScientificName)}"),
              subtitle = glue("{unique(RDFC_Filter_One()$IslandName)} {unique(RDFC_Filter_One()$SiteName)}"),
              color = "Common Name",
@@ -16885,7 +16876,7 @@ server <- function(input, output, session) {
             scale_x_date(date_labels = "%b %Y", date_breaks = "6 months", 
                          limits = c(as.Date("1970-01-01") + input$temp_Brush_Isl$xmin, 
                                     as.Date("1970-01-01") + input$temp_Brush_Isl$xmax),
-                         expand = c(0.01, 0)) +
+                         expand = expansion(mult = c(0.01, .01))) +
             scale_y_continuous(breaks = c(8, 10, 12, 14, 16, 18, 20, 22),
                                sec.axis = sec_axis(~.*(9/5)+32, name = "Temperature (°F)", 
                                                    breaks = c(46.4, 50, 53.6, 57.2, 60.8, 64.4, 68, 71.6))) +
@@ -16923,7 +16914,7 @@ server <- function(input, output, session) {
               scale_x_date(date_labels = "%b %Y", 
                            date_breaks = ifelse(input$temp_GraphOptions_Isl == "With No Index", "1 year", 
                                                 ifelse(input$temp_GraphOptions_Isl == "With ONI", "2 years", "4 years")), 
-                           limits = temp_scaledate_Isl(), expand = c(0.01, 0)) +
+                           limits = temp_scaledate_Isl(), expand = expansion(mult = c(0.01, .01))) +
               scale_y_continuous(breaks = c(8, 10, 12, 14, 16, 18, 20, 22),
                                  sec.axis = sec_axis(~.*(9/5)+32, name = "Temperature (°F)", 
                                                      breaks = c(46.4, 50, 53.6, 57.2, 60.8, 64.4, 68, 71.6))) +
@@ -16962,7 +16953,7 @@ server <- function(input, output, session) {
           scale_x_date(date_labels = "%b %Y", 
                        date_breaks = ifelse(input$temp_GraphOptions_Isl == "With No Index", "1 year", 
                                             ifelse(input$temp_GraphOptions_Isl == "With ONI", "2 years", "4 years")),
-                       limits = temp_scaledate_Isl(), expand = c(0.01, 0)) +
+                       limits = temp_scaledate_Isl(), expand = expansion(mult = c(0.01, .01))) +
           scale_y_continuous(breaks = c(10, 14, 18, 22),
                              sec.axis = sec_axis(~.*(9/5)+32, name = "Temp (°F)", 
                                                  breaks = c(50, 57.2, 64.4, 71.6))) +
@@ -18722,7 +18713,7 @@ server <- function(input, output, session) {
           geom_line(data = VD_Filter_One(), show.legend = FALSE, alpha = as.numeric(input$VD_MeanDate_One),
                     aes(x = lubridate::year(MeanDate), y = lubridate::month(MeanDate),
                         group = SiteName), color = "black") +
-          scale_y_continuous(expand = c(0.1, 0), breaks = 4:11, 
+          scale_y_continuous(expand = expansion(mult = c(0, .1)), breaks = 4:11, 
                              labels =  c("Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov")) +
           scale_x_continuous(breaks = unique(lubridate::year(VD_Filter_One()$Date))) +
           labs(title = glue("{unique(VD_Filter_One()$IslandName)} {unique(VD_Filter_One()$SiteName)}"),
@@ -18751,7 +18742,7 @@ server <- function(input, output, session) {
           geom_line(data = VD_Filter_One(), show.legend = FALSE, alpha = as.numeric(input$VD_MeanDate_One),
                     aes(x = lubridate::year(MeanDate), y = MeanWeekDay,
                         group = SiteName), color = "black") +
-          scale_y_continuous(expand = c(0.1, 0), breaks = 1:7, 
+          scale_y_continuous(expand = expansion(mult = c(0, .1)), breaks = 1:7, 
                              labels =  c("Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat")) +
           scale_x_continuous(breaks = unique(lubridate::year(VD_Filter_One()$Date))) +
           labs(title = glue("{unique(VD_Filter_One()$IslandName)} {unique(VD_Filter_One()$SiteName)}"),
@@ -18909,7 +18900,7 @@ server <- function(input, output, session) {
           geom_line(data = VD_Filter_Isl(), show.legend = FALSE, alpha = as.numeric(input$VD_MeanDate_Isl),
                     aes(x = lubridate::year(Isl_MeanDate), y = lubridate::month(Isl_MeanDate),
                         group = IslandName, color = IslandName)) +
-          scale_y_continuous(expand = c(0.1, 0), breaks = 4:11, 
+          scale_y_continuous(expand = expansion(mult = c(0, .1)), breaks = 4:11, 
                              labels =  c("Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov")) +
           scale_x_continuous(breaks = unique(lubridate::year(VD_Filter_Isl()$Date))) +
           labs(title = glue("{unique(VD_Filter_Isl()$IslandName)}"),
