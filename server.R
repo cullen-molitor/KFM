@@ -2199,55 +2199,98 @@ server <- function(input, output, session) {
       
       oneM_Filter_All <- reactive({
         oneM_DF %>%
-          filter(SiteName == input$oneM_SiteName_All) %>%
+          filter(SiteName == input$oneM_SiteNameAll) %>%
           drop_na()
       })
       
-      oneM_line_alpha <- reactive({
-        if (input$oneM_Graph_All == "Line"){return(1)}else{return(0)}
-      })
-      
-      oneM_bar_alpha <- reactive({
-        if (input$oneM_Graph_All == "Bar"){return(1)}else{return(0)}
-      })
-      
       output$oneM_Plot_All <- renderPlot({
-        out <- by(data = oneM_Filter_All(), INDICES = oneM_Filter_All()$CommonName, FUN = function(m) {
-          m <- droplevels(m)
-          m <- ggplot() + 
-            geom_line(data = m, size = 1, alpha = oneM_line_alpha(),
-                      aes(x = Date, y = MeanDensity_sqm, group = CommonName, colour = CommonName, linetype = SiteName)) +
-            geom_col(data = m, width = 250, alpha =  oneM_bar_alpha(),
-                     aes(x = Date, y = MeanDensity_sqm, group = CommonName, fill = CommonName)) +
-            scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
-                         expand = c(0.01, 0)) +
-            geom_errorbar(data = m, aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
-                          width = 0.25, color = "black") +
-            labs(title = m$ScientificName, 
-                 subtitle = glue("{m$IslandName} {m$SiteName}"),
-                 color = "Common Name",
-                 fill = "Common Name",
-                 x = "Year",
-                 y = "Mean Density") +
-            scale_color_manual(values = SpeciesColor) +
-            scale_fill_manual(values = SpeciesColor) +
-            scale_linetype_manual(values = SiteLine, guide = FALSE) +
-            theme_classic() +
-            theme(legend.position = "right",
-                  legend.justification = c(0,0.5),
-                  legend.background = element_rect(),
-                  legend.title = element_text(size = 14, colour = "black", face = "bold"),
-                  legend.text = element_text(size = 13, colour = "black", face = "bold"),
-                  plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                  plot.subtitle = element_text(hjust = 0.5, size = 16),
-                  plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
-                  axis.title = element_text(size = 16, face = "bold"),
-                  axis.text.y = element_text(size = 12, face = "bold"),
-                  axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
-                  strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
-        })
-        do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v'))
+        if (is.null(input$oneM_GraphAll))
+          return(NULL)
+        
+        if (input$oneM_GraphAll == "Line") {
+          return({
+            out <- by(data = oneM_Filter_All(), INDICES = oneM_Filter_All()$CommonName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() + 
+                geom_line(data = m, 
+                          aes(Date, MeanDensity_sqm, group = CommonName, colour = CommonName, linetype = SiteName),
+                          size = 1) +
+                scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
+                             expand = c(0.01, 0)) +
+                geom_errorbar(data = m, 
+                              aes(x = Date, ymin = MeanDensity_sqm - StandardError,
+                                  ymax = MeanDensity_sqm + StandardError),
+                              width = 0.25,
+                              color = "black") +
+                labs(title = m$ScientificName, 
+                     subtitle = glue("{m$IslandName} {m$SiteName}"),
+                     color = "Common Name",
+                     x = "Year",
+                     y = "Mean Density") +
+                scale_color_manual(values = SpeciesColor) +
+                scale_linetype_manual(values = SiteLine, guide = FALSE) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+              
+            })
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v'))
+          })
+        } 
+        else if (input$oneM_GraphAll == "Bar") {
+          return({
+            out <- by(data = oneM_Filter_All(), INDICES = oneM_Filter_All()$CommonName, FUN = function(m) {
+              m <- droplevels(m)
+              m <- ggplot() + 
+                geom_col(data = m, 
+                         aes(x = Date, y = MeanDensity_sqm, group = CommonName, fill = CommonName, linetype = SiteName),
+                         width = 250) +
+                geom_text(data = m, 
+                          aes(x = Date, y = MeanDensity_sqm, label = round(MeanDensity_sqm, digits = 2)),
+                          position = position_dodge(1),
+                          vjust = -.2,
+                          hjust = .5,
+                          angle = 0) +
+                scale_x_date(date_labels = "%b %Y", breaks = unique(m$Date),
+                             expand = c(0.01, 0)) +
+                scale_y_continuous(expand = c(0.1, 0)) +
+                labs(title = m$ScientificName, 
+                     subtitle = glue("{m$IslandName} {m$SiteName}"),
+                     color = "Common Name",
+                     x = "Year",
+                     y = "Mean Density") +
+                scale_fill_manual(values = SpeciesColor) +
+                scale_linetype_manual(values = SiteLine, guide = FALSE) +
+                theme_classic() +
+                theme(legend.position = "right",
+                      legend.justification = c(0,0.5),
+                      legend.background = element_rect(),
+                      legend.title = element_text(size = 14, colour = "black", face = "bold"),
+                      legend.text = element_text(size = 13, colour = "black", face = "bold"),
+                      plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
+                      plot.subtitle = element_text(hjust = 0.5, size = 16),
+                      plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
+                      axis.title = element_text(size = 16, face = "bold"),
+                      axis.text.y = element_text(size = 12, face = "bold"),
+                      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold"),
+                      strip.text = element_text(size = 12, colour = "black", angle = 90, face = "bold"))
+              
+            })
+            do.call(cowplot::plot_grid, c(out, ncol = 1, align = 'v'))
+          })
+        } 
       })
+      
     }
     
   }
