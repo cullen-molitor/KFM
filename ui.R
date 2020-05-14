@@ -37,7 +37,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                    selected = "Bat Star"),
                        radioButtons(inputId = "oneM_Graph_One",
                                     label = "Choose a graph:",
-                                    choices = c("Line", "Bar", "Smooth Line", 'Boxplot', "Jitter")),
+                                    choices = c("Line", "Bar", "Smooth Line", 'Boxplot')),
                        radioButtons(inputId = "oneM_DataSummary_One",
                                     label = "Choose a data Summary:",
                                     choices = c("One species at one site" , "One species with island average")),

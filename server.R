@@ -29,8 +29,7 @@ server <- function(input, output, session) {
                                                                    label = "Show the standard error?",
                                                                    choices = c("Yes" = TRUE, "No" = FALSE),
                                                                    inline = TRUE, selected = FALSE))),
-                           conditionalPanel("input.oneM_Graph_One == 'Smooth Line' || input.oneM_Graph_One == 'Boxplot' || 
-                                            input.oneM_Graph_One == 'Jitter'",
+                           conditionalPanel("input.oneM_Graph_One == 'Smooth Line' || input.oneM_Graph_One == 'Boxplot'",
                                             column(2, radioButtons(inputId = "oneM_SmoothPoint_One",
                                                                    label = "Show the mean values?",
                                                                    choices = c("Yes" = 1, "No" = 0),
@@ -495,81 +494,47 @@ server <- function(input, output, session) {
       
       # Line toggle (changes alpha value)
       oneM_Line_Alpha_One <- reactive({
-        if (input$oneM_Graph_One == "Line"){return(1)}else{0}
+        if (input$oneM_Graph_One == "Line"){return(1)}
+        else if (input$oneM_Graph_One == "Bar"){return(0)}
+        else if (input$oneM_Graph_One == "Smooth Line"){return(0)}
+        else if (input$oneM_Graph_One == "Boxplot"){return(0)}
       })
       
       # Bar toggle (changes alpha value)
       oneM_Bar_Alpha_One <- reactive({
-        if (input$oneM_Graph_One == "Bar"){return(1)}else{0}
+        if (input$oneM_Graph_One == "Line"){return(0)}
+        else if (input$oneM_Graph_One == "Bar"){return(1)}
+        else if (input$oneM_Graph_One == "Smooth Line"){return(0)}
+        else if (input$oneM_Graph_One == "Boxplot"){return(0)}
       })
       
       # Smooth Line toggle (changes alpha value)
       oneM_Smooth_Alpha_One <- reactive({
-        if (input$oneM_Graph_One == "Smooth Line"){return(1)}else{0}
+        if (input$oneM_Graph_One == "Line"){return(0)}
+        else if (input$oneM_Graph_One == "Bar"){return(0)}
+        else if (input$oneM_Graph_One == "Smooth Line"){return(1)}
+        else if (input$oneM_Graph_One == "Boxplot"){return(0)}
       })
       
-      # Smooth Line SE ribbon toggle (changes alpha value)
       oneM_Smooth_Ribbon_Alpha_One <- reactive({
-        if (input$oneM_Graph_One == "Smooth Line"){return(.4)}else{0}
+        if (input$oneM_Graph_One == "Line"){return(0)}
+        else if (input$oneM_Graph_One == "Bar"){return(0)}
+        else if (input$oneM_Graph_One == "Smooth Line"){return(0.4)}
+        else if (input$oneM_Graph_One == "Boxplot"){return(0)}
       })
       
       # Boxplot toggle (changes alpha value)
       oneM_Boxplot_Alpha_One <- reactive({
-        if (input$oneM_Graph_One == "Boxplot"){return(1)}else{0}
+        if (input$oneM_Graph_One == "Line"){return(0)}
+        else if (input$oneM_Graph_One == "Bar"){return(0)}
+        else if (input$oneM_Graph_One == "Smooth Line"){return(0)}
+        else if (input$oneM_Graph_One == "Boxplot"){return(1)}
       })
       
-      # Jitter toggle (changes alpha value)
-      oneM_Jitter_Alpha_One <- reactive({
-        if (input$oneM_Graph_One == "Jitter"){return(1)}else{0}
-      })
-      
-      
-      oneM_point_Color_One <- reactive({
-        if (input$oneM_Graph_One == "Smooth Line"){
-          oneM_Filter_One()$CommonName
-        } else{oneM_Filter_One()$SiteName}
-      }) 
-
-      
-      
-      # Line Island Mean toggle (changes alpha value)
-      oneM_Line_Isl_Alpha_One <- reactive({
-        if (input$oneM_Graph_One == "Line" && input$oneM_DataSummary_One == "One species with island average")
-        {return(1)}else{0}
-      })
-      
-      # Bar Island Mean toggle (changes alpha value)
-      oneM_Bar_Isl_Alpha_One <- reactive({
-        if (input$oneM_Graph_One == "Bar" && input$oneM_DataSummary_One == "One species with island average")
-        {return(1)}else {0}
-      })
-      
-      # Smooth Island Mean Line toggle (changes alpha value)
-      oneM_Smooth_Isl_Alpha_One <- reactive({
-        if (input$oneM_Graph_One == "Smooth Line" && input$oneM_DataSummary_One == "One species with island average")
-          {return(1)} else {0}
-      })
-      
-      # Smooth Island Mean Line SE ribbon toggle (changes alpha value)
-      oneM_Smooth_Isl_Ribbon_Alpha_One <- reactive({
-        if (input$oneM_Graph_One == "Smooth Line" && input$oneM_DataSummary_One == "One species with island average")
-        {return(0.4)}else {0}
-      })
-      
-      # Boxplot Island Mean toggle (changes alpha value)
-      oneM_Boxplot_Isl_Alpha_One <- reactive({
-        if (input$oneM_Graph_One == "Boxplot" && input$oneM_DataSummary_One == "One species with island average")
-        {return(1)}else{0}
-      })
-      
-      # Error bar island average toggle (changes alpha value)
-      oneM_EB_Isl_Alpha_One <- reactive({
-        if (input$oneM_EB_one == 1 && input$oneM_DataSummary_One == "One species with island average")
-          {return(1)}else{0}
-      })
+      # update_stat_defaults("smooth", list(fill = NULL))
       
       # Plot
-      oneM_Plot_Reactive_One <- reactive({ 
+      oneM_Plot_Reactive_One <- reactive({
         ggplot() +
           geom_rect(
             data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = ANOM), 
@@ -600,8 +565,7 @@ server <- function(input, output, session) {
             aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName)) +
           geom_errorbar(
             data = oneM_Filter_One(), width = 0, color = "black",
-            aes(x = Date - ifelse(input$oneM_Graph_One == "Bar" && input$oneM_DataSummary_One == "One species with island average", 50, 0),
-                ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
+            aes(x = Date, ymin = MeanDensity_sqm - StandardError, ymax = MeanDensity_sqm + StandardError),
             alpha = ifelse(input$oneM_Graph_One == "Line" || input$oneM_Graph_One == "Bar",
                            as.numeric(input$oneM_EB_one), 0)) +
           geom_smooth(
@@ -612,17 +576,13 @@ server <- function(input, output, session) {
             data = oneM_Filter_One(), alpha = as.numeric(oneM_Smooth_Ribbon_Alpha_One()),
             aes(x = Date, y = MeanDensity_sqm, group = ScientificName, color = CommonName), 
             size = 1, span = input$oneM_SmoothSlide_One, se = as.logical(input$oneM_SmoothSE_One)) +
-          geom_boxplot(
+          stat_boxplot(
             data = oneM_RawFilter_One(), alpha = as.numeric(oneM_Boxplot_Alpha_One()),
-            aes(x = Date, y = Count, group = SurveyYear, color = CommonName),
-            show.legend = ifelse(input$oneM_Graph_One == "Boxplot", TRUE, FALSE)) +
-          geom_jitter(
-            data = oneM_RawFilter_One(), alpha = as.numeric(oneM_Jitter_Alpha_One()),
             aes(x = Date, y = Count, group = SurveyYear, color = CommonName)) +
           geom_point(
-            data = oneM_Filter_One(), aes(x = Date, y = MeanDensity_sqm, color = CommonName), # oneM_point_Color_One()), 
-            size = 3, alpha = ifelse(input$oneM_Graph_One == "Smooth Line" || input$oneM_Graph_One == "Boxplot" || 
-                                       input$oneM_Graph_One == "Jitter", as.numeric(input$oneM_SmoothPoint_One), 0)) +
+            data = oneM_Filter_One(), aes(x = Date, y = MeanDensity_sqm, color = CommonName), 
+            size = 2, alpha = ifelse(input$oneM_Graph_One == "Smooth Line" || input$oneM_Graph_One == "Boxplot", 
+                                     as.numeric(input$oneM_SmoothPoint_One), 0)) +
           scale_x_date(
             date_labels = "%b %Y", breaks = unique(oneM_Filter_One()$Date),
             limits = c(min(as.Date(oneM_Filter_One()$Date))-365, max(as.Date(oneM_Filter_One()$Date))+365),
@@ -630,12 +590,11 @@ server <- function(input, output, session) {
           scale_y_continuous(
             expand = expansion(mult = c(0, .1)),
             limits = 
-              c(0, ifelse(input$oneM_Graph_One == "Boxplot" || input$oneM_Graph_One == "Jitter", max(oneM_RawFilter_One()$Count),
-                          ifelse(input$oneM_Graph_One != "Boxplot" && input$oneM_Graph_One != "Jitter" && 
-                                   input$oneM_DataSummary_One != "One species with island average",  
+              c(0, ifelse(input$oneM_Graph_One == "Boxplot", max(oneM_RawFilter_One()$Count),
+                          ifelse(input$oneM_Graph_One != "Boxplot" && input$oneM_DataSummary_One != "One species with island average",  
                                  max(oneM_Filter_One()$MeanDensity_sqm + oneM_Filter_One()$StandardError),
-                                 pmax(max(oneM_Filter_One()$MeanDensity_sqm) + max(oneM_Filter_One()$StandardError), 
-                                      max(oneM_Filter_One()$Island_Mean_Density) + max(oneM_Filter_One()$IslandSE)))))) +
+                                 pmax(oneM_Filter_One()$MeanDensity_sqm + oneM_Filter_One()$StandardError, 
+                                      oneM_Filter_One()$Island_Mean_Density + oneM_Filter_One()$IslandSE))))) +
           labs(
             title = glue("{unique(oneM_Filter_One()$ScientificName)}"),
             subtitle = glue("{unique(oneM_Filter_One()$IslandName)} {unique(oneM_Filter_One()$SiteName)}"),
@@ -645,9 +604,9 @@ server <- function(input, output, session) {
                        lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(oneM_Filter_One()$MeanDepth), 2)} ft"),
             x = "Year",
-            y = ifelse(input$oneM_Graph_One == "Boxplot" || input$oneM_Graph_One == "Jitter", "Count by Quadrat", "Mean Density")) +
+            y = "Mean Density") +
           scale_color_manual(
-            values = c(SpeciesColor, SiteColor)) +
+            values = SpeciesColor) +
           theme_classic() +
           theme(
             legend.position = "bottom",
@@ -658,47 +617,7 @@ server <- function(input, output, session) {
             plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
             axis.title = element_text(size = 16, face = "bold"),
             axis.text.y = element_text(size = 12, face = "bold",  color = "black"),
-            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))  +
-          new_scale_color() +
-          geom_line(
-            data = oneM_Filter_One(), size = 1, alpha = as.numeric(oneM_Line_Isl_Alpha_One()),
-            aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName)) +
-          new_scale_fill() +
-          geom_col(data = oneM_Filter_One(), alpha = as.numeric(oneM_Bar_Isl_Alpha_One()),
-                   aes(x = Date + 50, y = Island_Mean_Density, fill = IslandName), position = "dodge", width = 100,
-                   show.legend = ifelse(input$oneM_Graph_One == "Bar" && 
-                                          input$oneM_DataSummary_One == "One species with island average", TRUE, FALSE)) +
-          geom_errorbar(
-            data = oneM_Filter_One(), width = 0, color = "black",
-            aes(x = Date + ifelse(input$oneM_Graph_One == "Bar" && input$oneM_DataSummary_One == "One species with island average", 50, 0),
-                ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-            alpha = ifelse(input$oneM_Graph_One == "Line" || input$oneM_Graph_One == "Bar",
-                           oneM_EB_Isl_Alpha_One(), 0))  +
-          geom_smooth(
-            data = oneM_Filter_One(), alpha = as.numeric(oneM_Smooth_Isl_Alpha_One()),
-                      aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName),
-                      size = 1, span = input$oneM_SmoothSlide_One, se = FALSE,
-            show.legend = ifelse(input$oneM_Graph_One == "Smooth Line" && 
-                                   input$oneM_DataSummary_One == "One species with island average", TRUE, FALSE)) +
-          geom_smooth(
-            data = oneM_Filter_One(), alpha = as.numeric(oneM_Smooth_Isl_Ribbon_Alpha_One()),
-                      aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName),
-                      size = 1, span = input$oneM_SmoothSlide_One, se = as.logical(input$oneM_SmoothSE_One),
-            show.legend = ifelse(input$oneM_Graph_One == "Smooth Line" && 
-                                   input$oneM_DataSummary_One == "One species with island average", TRUE, FALSE)) +
-          geom_point(
-            data = oneM_Filter_One(), aes(x = Date, y = Island_Mean_Density, color = IslandName),
-            size = 3, alpha = ifelse(input$oneM_DataSummary_One == "One species with island average" && 
-                                       (input$oneM_Graph_One == "Smooth Line" || input$oneM_Graph_One == "Boxplot" || 
-                                        input$oneM_Graph_One == "Jitter"), as.numeric(input$oneM_SmoothPoint_One), 0),
-            show.legend = ifelse(input$oneM_DataSummary_One == "One species with island average", TRUE, FALSE)) +
-          scale_color_manual(
-            values = SpeciesColor) +
-          scale_fill_manual(
-            values = SpeciesColor) +
-          labs(
-            color = "Island Average",
-            fill = "Island Average")
+            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12, face = "bold",  color = "black"))
       }) 
       
       # Main Plot Output
@@ -707,61 +626,61 @@ server <- function(input, output, session) {
         if (is.null(input$oneM_Graph_One))
           return(NULL) 
         
-        else if(input$oneM_DataSummary_One == "One species at one site" || input$oneM_DataSummary_One == "One species with island average")
+        else if(input$oneM_DataSummary_One == "One species at one site")
         {
           p <- oneM_Plot_Reactive_One()
         } 
-        # else if(input$oneM_Graph_One == "Line" && input$oneM_DataSummary_One == "One species with island average")
-        # {
-        #   p <- oneM_Plot_Reactive_One() +
-        #     new_scale_color() +
-        #     geom_line(data = oneM_Filter_One(), size = 1,
-        #               aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName)) +
-        #     geom_errorbar(data = oneM_Filter_One(),
-        #                   aes(x = Date, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-        #                   width = 0, color = "black", alpha = as.numeric(input$oneM_EB_one)) +
-        #     labs(color = "Island Average") +
-        #     scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2))
-        # }
-        # else if(input$oneM_Graph_One == "Bar" && input$oneM_DataSummary_One == "One species with island average") 
-        # {
-        #   p <- oneM_Plot_Reactive_One() +
-        #     new_scale_fill() +
-        #     geom_col(data = oneM_Filter_One(),
-        #              aes(x = Date + 50, y = Island_Mean_Density, fill = IslandName),
-        #              position = "dodge",
-        #              width = 100) +
-        #     geom_errorbar(data = oneM_Filter_One(),
-        #                   aes(x = Date + 50, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
-        #                   width = 0, color = "black", alpha = as.numeric(input$oneM_EB_one)) +
-        #     scale_fill_manual(values = SpeciesColor, guide = guide_legend(order = 2)) +
-        #     labs(fill = "Island Mean")
-        # } 
-        # else if(input$oneM_Graph_One == "Smooth Line" && input$oneM_DataSummary_One == "One species with island average")
-        # {
-          # p <- oneM_Plot_Reactive_One() +
-          #   new_scale_color() +
-          #   stat_smooth(data = oneM_Filter_One(), alpha = 1,
-          #               aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName),
-          #               size = 1, span = input$oneM_SmoothSlide_One, se = FALSE) +
-          # 
-          #   stat_smooth(data = oneM_Filter_One(),
-          #               aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName),
-          #               size = 1, span = input$oneM_SmoothSlide_One, se = as.logical(input$oneM_SmoothSE_One)) +
-          #   geom_point(data = oneM_Filter_One(), aes(x = Date, y = Island_Mean_Density, color = IslandName),
-          #              size = 2, alpha = as.numeric(input$oneM_SmoothPoint_One)) +
-          #   labs(color = "Island Average") +
-          #   scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2))
-        # }
-        # else if(input$oneM_Graph_One == "Boxplot" && input$oneM_DataSummary_One == "One species with island average")
-        # {
-        #   p <- oneM_Plot_Reactive_One() +
-        #     new_scale_color() +
-        #     geom_point(data = oneM_Filter_One(), aes(x = Date, y = Island_Mean_Density, color = IslandName), 
-        #                size = 2) +
-        #     labs(color = "Island Average") +
-        #     scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2)) 
-        # }
+        else if(input$oneM_Graph_One == "Line" && input$oneM_DataSummary_One == "One species with island average")
+        {
+          p <- oneM_Plot_Reactive_One() +
+            new_scale_color() +
+            geom_line(data = oneM_Filter_One(), size = 1,
+                      aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName)) +
+            geom_errorbar(data = oneM_Filter_One(),
+                          aes(x = Date, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
+                          width = 0, color = "black", alpha = as.numeric(input$oneM_EB_one)) +
+            labs(color = "Island Average") +
+            scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2))
+        }
+        else if(input$oneM_Graph_One == "Bar" && input$oneM_DataSummary_One == "One species with island average") 
+        {
+          p <- oneM_Plot_Reactive_One() +
+            new_scale_fill() +
+            geom_col(data = oneM_Filter_One(),
+                     aes(x = Date + 50, y = Island_Mean_Density, fill = IslandName),
+                     position = "dodge",
+                     width = 100) +
+            geom_errorbar(data = oneM_Filter_One(),
+                          aes(x = Date + 50, ymin = Island_Mean_Density - IslandSE, ymax = Island_Mean_Density + IslandSE),
+                          width = 0, color = "black", alpha = as.numeric(input$oneM_EB_one)) +
+            scale_fill_manual(values = SpeciesColor, guide = guide_legend(order = 2)) +
+            labs(fill = "Island Mean")
+        } 
+        else if(input$oneM_Graph_One == "Smooth Line" && input$oneM_DataSummary_One == "One species with island average")
+        {
+          p <- oneM_Plot_Reactive_One() +
+            new_scale_color() +
+            stat_smooth(data = oneM_Filter_One(), alpha = 1,
+                        aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName), 
+                        size = 1, span = input$oneM_SmoothSlide_One, se = FALSE) +
+            
+            stat_smooth(data = oneM_Filter_One(), 
+                        aes(x = Date, y = Island_Mean_Density, group = ScientificName, color = IslandName), 
+                        size = 1, span = input$oneM_SmoothSlide_One, se = as.logical(input$oneM_SmoothSE_One)) +
+            geom_point(data = oneM_Filter_One(), aes(x = Date, y = Island_Mean_Density, color = IslandName), 
+                       size = 2, alpha = as.numeric(input$oneM_SmoothPoint_One)) +
+            labs(color = "Island Average") +
+            scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2)) 
+        }
+        else if(input$oneM_Graph_One == "Boxplot" && input$oneM_DataSummary_One == "One species with island average")
+        {
+          p <- oneM_Plot_Reactive_One() +
+            new_scale_color() +
+            geom_point(data = oneM_Filter_One(), aes(x = Date, y = Island_Mean_Density, color = IslandName), 
+                       size = 2) +
+            labs(color = "Island Average") +
+            scale_color_manual(values = SpeciesColor, guide = guide_legend(order = 2)) 
+        }
         return(p)
       })  
       
