@@ -420,7 +420,8 @@
               tags$a(href="https://www.youtube.com/watch?v=86foiSxQmVU", "KFM Lecture Part 1", target = "_blank"),
               tags$br(),
               tags$a(href="https://www.youtube.com/watch?v=pv9N2xDu0y8", "KFM Lecture Part 2", target = "_blank"),
-              
+              tags$br(),
+              tags$a(href="https://www.nps.gov/im/medn/index.htm", "Mediterranean Coast Inventory & Monitoring Network", target = "_blank"),
               tags$br(), tags$br(),
               "To view the blog posts from the Our World Underwater Scholarship Society's (OWUSS) NPS Interns please visit:",
               tags$br(),
@@ -467,7 +468,8 @@
               tags$a(href="https://www.youtube.com/watch?v=86foiSxQmVU", "KFM Lecture Part 1", target = "_blank"),
               tags$br(),
               tags$a(href="https://www.youtube.com/watch?v=pv9N2xDu0y8", "KFM Lecture Part 2", target = "_blank"),
-              
+              tags$br(),
+              tags$a(href="https://www.nps.gov/im/medn/index.htm", "Mediterranean Coast Inventory & Monitoring Network", target = "_blank"),
               tags$br(), tags$br(),
               "To view the blog posts from the Our World Underwater Scholarship Society's (OWUSS) NPS Interns please visit:",
               tags$br(),
@@ -618,6 +620,8 @@
 #  
 #   
 # }
+
+
 
 
 

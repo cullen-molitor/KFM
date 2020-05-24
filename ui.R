@@ -4,7 +4,7 @@
 
 # Define the User Interface for application 
 
-ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
+ui <- dashboardPage(title = "KFM App",  skin = "green",# UI   ----
   dashboardHeader( # Dash_B_Header   ----
     title = tags$strong("Kelp Forest Monitoring", 
                         tags$img(height = 50, width = 100, src = "KFMshirtdesign_1.png")),
@@ -1115,7 +1115,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                    label = "Choose a Site:",
                                    choices = SiteNames),
                        radioButtons(inputId = "VD_MeanDate_One",
-                                    label = "Show the mean survey month?",
+                                    label = "Show the mean?",
                                     choices = c("Yes" = 1, "No" = 0)),
                        radioButtons(inputId = "VD_SurveyType_One",
                                     label = "Choose a Survey Protocol:",
@@ -1132,19 +1132,27 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                        radioButtons(inputId = "VD_SurveyType_Isl",
                                     label = "Choose a Survey Protocol:",
                                     choices = c("All", "Core Vs Fish", Survey_Levels))
+      ),
+      # ...... Weekly Itinerary ----
+      conditionalPanel(condition = "input.tabselected == 'VD_TP' && input.VD_allORone =='Weekly Itinerary'",
+                       selectInput(inputId = "VD_Year",
+                                   label = "Choose a Year:",
+                                   choices = max(visitDates$SurveyYear):1982),
+                       uiOutput(outputId = "VD_TripNum_Out")
       )
-      
-    ), # End SidebarMenu   ----
-    tags$head( # ___ HTML Sidebar Colors     ----
+    ), 
+    # End SidebarMenu   ----
+    # ___ HTML Sidebar Colors     ----
+    tags$head(     
       tags$style(
         HTML(
-        '/* main sidebar */
-        .skin-blue .main-sidebar {background-color: black;} 
-        
-        /* active selected tab in the sidebarmenu */
-        .skin-blue .main-sidebar .sidebar .sidebar-menu .active a{background-color: white;}'
-    ))),
-    tags$head( # ___ CSS Colors and sizes     ----
+          '.skin-green .main-sidebar {background-color: black;} 
+           .skin-green .main-sidebar .sidebar .sidebar-menu .active a{background-color: white;}
+           .tabbable > .nav > li > a {background-color: lightslategray;  color:white}
+           .tabbable > .nav > li[class=active]    > a {background-color: #3c8dbc; color:white}'
+        ))),
+    # ___ CSS Colors and sizes     ----
+    tags$head( 
       tags$style(
         type='text/css', 
         "span.irs-grid-text {font-size: 10pt; color: #f6f6f6;}",
@@ -1166,35 +1174,32 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
         "input {color: black;}",
         ".form-group {margin-bottom: 0px;}",
         "section.sidebar .shiny-input-container {padding: 5px 15px 0px 15px;}",
-        ".leaflet-control-layers label {color: black;}"
+        ".leaflet-control-layers label {color: black;}", 
+        "h1, .h1, h2, .h2, h3, .h3 {margin-top: 0px;"
         ))
   ),
-  dashboardBody( # Dash_B_Body    ----
-                 tags$head(tags$style('body {color:white;}')),
-                 setBackgroundColor(color = c("darkslategrey"), 
-                                    shinydashboard = TRUE),
-                 tags$style(HTML(".tabbable > .nav > li > a {background-color: lightslategray;  color:white}
-                     .tabbable > .nav > li[class=active]    > a {background-color: #3c8dbc; color:white}"
-                 )),
+  # Dash_B_Body    ----
+  dashboardBody( 
+    tags$head(tags$style('body {color:white;}')),
+    setBackgroundColor(color = c("darkslategrey"), 
+                       shinydashboard = TRUE),
     tabsetPanel(id = "tabselected",  # > Tabset Panel    ----
        tabPanel("About", value = "about", # ** About_TP     ----
-                         tags$hr(),
-                         includeMarkdown(path = "about.md"),
-                         tags$hr(),
-                         tags$img(height = 900,
-                                  width = 1250,
+                         tags$hr(), includeMarkdown(path = "about.md"), tags$hr(),
+                         tags$img(height = 900, width = 1250,
                                   src = "Kelp Forest Sites - With names.jpg"),
-                         tags$hr()
-                ),
+                         tags$hr()),
        tabPanel("Program History", value = 'hist',   # ** History_TP    ----
-                fluidRow(column(10, offset = 2, tags$h1(tags$strong("History as Written in the KFM Handbook")))),
+                tags$hr(),
+                tags$h1(tags$strong("History as Written in the KFM Handbook")),
                 tags$hr(),
                 htmlOutput(outputId = "HistoryPDF"),
                 tags$hr(),
                 NPS_tagList), 
        tabPanel("Sampling Protocols", value = 'protocol', # ** Protocols_TP      ----
-                fluidRow(column(11, offset = 1, tags$h1(tags$strong("Sampling Protocols, Data Managment, and Example Datasheets")))),
-                radioButtons(inputId = "Proto",
+                tags$hr(),
+                tags$h1(tags$strong("Sampling Protocols, Data Managment, and Example Datasheets")),
+                fluidRow(column(3, radioButtons(inputId = "Proto",
                              label = "What would you like to view?",
                              choices = c("Survey Protocols", 
                                          "Protocol Guides",
@@ -1202,12 +1207,17 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                          "Data Management and History",
                                          "Datasheets",
                                          "Other Guides"),
-                             inline = FALSE),
+                             inline = FALSE)),
+                         column(2, imageOutput(outputId = "Proto_Photo",
+                                               height = 220)),
+                         column(2, imageOutput(outputId = "Proto_Photo_Two",
+                                               height = 220))),
                 tags$hr(),
                 htmlOutput(outputId = "SurveyProtocols"),
                 tags$hr()), 
        tabPanel("1 m Quadrats", value = "oneM_TP", # ** oneM_TP         ---- 
-                fluidRow(column(6, offset = 2, tags$h1(tags$strong("1 m Quadrat Species Densities")))),
+                tags$hr(),
+                tags$h1(tags$strong("1 m Quadrats")),
                 fluidRow(column(3, radioButtons(inputId = "oneM_allORone",
                                                 label = "What would you like to view?",
                                                 choices = c("One Species by Site",
@@ -1230,7 +1240,8 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                             height = 625),
                 tags$hr()),
        tabPanel("5 m Quadrats", value = "fiveM_TP", # ** fiveM_TP       ---- 
-                fluidRow(column(6, offset = 2, tags$h1(tags$strong("5 m Quadrat Species Densities")))),
+                tags$hr(),
+                tags$h1(tags$strong("5 m Quadrat Species Densities")),
                 fluidRow(column(3, radioButtons(inputId = "fiveM_allORone",
                                                 label = "What would you like to view?",
                                                 choices = c("One Species by Site",
@@ -1257,7 +1268,8 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                        height = 200)))),
                 uiOutput(outputId = "fiveM_UIout")),
        tabPanel("Band Transects", value = "bands_TP", # ** bands_TP      ---- 
-                fluidRow(column(6, offset = 2, tags$h1(tags$strong("Band Transect Species Densities")))),
+                tags$hr(),
+                tags$h1(tags$strong("Band Transect Species Densities")),
                 fluidRow(column(3, radioButtons(inputId = "bands_allORone",
                                                 label = "What would you like to view?",
                                                 choices = c("One Species by Site",
@@ -1284,7 +1296,8 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                        height = 200)))),
                 uiOutput(outputId = "bands_UIout")),
        tabPanel("Core Densities", value = "core_TP", # ** Core_TP       ----
-                fluidRow(column(11, offset = 1,tags$h1(tags$strong("Compare Densities Across Core Protocols (1 m, 5 m, and Bands)")))),
+                tags$hr(),
+                tags$h1(tags$strong("Compare Densities Across Core Protocols (1 m, 5 m, and Bands)")),
                 fluidRow(column(3, radioButtons(inputId = "core_allORone",
                                                 label = "What would you like to view?",
                                                 choices = c("Two Species by Site",
@@ -1302,7 +1315,8 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                 imageOutput(outputId = "core_LargeSitePhoto_One",
                             height = 625)),
        tabPanel("RPCs", value = "rpcs_TP", # ** rpcs_TP         ---- 
-                fluidRow(column(6, offset = 2, tags$h1(tags$strong("Random Point Contacts Percent Cover")))),
+                tags$hr(),
+                tags$h1(tags$strong("Random Point Contacts Percent Cover")),
                 fluidRow(column(3, radioButtons(inputId = "rpcs_allORone",
                                                 label = "What would you like to view?",
                                                 choices = c("One Species by Site",
@@ -1329,7 +1343,8 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                        height = 200)))),
                 uiOutput(outputId = "rpcs_UIout")),
        tabPanel("NHSF", value = "NHSF_TP", # ** NHSF_TP         ---- 
-                fluidRow(column(12, offset = 2, tags$h1(tags$strong("Natural Habitat Size Frequency Distributions")))),
+                tags$hr(),
+                tags$h1(tags$strong("Natural Habitat Size Frequency Distributions")),
                 fluidRow(column(3, radioButtons(inputId = "NHSF_distORmean_One",
                                                 label = "What would you like to view?",
                                                 choices = c("Size Distribution",
@@ -1378,7 +1393,8 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                              height = 625),
                                  tags$hr())),
        tabPanel("Fish Sizes", value = "FSF_TP", # ** FSF_TP         ---- 
-                fluidRow(column(12, offset = 2, tags$h1(tags$strong("Fish Size Frequency Distributions")))),
+                tags$hr(),
+                tags$h1(tags$strong("Fish Size Frequency Distributions")),
                 fluidRow(column(3, radioButtons(inputId = "FSF_distORmean_One",
                                                 label = "What would you like to view?",
                                                 choices = c("Size Distribution",
@@ -1427,7 +1443,8 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                                              height = 625),
                                  tags$hr())),
        tabPanel("Roving Diver Fish Count", value = "RDFC_TP", # ** RDFC_TP     ----
-                fluidRow(column(6, offset = 3,tags$h1(tags$strong("Roving Diver Fish Count")))),
+                tags$hr(),
+                tags$h1(tags$strong("Roving Diver Fish Count")),
                 fluidRow(column(3, radioButtons(inputId = "RDFC_allORone",
                                                 label = "What would you like to view?",
                                                 choices = c("One Species by Site",
@@ -1443,7 +1460,8 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                             height = 625),
                 tags$hr()),
        tabPanel("Temperature", value = "temps", #** Temp_TP    ----
-                fluidRow(column(6, offset = 3,tags$h1(tags$strong("Water Temperatures")))),
+                tags$hr(),
+                tags$h1(tags$strong("Water Temperatures")),
                 fluidRow(column(3, radioButtons(inputId = "temp_allORone",
                                                 label = "What would you like to view?",
                                                 choices = c("Benthic Temperature by Site",
@@ -1459,7 +1477,8 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                 tags$hr()
        ),
        tabPanel("Stats", value = 'stat', # ** Stats_TP      ----
-                fluidRow(column(6, offset = 3,tags$h1(tags$strong("Statistical Tests")))),
+                tags$hr(),
+                tags$h1(tags$strong("Statistical Tests")),
                 fluidRow(column(3, radioButtons(inputId = "statTest",
                                                 label = "What would you like to view?",
                                                 choices = c("Empirical Cumulative Distribution", "Other"),
@@ -1479,17 +1498,20 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                 uiOutput(outputId = "outStat")
        ),
        tabPanel("Photo Library", value = 'photo', # ** Photos_TP      ----
-                fluidRow(column(6, offset = 4,tags$h1(tags$strong("Photo Library")))),
+                tags$hr(),
+                tags$h1(tags$strong("Photo Library")),
                 radioButtons(inputId = "photogroups",
                              label = "What would you like to view?",
                              choices = c("Indicator Species",
                                          "Disease", 
                                          "Kelp Forest Scenes"),
                              inline = TRUE),
-                uiOutput(outputId = "outPhoto")
+                uiOutput(outputId = "outPhoto"),
+                tags$hr()
        ),
        tabPanel("Site Maps", value = "maps", # ** maps_TP      ---- 
-                fluidRow(column(6, offset = 3,tags$h1(tags$strong("Site Maps")))),
+                tags$hr(),
+                tags$h1(tags$strong("Site Maps")),
                 radioButtons(inputId = "maptype",
                              label = "What would you like to view?",
                              choices = c("Leaflet Maps",
@@ -1502,24 +1524,27 @@ ui <- dashboardPage(title = "KFM App",  skin = "blue",# UI   ----
                 uiOutput(outputId = "MAPS"),
                 tags$hr()),
        tabPanel("Reports", value = 'reports', # ** Reports_TP      ----
-                fluidRow(column(6, offset = 3,tags$h1(tags$strong("KFM Annual Reports")))),
+                tags$hr(),
+                tags$h1(tags$strong("KFM Annual Reports")),
                 tags$hr(),
                 htmlOutput(outputId = "viewReport", height = 600),
                 tags$hr(),
                 NPSreports_tagList),
        tabPanel("Visit Dates", value = "VD_TP", # ** VD_TP     ----
-                fluidRow(column(6, offset = 3,tags$h1(tags$strong("Monitoring Dates")))),
+                tags$hr(),
+                tags$h1(tags$strong("Monitoring Dates")),
                 fluidRow(column(3, radioButtons(inputId = "VD_allORone",
                                                 label = "What would you like to view?",
                                                 choices = c("By Site",
-                                                            "By Island"),
+                                                            "By Island",
+                                                            "Weekly Itinerary"),
                                                 inline = FALSE)),
                          column(3, imageOutput(outputId = "VD_TopSitePhoto_One",
                                                height = 200))),
                 tags$hr(),
                 uiOutput(outputId = "VD_UIout"),
                 imageOutput(outputId = "VD_LargeSitePhoto_One",
-                            height = 625))
+                            height = 625), tags$hr())
     )
   )
 ) #End of User Interface Section  ----

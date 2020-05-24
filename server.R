@@ -56,20 +56,18 @@ server <- function(input, output, session) {
                                           tags$hr(),
                                           imageOutput(outputId = "oneM_BoxplotDescription_One")),
                          tags$hr(),
-                         fluidRow(column(4, tags$h2(tags$strong(input$oneM_SpeciesName_One)),
+                         fluidRow(column(3, tags$h2(tags$strong("Species Classification")),
+                                         DTOutput(outputId = "oneM_DToutClass_One")),
+                                  column(4, tags$h2(tags$strong(input$oneM_SpeciesName_One)),
                                          imageOutput(outputId = "oneM_LargeSpPhoto_One",
                                                      height = 500)),
-                                  column(3, tags$h2(tags$strong("Species Classification")),
-                                         DTOutput(outputId = "oneM_DToutClass_One",
-                                                  height = 500)),
                                   column(5, tags$h2(tags$strong("Species Description")),
                                          DTOutput(outputId = "oneM_DToutDesc_One",
                                                   height = 500))),
-                         
                          tags$hr(),
+                         tags$h2(tags$strong("Summary Data")),
                          DTOutput(outputId = "oneM_DToutData_One",
-                                  height = 550),
-                         tags$hr(),
+                                  height = 575),
                          tags$hr()
       )
     } 
@@ -251,8 +249,9 @@ server <- function(input, output, session) {
     }
     else if(input$oneM_allORone == "All Species") { # oneM_TP_all   ----
       dyn_ui <- tabPanel("1 m Quadrats", value = 'oneM_TP',  
-                         fluidRow(column(12, tags$h1(tags$strong(
-                           "This section has the species in the order they appear on the datasheet")))),
+                         tags$hr(),
+                         tags$h1(tags$strong(
+                           "This section has the species in the order they appear on the datasheet")),
                          plotOutput(outputId = "oneM_Plot_All",
                                     height = 7000),
                          tags$hr())
@@ -293,7 +292,7 @@ server <- function(input, output, session) {
       
       # filtered Species Description table
       oneM_SpeciesDescription_One <- reactive({
-        SpeciesName %>%
+        SpeciesName%>%
           filter(CommonName == input$oneM_SpeciesName_One) %>%
           select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
           pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
@@ -320,7 +319,7 @@ server <- function(input, output, session) {
                       contentType = "image/jpg", width = 210, height = 210))
         }
         else if (input$oneM_allORone == 'All Species') {
-          return(list(src = glue("www/1mQuads.jpg"), contentType = "image/jpg", width = 210, height = 210))
+          return(list(src = "www/Protocol_Photos/oneM_.jpg", contentType = "image/jpg", width = 210, height = 210))
         }
       }, deleteFile = FALSE) 
       
@@ -406,83 +405,54 @@ server <- function(input, output, session) {
                       backgroundPosition = 'center'
           )
       }) 
-      
+    
       # Species Description data table
       output$oneM_DToutDesc_One <- renderDT({
-        datatable(oneM_SpeciesDescription_One(), 
-                  options = list(
-                    initComplete = JS(
-                      "function(settings, json) {",
-                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
-                      "}"),
-                    searching = FALSE,
-                    lengthChange = FALSE,
-                    paging = FALSE,
-                    ordering = FALSE,
-                    info = FALSE),
-                  rownames = FALSE) %>% 
-          formatStyle(names(oneM_SpeciesDescription_One()),
-                      color = "black",
-                      backgroundColor = 'white',
-                      backgroundPosition = 'center'
-          )
-      }) 
+      datatable(oneM_SpeciesDescription_One(), rownames = FALSE, # editable = TRUE, 
+                options = list(searching = FALSE, lengthChange = FALSE, paging = FALSE,
+                ordering = FALSE, info = FALSE, 
+                  initComplete = JS(
+                    "function(settings, json) {",
+                    "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                    "}"))) %>%
+        formatStyle(names(oneM_SpeciesDescription_One()),
+                    color = "black",
+                    backgroundColor = 'white',
+                    backgroundPosition = 'center'
+        )
+      })
+      
+      # proxyDescr <- dataTableProxy("oneM_DToutDesc_One")
+      # 
+      # observeEvent(input$oneM_DToutDesc_One_cell_edit, {
+      #   info <- input$oneM_DToutDesc_One_cell_edit
+      #   i <- info$row
+      #   j <- info$col + 1L # column index offset by 1
+      #   v <- info$value
+      #   oneM_SpeciesDescription_One()[i, j] <- coerceValue(v, oneM_SpeciesDescription_One()[i, j])
+      #   replaceData(proxyDescr, oneM_SpeciesDescription_One(), resetPaging = FALSE, rownames = FALSE)  # important
+      # })
       
       # ONI layer toggle (changes alpha value)
       oneM_alphaONI_one <- reactive({
-        if(input$oneM_GraphOptions_One == "With No Index"){
-          return(0)
-        }
-        else if(input$oneM_GraphOptions_One == "With ONI"){
-          return(1)
-        }
-        else if(input$oneM_GraphOptions_One == "With PDO (NOAA)"){
-          return(0)
-        }
-        else if(input$oneM_GraphOptions_One == "With PDO (UW)"){
-          return(0)
-        }
+        if(input$oneM_GraphOptions_One == "With ONI"){return(1)}else{0}
       }) 
       
       # PDO NOAA layer toggle (changes alpha value)
       oneM_alphaPDO_NOAA_one <- reactive({
-        if(input$oneM_GraphOptions_One == "With No Index"){
-          return(0)
-        }
-        if(input$oneM_GraphOptions_One == "With ONI"){
-          return(0)
-          
-        }
-        if(input$oneM_GraphOptions_One == "With PDO (NOAA)"){
-          return(1)
-        }
-        if(input$oneM_GraphOptions_One == "With PDO (UW)"){
-          return(0)
-        }
+        if(input$oneM_GraphOptions_One == "With PDO (NOAA)"){return(1)}else{0}
       }) 
       
       # PDO UW layer toggle (changes alpha value)
       oneM_alphaPDO_UW_one <- reactive({
-        if(input$oneM_GraphOptions_One == "With No Index"){
-          return(0)
-        }
-        if(input$oneM_GraphOptions_One == "With ONI"){
-          return(0)
-          
-        }
-        if(input$oneM_GraphOptions_One == "With PDO (NOAA)"){
-          return(0)
-        }
-        if(input$oneM_GraphOptions_One == "With PDO (UW)"){
-          return(1)
-        }
+        if(input$oneM_GraphOptions_One == "With PDO (UW)"){return(1)}else{0}
       }) 
       
       # ONI/PDO scale photo
       output$oneM_ONIpdoPIC_One <- renderImage({
         if(input$oneM_GraphOptions_One == 'With ONI'){
           return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
-        }
+          }
         if(input$oneM_GraphOptions_One == 'With PDO (NOAA)'){
           return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
         }
@@ -519,7 +489,7 @@ server <- function(input, output, session) {
                        lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                        } and has a mean depth of {round(mean(oneM_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
-               y = expression("Mean Density (#/m"^"2"~")")) +
+               y = "Mean Density") +
           scale_color_manual(values = SpeciesColor) +
           theme_classic() +
           theme(legend.position = "bottom",
@@ -567,7 +537,7 @@ server <- function(input, output, session) {
                  lubridate::month(round(mean(month(oneM_Filter_One()$Date)), 0), label = TRUE, abbr = FALSE)
                  } and has a mean depth of {round(mean(oneM_Filter_One()$MeanDepth), 2)} ft"),
                x = "Year",
-               y = expression("Mean Density (#/m"^"2"~")")) +
+               y = "Mean Density") +
           scale_fill_manual(values = SpeciesColor) +
           theme_classic() +
           theme(legend.position = "bottom",
@@ -799,28 +769,19 @@ server <- function(input, output, session) {
       
       # Filtered data table output
       output$oneM_DToutData_One <- renderDT({
-        datatable(oneM_Filter_One(),
-                  extensions = c('Buttons', 'ColReorder'),
+        datatable(oneM_Filter_One(), rownames = FALSE, extensions = c('Buttons', 'ColReorder'),
                   options = list(
+                    scrollY = "500px", scrollX = TRUE, paging = FALSE,
+                    ordering = TRUE, info = FALSE, dom = 'Bfrtip', colReorder = TRUE,
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
                     initComplete = JS(
                       "function(settings, json) {",
                       "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
                       "}"),
-                    scrollY = "500px",
-                    scrollX = TRUE, 
-                    paging = FALSE,
-                    ordering = TRUE,
-                    info = FALSE,
-                    dom = 'Bfrtip',
-                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
                     columnDefs = c(list(list(visible = FALSE, targets = c(10, 12, 13, 14, 15))), 
-                                   list(list(className = 'dt-center', targets = 0:11))),
-                    colReorder = TRUE),
-                  rownames = FALSE) %>% 
+                                   list(list(className = 'dt-center', targets = 0:11))))) %>% 
           formatStyle(names(oneM_Filter_One()),
-                      color = "black",
-                      backgroundColor = 'white'
-          )
+                      color = "black", backgroundColor = 'white')
       }) 
       
     }
@@ -1091,7 +1052,7 @@ server <- function(input, output, session) {
                     legend.title = element_text(size = 14, colour = "black", face = "bold"),
                     legend.text = element_text(size = 13, colour = "black", face = "bold"),
                     plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16, face = "bold"),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold"),
@@ -1169,6 +1130,7 @@ server <- function(input, output, session) {
                            expand = expansion(mult = c(0.01, .01))) +
               scale_y_continuous(expand = expansion(mult = c(0, .1))) +
               labs(title = glue("{unique(oneM_FilterByIsl_Isl()$ScientificName)}"), 
+                   subtitle = input$oneM_SpeciesName_Isl,
                    color = "Common Name",
                    x = "Year",
                    y = "Mean Density") +
@@ -1180,7 +1142,7 @@ server <- function(input, output, session) {
                     legend.title = element_text(size = 14, colour = "black", face = "bold"),
                     legend.text = element_text(size = 13, colour = "black", face = "bold"),
                     plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 16),
+                    plot.subtitle = element_text(hjust = 0.5, size = 16, face = "bold"),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold"),
@@ -1485,7 +1447,7 @@ server <- function(input, output, session) {
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
               geom_point(data = oneM_Filter_Isl(), aes(x = Date, y = MeanDensity_sqm, color = SiteName), 
                          size = 2, alpha = as.numeric(input$oneM_SmoothPoint_Isl)) +
-              geom_smooth(data = oneM_Filter_Isl(), aes(x= Date, y = MeanDensity_sqm, color = SiteName),
+              geom_smooth(data = oneM_Filter_Isl(), aes(x= Date, y = MeanDensity_sqm, color = SiteName, linetype = SiteName),
                           se = as.logical(input$oneM_SmoothSE_Isl), span = input$oneM_SmoothSlide_Isl) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
                            limits = c(min(as.Date(oneM_Filter_Isl()$Date))-365, 
@@ -1498,6 +1460,7 @@ server <- function(input, output, session) {
                    x = "Year",
                    y = "Mean Density") +
               scale_color_manual(values = SiteColor2, guide = guide_legend(ncol = 10)) +
+              scale_linetype_manual(values = SiteLine, guide = guide_legend(ncol = 10)) +
               theme_classic() +
               theme(legend.position = "bottom",
                     legend.background = element_rect(),
@@ -1670,7 +1633,7 @@ server <- function(input, output, session) {
                     legend.text = element_text(size = 14, vjust = .5),
                     legend.key.width = unit(2, "cm"),
                     plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18, face = "bold"),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold", color = "black"),
@@ -1781,7 +1744,7 @@ server <- function(input, output, session) {
                     legend.text = element_text(size = 14, vjust = .5),
                     legend.key.width = unit(2, "cm"),
                     plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18, face = "bold"),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold", color = "black"),
@@ -1893,7 +1856,7 @@ server <- function(input, output, session) {
                     legend.text = element_text(size = 14, vjust = .5),
                     legend.key.width = unit(2, "cm"),
                     plot.title = element_text(hjust = 0.5, size = 22, face = "bold.italic"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 18),
+                    plot.subtitle = element_text(hjust = 0.5, size = 18, face = "bold"),
                     plot.caption = element_text(hjust = 0, size = 12, face = "bold"),
                     axis.title = element_text(size = 16, face = "bold"),
                     axis.text.y = element_text(size = 12, face = "bold", color = "black"),
@@ -1915,16 +1878,16 @@ server <- function(input, output, session) {
                           position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_MPA()), show.legend = FALSE) +
                 scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
                 geom_point(data = m, aes(x = Date, MeanDensity_sqm, color = SiteName),
-                           size = 1, alpha = as.numeric(input$oneM_SmoothPoint_MPA), show.legend = FALSE) +
+                           size = 2, alpha = as.numeric(input$oneM_SmoothPoint_MPA), show.legend = FALSE) +
                 geom_smooth(data = m, aes(x = Date, MeanDensity_sqm, color = SiteName, linetype = SiteName),
                             se = as.logical(input$oneM_SmoothSE_MPA),
                             span = input$oneM_SmoothSlide_MPA) +
                 scale_x_date(date_labels = "%Y", breaks = unique(m$Date),
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
                              expand = expansion(mult = c(0.01, .01))) +
-                scale_y_continuous(expand = expansion(mult = c(0, .01)),
-                  limits = c(0, ifelse(input$oneM_FreeOrLock_MPA == "Locked Scales", 
-                                       max(oneM_Filter_MPA()$MaxSum), max(m$MeanDensity_sqm)))) +
+                scale_y_continuous(expand = expansion(mult = c(0, .1)),
+                  limits = c(NA, ifelse(input$oneM_FreeOrLock_MPA == "Locked Scales", 
+                                       max(oneM_Filter_MPA()$MaxSum) + max(oneM_Filter_MPA()$MPA_SE), NA))) +
                 labs(color = "Site Name",
                      linetype = "Site Name",
                      x = "Year",
@@ -18105,6 +18068,50 @@ server <- function(input, output, session) {
         filter(Alt_SurveyType == input$protoChoice)
     })
     
+    # 1st Small species photo above plot
+    output$Proto_Photo <- renderImage({
+      list(src = "www/KFM_Old.jpg", contentType = "image/jpg", width = 191, height = 230)
+    }, deleteFile = FALSE) 
+    
+    output$Proto_Photo_Two <- renderImage({
+      if (input$protoChoice == "1 m Quads"){
+        return(list(src = "www/Protocol_Photos/1m.jpg", contentType = "image/jpg", width = 346, height = 230))
+      }
+      else if (input$protoChoice == "5 m Quads"){
+        return(list(src = "www/Protocol_Photos/5mQuads.jpg", contentType = "image/jpg", width = 346, height = 230))
+      }
+      else if (input$protoChoice == "ARMs"){
+        return(list(src = "www/Protocol_Photos/ARM.jpg", contentType = "image/jpg", width = 346, height = 230))
+      }
+      else if (input$protoChoice == "Bands"){
+        return(list(src = "www/Protocol_Photos/Band.jpg", contentType = "image/jpg", width = 346, height = 230))
+      }
+      else if (input$protoChoice == "Fish Sizes"){
+        return(list(src = "www/Protocol_Photos/FSF.jpg", contentType = "image/jpg", width = 346, height = 230))
+      }
+      else if (input$protoChoice == "NHSF"){
+        return(list(src = "www/Protocol_Photos/NHSF.jpg", contentType = "image/jpg", width = 346, height = 230))
+      }
+      else if (input$protoChoice == "RDFC"){
+        return(list(src = "www/Protocol_Photos/RDFC.jpg", contentType = "image/jpg", width = 346, height = 230))
+      }
+      else if (input$protoChoice == "RPCs"){
+        return(list(src = "www/Protocol_Photos/RPC.jpg", contentType = "image/jpg", width = 346, height = 230))
+      }
+      else if (input$protoChoice == "Species List"){
+        return(list(src = "www/Protocol_Photos/SpeciesList.jpg", contentType = "image/jpg", width = 346, height = 230))
+      }
+      else if (input$protoChoice == "Temp Loggers"){
+        return(list(src = "www/Protocol_Photos/Temp.jpg", contentType = "image/jpg", width = 346, height = 230))
+      }
+      else if (input$protoChoice == "Site Videos"){
+        return(list(src = "www/Protocol_Photos/Video.jpg", contentType = "image/jpg", width = 346, height = 230))
+      }
+      else if (input$protoChoice == "Fish Transects"){
+        return(list(src = "www/Protocol_Photos/VFT.jpg", contentType = "image/jpg", width = 346, height = 230))
+      }
+    }, deleteFile = FALSE) 
+    
     output$SurveyProtocols <- renderUI({
       if (is.null(input$Proto))
         return(NULL)
@@ -18160,103 +18167,93 @@ server <- function(input, output, session) {
       return(NULL)
     else if(input$photogroups == "Indicator Species") { #  Indicator Species   ----
       dyn_ui <- tabPanel("Photo Library", value = 'photo',
-                         fluidRow(column(8, 
-                                         radioButtons(inputId = "class",
-                                                      label = "Choose",
-                                                      choices = c("Algae", "Invertebrates", "Fish"),
-                                                      inline = TRUE),
-                                         imageOutput(outputId = "Indicator",
-                                                     height = 700)),
-                                  column(3, tags$h2(tags$strong("Species Classification")),
+                         radioButtons(inputId = "class",
+                                      label = "Choose",
+                                      choices = c("Algae", "Invertebrates", "Fish"),
+                                      inline = TRUE),
+                         tags$hr(),
+                         fluidRow(column(8, imageOutput(outputId = "Indicator",
+                                               height = 700)),
+                         column(3, tags$h2(tags$strong("Species Classification")),
                                          DTOutput(outputId = "DToutClassPhoto",
-                                                  height = 600))
-                         ),
-                         tags$hr()
-      )
+                                                  height = 600))))
     }
     else if(input$photogroups == "Disease") { #  Disease     ----
       dyn_ui <- tabPanel("Photo Library", value = 'photo',
+                         tags$hr(),
                          conditionalPanel("input.disease == 'Abalone'",
                                           tags$h1(tags$strong("Withering Syndrome (WS) in Red Abalone (Haliotis rufescens)")),
                                           imageOutput(outputId = "AbaloneWD1",
                                                       height = 600), tags$hr(),
                                           imageOutput(outputId = "AbaloneWD2",
-                                                      height = 600), tags$hr()),
+                                                      height = 600)),
                          conditionalPanel("input.disease == 'Urchins'",
                                           fluidRow(
                                             column(6, tags$h1(tags$strong("Red Urchin Wasting Disease")),
                                                    imageOutput(outputId = "RedWD",
-                                                               height = 400), tags$hr()),
+                                                               height = 400)),
                                             column(6, tags$h1(tags$strong("Purple Urchin Wasting Disease")),
                                                    imageOutput(outputId = "PurpleWD",
-                                                               height = 400), tags$hr())
-                                          ),
+                                                               height = 400))),
+                                          tags$hr(),
                                           fluidRow(
                                             column(6, tags$h1(tags$strong("Red Urchin Blackspot Disease")),
                                                    imageOutput(outputId = "RedBS",
-                                                               height = 400), tags$hr()),
+                                                               height = 400)),
                                             column(6, tags$h1(tags$strong("Purple Urchin Blackspot Disease")),
                                                    imageOutput(outputId = "PurpleBS",
-                                                               height = 400), tags$hr())
-                                          ),
+                                                               height = 400))),
+                                          tags$hr(),
                                           fluidRow(
                                             column(6, tags$h1(tags$strong("Red Urchin Both Diseases")),
                                                    imageOutput(outputId = "RedWDBS",
-                                                               height = 400), tags$hr()),
+                                                               height = 400)),
                                             column(6, tags$h1(tags$strong("Purple Urchin Both Diseases")),
                                                    imageOutput(outputId = "PurpleWDBS",
-                                                               height = 400), tags$hr())
-                                          )
-                         ),
+                                                               height = 400)))),
                          conditionalPanel("input.disease == 'Stars'",
-                                          fluidRow(column(12, offset = 3, tags$h1(tags$strong("Bat Star Wasting Disease")))),
-                                          fluidRow(
-                                            column(9, imageOutput(outputId = "BatWD",
-                                                                  height = 600)),
-                                            column(1, actionButton(inputId = "Disease_previous",
+                                          tags$h1(tags$strong("Bat Star Wasting Disease")),
+                                          fluidRow(column(1, actionButton(inputId = "Disease_previous",
                                                                    label = "Previous")),
                                             column(1, verbatimTextOutput(outputId = "Disease_numK")),
                                             column(1, actionButton(inputId = "Disease_next",
-                                                                   label = "Next"))
-                                          )
-                         ),
-                         tags$hr()
-      )
+                                                                   label = "Next"))),
+                                          imageOutput(outputId = "BatWD",
+                                                      height = 600)))
     }
     else if(input$photogroups == "Kelp Forest Scenes") { #  Kelp forest scenes   ----
       dyn_ui <- tabPanel("Photo Library", value = 'photo',
-                         if(input$Photographer == "Kenan Chan"){
-                           fluidRow(
-                             column(9, imageOutput(outputId = "KFS_photo_K", 
-                                                   height = 600)),
-                             column(1, actionButton(inputId = "KFS_previous",
-                                                    label = "Previous")),
-                             column(1, verbatimTextOutput(outputId = "KFS_numK")),
-                             column(1, actionButton(inputId = "KFS_next",
-                                                    label = "Next")))
-                         }
-                         else if(input$Photographer == "Laurie Montgomery"){
-                           fluidRow(
-                             column(9, imageOutput(outputId = "KFS_photo_L", 
-                                                   height = 600)),
-                             column(1, actionButton(inputId = "KFS_previousL",
-                                                    label = "Previous")),
-                             column(1, verbatimTextOutput(outputId = "KFS_numL")),
-                             column(1, actionButton(inputId = "KFS_nextL",
-                                                    label = "Next")))
-                         }
-                         else if(input$Photographer == "Brett Seymour"){
-                           fluidRow(
-                             column(9, imageOutput(outputId = "KFS_photo_B", 
-                                                   height = 600)),
-                             column(1, actionButton(inputId = "KFS_previousB",
-                                                    label = "Previous")),
-                             column(1, verbatimTextOutput(outputId = "KFS_numB")),
-                             column(1, actionButton(inputId = "KFS_nextB",
-                                                    label = "Next")))
-                         },
-                         tags$hr() 
-      )
+                         tags$hr(),
+                         conditionalPanel("input.Photographer == 'Kenan Chan'",
+                                          tags$h1(tags$strong(input$Photographer)),
+                                          fluidRow(
+                                            column(1, actionButton(inputId = "KFS_previous",
+                                                                   label = "Previous")),
+                                            column(1, verbatimTextOutput(outputId = "KFS_numK")),
+                                            column(1, actionButton(inputId = "KFS_next",
+                                                                   label = "Next"))), 
+                                          imageOutput(outputId = "KFS_photo_K", 
+                                                      height = 600)),
+                         conditionalPanel("input.Photographer == 'Laurie Montgomery'",
+                                          tags$h1(tags$strong(input$Photographer)),
+                                          fluidRow(
+                                            column(1, actionButton(inputId = "KFS_previousL",
+                                                                   label = "Previous")),
+                                            column(1, verbatimTextOutput(outputId = "KFS_numL")),
+                                            column(1, actionButton(inputId = "KFS_nextL",
+                                                                   label = "Next"))),
+                                          imageOutput(outputId = "KFS_photo_L", 
+                                                                  height = 600)),
+                         conditionalPanel("input.Photographer == 'Brett Seymour'",
+                                          tags$h1(tags$strong(input$Photographer)),
+                                          fluidRow(
+                                            column(1, actionButton(inputId = "KFS_previousB",
+                                                                   label = "Previous")),
+                                            column(1, verbatimTextOutput(outputId = "KFS_numB")),
+                                            column(1, actionButton(inputId = "KFS_nextB",
+                                                                   label = "Next"))),
+                                          imageOutput(outputId = "KFS_photo_B", 
+                                                      height = 600)))
     }
     return(dyn_ui)
   })
@@ -18512,37 +18509,31 @@ server <- function(input, output, session) {
     
     if(input$maptype == "Leaflet Maps") {
       dyn_ui <- tabPanel("Site Maps", value = "maps", # Maps_TP_Leaflet      ----
-                         fluidRow(column(8, leafletOutput(outputId = "Leaflet",
-                                                          height = 600, width = '100%')
-                         ))
+                         leafletOutput(outputId = "Leaflet",
+                                       height = 600, width = '100%')
       )
     }
     else if(input$maptype == "Satellite Site Maps") {
       dyn_ui <- tabPanel("Site Maps", value = "maps", # Maps_TP_Sat      ----
-                         fluidRow(column(8, imageOutput(outputId = "statMap",
-                                                        height = 600, width = 1000)
-                         ))
-      )
+                         imageOutput(outputId = "statMap",
+                                     height = 600, width = 1000))
     }
     else if (input$maptype == "Bathymetry Maps") {
       dyn_ui <- tabPanel("Site Maps", value = "maps", # Maps_TP_Bath  ----
                          imageOutput(outputId = "image1",
                                      height = 800),
-                         tags$hr()
-      )
+                         tags$hr())
     }
     else if (input$maptype == "ARM Maps") {
       dyn_ui <- tabPanel("Site Maps", value = "maps", # Maps_TP_ARMs  ----
                          imageOutput(outputId = "ARMmap",
                                      height = 800),
-                         tags$hr()
-      )
+                         tags$hr())
     }
     else if (input$maptype == "Site Descriptions") {
       dyn_ui <- tabPanel("Site Maps", value = "maps", # Maps_TP_Descriptions  ----
                          htmlOutput(outputId = 'SitePDF'),
-                         tags$hr()
-      )
+                         tags$hr())
     }
     return(dyn_ui)
   })
@@ -18714,7 +18705,21 @@ server <- function(input, output, session) {
                                   height = 500),
                          tags$hr())
     }
+    else if(input$VD_allORone == "Weekly Itinerary"){ # Weekly Itinerary  ----
+      dyn_ui <- tabPanel("Visit Dates", value = "VD_TP",
+                         DTOutput(outputId = "VD_Trip_Itinerary"),
+                         tags$hr(),
+                         leafletOutput(outputId = "Leaflet_Trip",
+                                       height = 600, width = '100%'),
+                         tags$hr())
+    }
     return(dyn_ui)
+  })
+  
+  output$VD_TripNum_Out <- renderUI({
+    radioButtons(inputId = "VD_TripNum",
+                 label = "Choose a Trip: ",
+                 choices = 1:max(VD_Itinerary_SB()$Trip_Number))
   })
   
   {  # ........ VD_Servers ........  ----
@@ -18750,6 +18755,11 @@ server <- function(input, output, session) {
             list(src = glue("www/Sat_Imagery/{unique(VD_Filter_Isl()$IslandCode)}.png"),
                  contentType = "image/png", width = 430, height = 210))
         }
+        else if (input$VD_allORone =='Weekly Itinerary') {
+          return(
+            list(src = glue("www/Protocol_Photos/Boat.jpg"),
+                 contentType = "image/jpg", width = 315, height = 210))
+        }
       }, deleteFile = FALSE) # Small Site photo above plot
       
       output$VD_LargeSitePhoto_One <- renderImage({
@@ -18762,6 +18772,11 @@ server <- function(input, output, session) {
           return(
             list(src = glue("www/Sat_Imagery/{unique(VD_Filter_Isl()$IslandCode)}.png"),
                  contentType = "image/png", width = 1250, height = 625))
+        }
+        else if (input$VD_allORone =='Weekly Itinerary') {
+          return(
+            list(src = glue("www/Protocol_Photos/Boat.jpg"),
+                 contentType = "image/jpg", width = 937, height = 625))
         }
       }, deleteFile = FALSE) # Large Site photo below plot
       
@@ -19089,6 +19104,75 @@ server <- function(input, output, session) {
                       backgroundColor = 'white',
                       backgroundPosition = 'center'
           )
+      })
+      
+    }
+    
+    { # Weekly Itinerary
+      
+      VD_Itinerary_SB <- reactive({
+        visitDates %>%
+          filter(SurveyYear == input$VD_Year)
+      })
+      
+      VD_Itinerary <- reactive({
+        VD_Itinerary_SB() %>%
+          filter(Trip_Number == input$VD_TripNum) %>% 
+          distinct(Date, SiteName, .keep_all = TRUE) %>% 
+          arrange(Date) %>% 
+          group_by(SurveyYear) %>% 
+          mutate(Trip_Number = cumsum(c(TRUE, diff(Date) > 3))) %>% 
+          ungroup() %>% 
+          select(Date, SiteNumber, SiteName, IslandName, Day_of_Week, Month, Latitude, Longitude)
+      })
+      
+      output$VD_Trip_Itinerary <- renderDT({
+        datatable(VD_Itinerary(), rownames = FALSE, extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    scrollY = "100%", scrollX = TRUE, paging = FALSE,
+                    ordering = TRUE, info = FALSE, dom = 'Bfrtip', colReorder = TRUE,
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    initComplete = JS("function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});", "}"),
+                    columnDefs = c(list(list(className = 'dt-center', targets = 0:7))))) %>% 
+          formatStyle(names(VD_Itinerary()),
+                      color = "black", backgroundColor = 'white')
+      }) 
+      
+      output$Leaflet_Trip <- renderLeaflet({
+        leaflet() %>%
+          setView(lng = -119.7277, lat = 33.76416, zoom = 9) %>%
+          addTiles(group = "OSM (default)") %>%
+          addProviderTiles(providers$Esri, group = "ESRI") %>%
+          addProviderTiles(providers$Esri.OceanBasemap, group = "Ocean Base") %>%
+          addProviderTiles(providers$Esri.WorldImagery, group = "Imagery") %>%
+          addProviderTiles(providers$Esri.WorldTopoMap, group = "Topography") %>%
+          addProviderTiles(providers$Esri.NatGeoWorldMap, group = "Nat. Geo.") %>%
+          addPolygons(data = marine, color = marine$Color, weight = 1,
+                      fillOpacity = 0.1, opacity = 0.25, label = marine$NAME, group = "MPAs")  %>%
+          addPolygons(data = NPS_boundary, weight = 2, color = "green", fill = FALSE,
+                      label = "Channel Islands National Park Boundary", group = "Park Boundary") %>%
+          addPolygons(data = CINMS_boundary, weight = 2, color = "blue", fill = FALSE,
+                      label = "Channel Islands National Marine Sanctuary Boundary", group = "Sanctuary Boundary") %>%
+          addPolylines(data = transects, group = "Transects")  %>%
+          
+          addPolylines(data = VD_Itinerary(), color = "red", group = "Trip Legs",
+                       lng = c(-119.273384, unique(VD_Itinerary()$Longitude),-119.273384),
+                       lat = c(34.245145, unique(VD_Itinerary()$Latitude), 34.245145))  %>%
+          
+          addMarkers(data = VD_Itinerary(), group = "Site Markers",
+                     label = paste(VD_Itinerary()$Day_of_Week, VD_Itinerary()$SiteName)) %>% 
+          addCircleMarkers(data = Buoys_List, label = Buoys_List$DC.description, group = "Buoy Stations") %>% 
+          addLayersControl(
+            baseGroups = c("OSM (default)", "ESRI", "Ocean Base", "Imagery", "Topography", "Nat. Geo."),
+            overlayGroups = c("MPAs", "Park Boundary", "Sanctuary Boundary", 
+                              "Transects", "Site Markers", "Buoy Stations", "Trip Legs"),
+            options = layersControlOptions(collapsed = TRUE)) %>%
+          addMeasure(position = "bottomleft",
+                     primaryLengthUnit = "meters",
+                     primaryAreaUnit = "sqmeters",
+                     activeColor = "#3D535D",
+                     completedColor = "#7D4479")
       })
       
     }
