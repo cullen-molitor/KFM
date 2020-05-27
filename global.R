@@ -7,6 +7,7 @@
   library(shiny) 
   library(lubridate)
   library(glue)
+  library(raster)
   library(ggridges)
   library(tidyverse)
   library(shinydashboard)
@@ -279,13 +280,14 @@
                                  ifelse(Type == "FMR", "orange", "purple"))))
   
   TransectSites <- siteInfo2 %>% 
-    filter(SiteNumber != as.numeric(1) &
-             SiteNumber != 5 &
-             SiteNumber != 11) 
+    filter(SiteNumber != 1 & SiteNumber != 5 & SiteNumber != 11) 
   
   transects <- st_read("KFM_Transects_SmoothLine5.shp")  %>%
-    st_as_sf()%>%
+    st_as_sf() %>%
+    group_by(Site_Code) %>% 
     mutate(geometry = st_transform(geometry, "+proj=longlat +ellps=WGS84 +datum=WGS84"))
+  
+  Transect_Endpoints <- read_csv('transect_0_100.csv')
   
   NPS_boundary <- st_read("nps_boundary.shp") %>%
     st_as_sf()
@@ -507,119 +509,123 @@
   }
 }
 
-# { # .. Buoys  ----
-#   
+{ # .. Buoys  ----
+
   { # Buoy Stations ----
     Buoys_List <- read_csv("Buoy_Stations.csv")
   }
-#   
-#   { # 46053 EAST SANTA BARBARA  ----
-#     Buoy_46053_DF <- read_csv(
-#       "Buoy_46053.csv",
-#       col_types = cols(
-#         Date = col_date(format = ""),
-#         Time = col_time(format = ""),
-#         lat = col_double(),
-#         lon = col_double(),
-#         wind_dir = col_double(),
-#         wind_spd = col_double(),
-#         gust = col_double(),
-#         wave_height = col_double(),
-#         dominant_wpd = col_double(),
-#         average_wpd = col_double(),
-#         mean_wave_dir = col_double(),
-#         air_pressure = col_double(),
-#         air_temperature = col_double(),
-#         sea_surface_temperature = col_double(),
-#         dewpt_temperature = col_double(),
-#         visibility = col_double(),
-#         water_level = col_double()
-#       )) 
-#     # Buoy_46053_DF <- Buoy_46053_DF[Buoy_46053_DF$Date %in% visitDates$Date, ]
-#     # write_csv(Buoy_46053_DF, "Buoy_46053.csv")
-#     
-#   }
-#   
-#   { # 46054 WEST SANTA BARBARA  ----
-#     Buoy_46054_DF <- read_csv(
-#       "Buoy_46054.csv",
-#       col_types = cols(
-#         Date = col_date(format = ""),
-#         Time = col_time(format = ""),
-#         lat = col_double(),
-#         lon = col_double(),
-#         wind_dir = col_double(),
-#         wind_spd = col_double(),
-#         gust = col_double(),
-#         wave_height = col_double(),
-#         dominant_wpd = col_double(),
-#         average_wpd = col_double(),
-#         mean_wave_dir = col_double(),
-#         air_pressure = col_double(),
-#         air_temperature = col_double(),
-#         sea_surface_temperature = col_double(),
-#         dewpt_temperature = col_double(),
-#         visibility = col_double(),
-#         water_level = col_double()
-#       ))
-#     # Buoy_46054_DF <- Buoy_46054_DF[Buoy_46054_DF$Date %in% visitDates$Date, ]
-#     # write_csv(Buoy_46054_DF, "Buoy_46054.csv")
-#   }
-#   
-#   { # 46218 (Platform) Harvest SIO 071 ----
-#     Buoy_46218_DF <- read_csv(
-#       "Buoy_46218.csv",
-#       col_types = cols(
-#         Date = col_date(format = ""),
-#         Time = col_time(format = ""),
-#         lat = col_double(),
-#         lon = col_double(),
-#         wind_dir = col_double(),
-#         wind_spd = col_double(),
-#         gust = col_double(),
-#         wave_height = col_double(),
-#         dominant_wpd = col_double(),
-#         average_wpd = col_double(),
-#         mean_wave_dir = col_double(),
-#         air_pressure = col_double(),
-#         air_temperature = col_double(),
-#         sea_surface_temperature = col_double(),
-#         dewpt_temperature = col_double(),
-#         visibility = col_double(),
-#         water_level = col_double()
-#       ))
-#     # Buoy_46218_DF <- Buoy_46218_DF[Buoy_46218_DF$Date %in% visitDates$Date, ]
-#     # write_csv(Buoy_46218_DF, "Buoy_46218.csv")
-#   }
-#   
-#   { # 46251 Santa Cruz Basin SIO 203   ----
-#     Buoy_46251_DF <- read_csv(
-#       "Buoy_46251.csv",
-#       col_types = cols(
-#         Date = col_date(format = ""),
-#         Time = col_time(format = ""),
-#         lat = col_double(),
-#         lon = col_double(),
-#         wind_dir = col_double(),
-#         wind_spd = col_double(),
-#         gust = col_double(),
-#         wave_height = col_double(),
-#         dominant_wpd = col_double(),
-#         average_wpd = col_double(),
-#         mean_wave_dir = col_double(),
-#         air_pressure = col_double(),
-#         air_temperature = col_double(),
-#         sea_surface_temperature = col_double(),
-#         dewpt_temperature = col_double(),
-#         visibility = col_double(),
-#         water_level = col_double()
-#       ))
-#     # Buoy_46251_DF <- Buoy_46251_DF[Buoy_46251_DF$Date %in% visitDates$Date, ]
-#     # write_csv(Buoy_46251_DF, "Buoy_46251.csv")
-#   }
-#  
-#   
-# }
+  
+  { # 46053 EAST SANTA BARBARA  ----
+    Buoy_46053_DF <- read_csv(
+      "Buoy_46053.csv",
+      col_types = cols(
+        Date = col_date(format = ""),
+        Time = col_time(format = ""),
+        lat = col_double(),
+        lon = col_double(),
+        wind_dir = col_double(),
+        wind_spd = col_double(),
+        gust = col_double(),
+        wave_height = col_double(),
+        dominant_wpd = col_double(),
+        average_wpd = col_double(),
+        mean_wave_dir = col_double(),
+        air_pressure = col_double(),
+        air_temperature = col_double(),
+        sea_surface_temperature = col_double(),
+        dewpt_temperature = col_double(),
+        visibility = col_double(),
+        water_level = col_double()
+      ))  %>% 
+      arrange(desc(Date), desc(Time))
+    # Buoy_46053_DF <- Buoy_46053_DF[Buoy_46053_DF$Date %in% visitDates$Date, ]
+    # write_csv(Buoy_46053_DF, "Buoy_46053.csv")
+
+  }
+
+  { # 46054 WEST SANTA BARBARA  ----
+    Buoy_46054_DF <- read_csv(
+      "Buoy_46054.csv",
+      col_types = cols(
+        Date = col_date(format = ""),
+        Time = col_time(format = ""),
+        lat = col_double(),
+        lon = col_double(),
+        wind_dir = col_double(),
+        wind_spd = col_double(),
+        gust = col_double(),
+        wave_height = col_double(),
+        dominant_wpd = col_double(),
+        average_wpd = col_double(),
+        mean_wave_dir = col_double(),
+        air_pressure = col_double(),
+        air_temperature = col_double(),
+        sea_surface_temperature = col_double(),
+        dewpt_temperature = col_double(),
+        visibility = col_double(),
+        water_level = col_double()
+      )) %>% 
+      arrange(desc(Date), desc(Time))
+    # Buoy_46054_DF <- Buoy_46054_DF[Buoy_46054_DF$Date %in% visitDates$Date, ]
+    # write_csv(Buoy_46054_DF, "Buoy_46054.csv")
+  }
+
+  { # 46218 (Platform) Harvest SIO 071 ----
+    Buoy_46218_DF <- read_csv(
+      "Buoy_46218.csv",
+      col_types = cols(
+        Date = col_date(format = ""),
+        Time = col_time(format = ""),
+        lat = col_double(),
+        lon = col_double(),
+        wind_dir = col_double(),
+        wind_spd = col_double(),
+        gust = col_double(),
+        wave_height = col_double(),
+        dominant_wpd = col_double(),
+        average_wpd = col_double(),
+        mean_wave_dir = col_double(),
+        air_pressure = col_double(),
+        air_temperature = col_double(),
+        sea_surface_temperature = col_double(),
+        dewpt_temperature = col_double(),
+        visibility = col_double(),
+        water_level = col_double()
+      )) %>% 
+      arrange(desc(Date), desc(Time))
+    # Buoy_46218_DF <- Buoy_46218_DF[Buoy_46218_DF$Date %in% visitDates$Date, ]
+    # write_csv(Buoy_46218_DF, "Buoy_46218.csv")
+  }
+
+  { # 46251 Santa Cruz Basin SIO 203   ----
+    Buoy_46251_DF <- read_csv(
+      "Buoy_46251.csv",
+      col_types = cols(
+        Date = col_date(format = ""),
+        Time = col_time(format = ""),
+        lat = col_double(),
+        lon = col_double(),
+        wind_dir = col_double(),
+        wind_spd = col_double(),
+        gust = col_double(),
+        wave_height = col_double(),
+        dominant_wpd = col_double(),
+        average_wpd = col_double(),
+        mean_wave_dir = col_double(),
+        air_pressure = col_double(),
+        air_temperature = col_double(),
+        sea_surface_temperature = col_double(),
+        dewpt_temperature = col_double(),
+        visibility = col_double(),
+        water_level = col_double()
+      )) %>% 
+      arrange(desc(Date), desc(Time))
+    # Buoy_46251_DF <- Buoy_46251_DF[Buoy_46251_DF$Date %in% visitDates$Date, ]
+    # write_csv(Buoy_46251_DF, "Buoy_46251.csv")
+  }
+
+
+}
 
 
 

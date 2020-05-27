@@ -18510,7 +18510,10 @@ server <- function(input, output, session) {
     if(input$maptype == "Leaflet Maps") {
       dyn_ui <- tabPanel("Site Maps", value = "maps", # Maps_TP_Leaflet      ----
                          leafletOutput(outputId = "Leaflet",
-                                       height = 600, width = '100%')
+                                       height = 600, width = '100%'),
+                         verbatimTextOutput(outputId = "Map_Text"),
+                         tags$hr(),
+                         DTOutput(outputId = "Lealet_Buoy_Table")
       )
     }
     else if(input$maptype == "Satellite Site Maps") {
@@ -18542,6 +18545,33 @@ server <- function(input, output, session) {
     
     { # Leaflet Maps     ----
       
+      output$Map_Text <- renderText({
+        paste("Buoy Number:", Buoy_Num()$station, "Latitude:", event()$lat, "Longitude:", event()$lng)
+      })
+      
+      event <- reactive({input$Leaflet_marker_click})
+        
+      Buoy_Num <- reactive({
+        Buoys_List %>% 
+          filter(lat == event()$lat,
+                 lon == event()$lng)
+      })
+      
+      Buoy_Num_Data <- reactive({
+        if (Buoy_Num()$station == 46053) {
+          return(head(Buoy_46053_DF))
+        }
+        else if (Buoy_Num()$station == 46054) {
+          return(head(Buoy_46054_DF))
+        }
+        else if (Buoy_Num()$station == 46218) {
+          return(head(Buoy_46218_DF))
+        }
+        else if (Buoy_Num()$station == 46251) {
+          return(head(Buoy_46251_DF))
+        }else{NULL}
+      })
+      
       output$Leaflet <- renderLeaflet({
         leaflet() %>%
           setView(lng = -119.7277, lat = 33.76416, zoom = 9) %>%
@@ -18552,18 +18582,28 @@ server <- function(input, output, session) {
           addProviderTiles(providers$Esri.WorldTopoMap, group = "Topography") %>%
           addProviderTiles(providers$Esri.NatGeoWorldMap, group = "Nat. Geo.") %>%
           addPolygons(data = marine, color = marine$Color, weight = 1,
-                      fillOpacity = 0.1, opacity = 0.25, label = marine$NAME, group = "MPAs")  %>%
+                      fillOpacity = 0.1, opacity = 0.25, label = marine$NAME, group = "MPA Boundaries")  %>%
           addPolygons(data = NPS_boundary, weight = 2, color = "green", fill = FALSE,
-                      label = "Channel Islands National Park Boundary", group = "Park Boundary") %>%
+                      label = "Channel Islands National Park (CINP) Boundary", group = "CINP Boundary") %>%
           addPolygons(data = CINMS_boundary, weight = 2, color = "blue", fill = FALSE,
-                      label = "Channel Islands National Marine Sanctuary Boundary", group = "Sanctuary Boundary") %>%
+                      label = "Channel Islands National Marine Sanctuary (CINMS) Boundary", group = "CINMS Boundary") %>%
           addPolylines(data = transects, group = "Transects")  %>%
+          
+          # addCircleMarkers(data = transects$start, group = "End Points") %>% 
+          
+          addCircles(radius = 1, group = "Transect End Points", color = "green",
+                     lng = Transect_Endpoints$Start_Long, lat = Transect_Endpoints$Start_Lat, 
+                     label = Transect_Endpoints$Start_Label) %>%
+          addCircles(radius = 1, group = "Transect End Points", color = "red",
+                     lng = Transect_Endpoints$End_Long, lat = Transect_Endpoints$End_Lat, 
+                     label = Transect_Endpoints$End_Label) %>%
+          
           addMarkers(data = siteInfo2, label = paste(siteInfo2$IslandCode, siteInfo2$SiteName), group = "Site Markers") %>% 
           addCircleMarkers(data = Buoys_List, label = Buoys_List$DC.description, group = "Buoy Stations") %>% 
           addLayersControl(
             baseGroups = c("OSM (default)", "ESRI", "Ocean Base", "Imagery", "Topography", "Nat. Geo."),
-            overlayGroups = c("MPAs", "Park Boundary", "Sanctuary Boundary", 
-                              "Transects", "Site Markers", "Buoy Stations"),
+            overlayGroups = c("Site Markers", "Transects", "Transect End Points",
+                              "MPA Boundaries", "CINP Boundary", "CINMS Boundary",  "Buoy Stations"),
             options = layersControlOptions(collapsed = TRUE)) %>%
           addMeasure(position = "bottomleft",
                      primaryLengthUnit = "meters",
@@ -18571,6 +18611,21 @@ server <- function(input, output, session) {
                      activeColor = "#3D535D",
                      completedColor = "#7D4479")
       })
+      
+      output$Lealet_Buoy_Table <- renderDT({
+        
+        datatable(Buoy_Num_Data(), rownames = FALSE, extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    scrollY = "100%", scrollX = TRUE, paging = FALSE,
+                    ordering = TRUE, info = FALSE, dom = 'Bfrtip', colReorder = TRUE,
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    initComplete = JS("function(settings, json) {",
+                                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});", "}"),
+                    columnDefs = c(list(list(className = 'dt-center', targets = 0:7))))) %>% 
+          formatStyle(names(Buoy_Num_Data()),
+                      color = "black", backgroundColor = 'white')
+      })
+      
     }
     
     { # Satellite Site Maps  -----
@@ -18711,6 +18766,9 @@ server <- function(input, output, session) {
                          tags$hr(),
                          leafletOutput(outputId = "Leaflet_Trip",
                                        height = 600, width = '100%'),
+                         verbatimTextOutput(outputId = "Map_Text_2"),
+                         tags$hr(),
+                         DTOutput(outputId = "Lealet_Buoy_Table_2"), 
                          tags$hr())
     }
     return(dyn_ui)
@@ -19157,8 +19215,8 @@ server <- function(input, output, session) {
           addPolylines(data = transects, group = "Transects")  %>%
           
           addPolylines(data = VD_Itinerary(), color = "red", group = "Trip Legs",
-                       lng = c(-119.273384, unique(VD_Itinerary()$Longitude),-119.273384),
-                       lat = c(34.245145, unique(VD_Itinerary()$Latitude), 34.245145))  %>%
+                       lng = c(-119.273384, unique(VD_Itinerary()$Longitude)),
+                       lat = c(34.245145, unique(VD_Itinerary()$Latitude)))  %>%
           
           addMarkers(data = VD_Itinerary(), group = "Site Markers",
                      label = paste(VD_Itinerary()$Day_of_Week, VD_Itinerary()$SiteName)) %>% 
@@ -19173,6 +19231,51 @@ server <- function(input, output, session) {
                      primaryAreaUnit = "sqmeters",
                      activeColor = "#3D535D",
                      completedColor = "#7D4479")
+      })
+      
+      output$Map_Text_2 <- renderText({
+        paste("Buoy Number:", Buoy_Num_2()$station, "Latitude:", event_2()$lat, "Longitude:", event_2()$lng)
+      })
+      
+      event_2 <- reactive({input$Leaflet_Trip_marker_click})
+      
+      Buoy_Num_2 <- reactive({
+        Buoys_List %>% 
+          filter(lat == event_2()$lat,
+                 lon == event_2()$lng)
+      })
+      
+      Buoy_Num_Data_2 <- reactive({
+        if (Buoy_Num_2()$station == 46053) {
+          return({
+            Buoy_46053_DF %>% 
+              filter(Date == subset(Buoy_46053_DF$Date, Date >= min(VD_Itinerary()$Date)  & Date <= max(VD_Itinerary()$Date)))
+            })
+        }
+        else if (Buoy_Num_2()$station == 46054) {
+          return(head(Buoy_46054_DF))
+        }
+        else if (Buoy_Num_2()$station == 46218) {
+          return(head(Buoy_46218_DF))
+        }
+        else if (Buoy_Num_2()$station == 46251) {
+          return(head(Buoy_46251_DF))
+        }else{NULL}
+      })
+      
+      
+      output$Lealet_Buoy_Table_2 <- renderDT({
+        
+        datatable(Buoy_Num_Data_2(), rownames = FALSE, extensions = c('Buttons', 'ColReorder'),
+                  options = list(
+                    scrollY = "500px", scrollX = TRUE, paging = FALSE,
+                    ordering = TRUE, info = FALSE, dom = 'Bfrtip', colReorder = TRUE,
+                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
+                    initComplete = JS("function(settings, json) {",
+                                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});", "}"),
+                    columnDefs = c(list(list(className = 'dt-center', targets = 0:7))))) %>% 
+          formatStyle(names(Buoy_Num_Data_2()),
+                      color = "black", backgroundColor = 'white')
       })
       
     }
