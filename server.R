@@ -266,37 +266,37 @@ server <- function(input, output, session) {
       # filtered summary table
       oneM_Filter_One <- reactive({ 
         oneM_DF %>%
-          filter(SiteName == input$oneM_SiteName_One,
-                 CommonName == input$oneM_SpeciesName_One) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
-                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
-                 Species, SiteNumber, IslandCode, SiteCode, IslandSE) 
+          dplyr::filter(SiteName == input$oneM_SiteName_One,
+                        CommonName == input$oneM_SpeciesName_One) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                        StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                        Species, SiteNumber, IslandCode, SiteCode, IslandSE) 
       }) 
       
       # filtered raw table
       oneM_RawFilter_One <- reactive({ 
         oneM_DFRaw %>%
-          filter(SiteName == input$oneM_SiteName_One,
-                 CommonName == input$oneM_SpeciesName_One)
+          dplyr::filter(SiteName == input$oneM_SiteName_One,
+                        CommonName == input$oneM_SpeciesName_One)
       }) 
       
       # filtered Species classification table
       oneM_SpeciesClass_One <- reactive({ 
         SpeciesName %>%
-          filter(CommonName == input$oneM_SpeciesName_One) %>%
-          select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
-                 Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
-          pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
-          select(Rank, Name)
+          dplyr::filter(CommonName == input$oneM_SpeciesName_One) %>%
+          dplyr::select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
+                        Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
+          dplyr::select(Rank, Name)
       }) 
       
       # filtered Species Description table
       oneM_SpeciesDescription_One <- reactive({
         SpeciesName%>%
-          filter(CommonName == input$oneM_SpeciesName_One) %>%
-          select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
-          pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
-          select(Category, Information)
+          dplyr::filter(CommonName == input$oneM_SpeciesName_One) %>%
+          dplyr::select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
+          dplyr::select(Category, Information)
       }) 
       
       # 1st Small species photo above plot
@@ -405,21 +405,21 @@ server <- function(input, output, session) {
                       backgroundPosition = 'center'
           )
       }) 
-    
+      
       # Species Description data table
       output$oneM_DToutDesc_One <- renderDT({
-      datatable(oneM_SpeciesDescription_One(), rownames = FALSE, # editable = TRUE, 
-                options = list(searching = FALSE, lengthChange = FALSE, paging = FALSE,
-                ordering = FALSE, info = FALSE, 
-                  initComplete = JS(
-                    "function(settings, json) {",
-                    "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
-                    "}"))) %>%
-        formatStyle(names(oneM_SpeciesDescription_One()),
-                    color = "black",
-                    backgroundColor = 'white',
-                    backgroundPosition = 'center'
-        )
+        datatable(oneM_SpeciesDescription_One(), rownames = FALSE, # editable = TRUE, 
+                  options = list(searching = FALSE, lengthChange = FALSE, paging = FALSE,
+                                 ordering = FALSE, info = FALSE, 
+                                 initComplete = JS(
+                                   "function(settings, json) {",
+                                   "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+                                   "}"))) %>%
+          formatStyle(names(oneM_SpeciesDescription_One()),
+                      color = "black",
+                      backgroundColor = 'white',
+                      backgroundPosition = 'center'
+          )
       })
       
       # proxyDescr <- dataTableProxy("oneM_DToutDesc_One")
@@ -452,7 +452,7 @@ server <- function(input, output, session) {
       output$oneM_ONIpdoPIC_One <- renderImage({
         if(input$oneM_GraphOptions_One == 'With ONI'){
           return(list(src = "www/ONI.png", contentType = "image/png", width = 340, height = 75))
-          }
+        }
         if(input$oneM_GraphOptions_One == 'With PDO (NOAA)'){
           return(list(src = "www/PDO_NOAA.png", contentType = "image/png", width = 340, height = 75))
         }
@@ -464,7 +464,7 @@ server <- function(input, output, session) {
       # Line Plot
       oneM_LinePlot_One <- reactive({
         ggplot() +
-          geom_rect(data = oni, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = ANOM), 
+          geom_rect(data = oni, aes(xmin = DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = ANOM), 
                     position = "identity", alpha = as.numeric(oneM_alphaONI_one()), show.legend = FALSE) +
           geom_rect(data = pdo_noaa, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                     position = "identity", alpha = as.numeric(oneM_alphaPDO_NOAA_one()), show.legend = FALSE) +
@@ -643,7 +643,7 @@ server <- function(input, output, session) {
                     position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_one()), show.legend = FALSE) +
           scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
           geom_violin(data = oneM_RawFilter_One(), aes(x = Date, y = Count, group = SurveyYear, color = CommonName)) +
-          geom_jitter(data = oneM_RawFilter_One() %>% filter(Count > 1), aes(x = Date, y = Count, group = SurveyYear, color = CommonName)) +
+          geom_jitter(data = oneM_RawFilter_One() %>% dplyr::filter(Count > 1), aes(x = Date, y = Count, group = SurveyYear, color = CommonName)) +
           scale_color_manual(values = SpeciesColor) +
           scale_x_date(date_labels = "%b %Y", breaks = unique(oneM_RawFilter_One()$Date), 
                        limits = c(min(as.Date(oneM_RawFilter_One()$Date))-365, max(as.Date(oneM_RawFilter_One()$Date))+365),
@@ -790,25 +790,25 @@ server <- function(input, output, session) {
       
       oneM_Filter_Isl <- reactive({
         oneM_DF <- oneM_DF %>%
-          filter(CommonName == input$oneM_SpeciesName_Isl) %>%
-          group_by(SurveyYear, IslandName) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = sum(MeanDensity_sqm)) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanDensity_sqm)))
+          dplyr::filter(CommonName == input$oneM_SpeciesName_Isl) %>%
+          dplyr::group_by(SurveyYear, IslandName) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = sum(MeanDensity_sqm)) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanDensity_sqm)))
         
       })
       
       oneM_FilterByIsl_Isl <- reactive({
         oneM_DF %>%
-          filter(CommonName == input$oneM_SpeciesName_Isl) %>%
-          group_by(IslandDate, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(IslandDate, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear, 
-                   Island_Mean_Density, IslandSD, IslandSE, IslandQuads, IslandAreaSurveyed, IslandTotalCount) %>%
-          ungroup() %>%
-          group_by(SurveyYear) %>%
-          mutate(IslandDate = mean(IslandDate))
+          dplyr::filter(CommonName == input$oneM_SpeciesName_Isl) %>%
+          dplyr::group_by(IslandDate, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(IslandDate, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear, 
+                          Island_Mean_Density, IslandSD, IslandSE, IslandQuads, IslandAreaSurveyed, IslandTotalCount) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SurveyYear) %>%
+          dplyr::mutate(IslandDate = mean(IslandDate))
       })
       
       oneM_yValue_Isl <- reactive({
@@ -1172,8 +1172,8 @@ server <- function(input, output, session) {
                                         max(as.Date(oneM_FilterByIsl_Isl()$IslandDate))+365),
                              expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(expand = expansion(mult = c(0, .01)),
-                  limits = c(0, ifelse(input$oneM_FreeOrLock_Isl == "Locked Scales", 
-                                       max(oneM_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm)))) +
+                                   limits = c(0, ifelse(input$oneM_FreeOrLock_Isl == "Locked Scales", 
+                                                        max(oneM_Filter_Isl()$MaxSum), max(m$MeanDensity_sqm)))) +
                 labs(color = "Site Name",
                      linetype = "Site Name",
                      x = "Year",
@@ -1361,7 +1361,7 @@ server <- function(input, output, session) {
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_Isl()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
               new_scale_fill() +
-              geom_col(data = oneM_Filter_Isl() %>% group_by(SurveyYear) %>% mutate(Date = mean(Date)), 
+              geom_col(data = oneM_Filter_Isl() %>% dplyr::group_by(SurveyYear) %>% dplyr::mutate(Date = mean(Date)), 
                        aes(x = Date-75, y = MeanDensity_sqm, fill = SiteName),
                        position = input$oneM_BarOptions_Isl, width = 280) +
               scale_x_date(date_labels = "%Y", date_breaks = "1 year",
@@ -1483,46 +1483,46 @@ server <- function(input, output, session) {
       
       oneM_Filter_MPA <- reactive({
         oneM_DFMPA %>%
-          filter(CommonName == input$oneM_SpeciesName_MPA) %>%
-          group_by(IslandCode, SurveyYear) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = max(sum(MeanDensity_sqm))) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanDensity_sqm))) %>%
+          dplyr::filter(CommonName == input$oneM_SpeciesName_MPA) %>%
+          dplyr::group_by(IslandCode, SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = max(sum(MeanDensity_sqm))) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanDensity_sqm))) %>%
           arrange(SiteName)
       })
       
       oneM_FilterBarSite_MPA <-reactive({
         oneM_DFMPA %>%
-          filter(CommonName == input$oneM_SpeciesName_MPA,
-                 SiteName != "Keyhole") %>%
-          group_by(IslandCode, SurveyYear) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = max(sum(MeanDensity_sqm))) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanDensity_sqm)))
+          dplyr::filter(CommonName == input$oneM_SpeciesName_MPA,
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(IslandCode, SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = max(sum(MeanDensity_sqm))) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanDensity_sqm)))
       })
       
       oneM_Inside_MPA <- reactive({
         oneM_DFMPA %>% 
-          filter(CommonName == input$oneM_SpeciesName_MPA,
-                 ReserveStatus == "Inside",
-                 SiteName != "Keyhole") %>%
-          group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
-                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
+          dplyr::filter(CommonName == input$oneM_SpeciesName_MPA,
+                        ReserveStatus == "Inside",
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
+                          MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
       })
       
       oneM_Outside_MPA <- reactive({
         oneM_DFMPA %>%
-          filter(CommonName == input$oneM_SpeciesName_MPA,
-                 ReserveStatus == "Outside",
-                 SiteName != "Keyhole") %>%
-          group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
-                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
+          dplyr::filter(CommonName == input$oneM_SpeciesName_MPA,
+                        ReserveStatus == "Outside",
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
+                          MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
       })
       
       oneM_alphaONI_MPA <- reactive({
@@ -1607,7 +1607,7 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = oneM_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_line(data = oneM_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                         aes(x = MPA_Date, y = MPA_Mean, group = ReserveStatus, color = ReserveStatus, linetype = ReserveStatus),
                         size = 1) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
@@ -1766,22 +1766,22 @@ server <- function(input, output, session) {
                           position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_MPA()), show.legend = FALSE) +
                 scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
                 new_scale_fill() +
-                geom_col(data = m %>% filter(ReserveStatus == "Inside"), 
+                geom_col(data = m %>% dplyr::filter(ReserveStatus == "Inside"), 
                          aes(x = Date - 70, y = MeanDensity_sqm, fill = SiteName),
                          position = "stack", width = 140) +
-                geom_text(data = m %>% filter(ReserveStatus == "Inside") %>% 
-                            group_by(IslandName, SurveyYear) %>% mutate(SumBar = sum(MeanDensity_sqm)),
+                geom_text(data = m %>% dplyr::filter(ReserveStatus == "Inside") %>% 
+                            dplyr::group_by(IslandName, SurveyYear) %>% dplyr::mutate(SumBar = sum(MeanDensity_sqm)),
                           aes(x = Date - 70, y = SumBar, label = "In"),
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_fill_manual(values = SiteColor) +
                 labs(fill = "Inside") +
                 new_scale_fill() +
-                geom_col(data = m %>% filter(ReserveStatus == "Outside") , 
+                geom_col(data = m %>% dplyr::filter(ReserveStatus == "Outside") , 
                          aes(x = Date + 70, y = MeanDensity_sqm, fill = SiteName),
                          position = "stack", width = 140) +
-                geom_text(data = m %>% filter(ReserveStatus == "Outside") %>%
-                            group_by(IslandName, SurveyYear) %>%
-                            mutate(SumBar = sum(MeanDensity_sqm)),
+                geom_text(data = m %>% dplyr::filter(ReserveStatus == "Outside") %>%
+                            dplyr::group_by(IslandName, SurveyYear) %>%
+                            dplyr::mutate(SumBar = sum(MeanDensity_sqm)),
                           aes(x = Date + 70, y = SumBar, label = "Out"),
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_y_continuous(limits = c(0, ifelse(input$oneM_FreeOrLock_MPA == "Locked Scales", 
@@ -1829,10 +1829,10 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(oneM_alphaPDO_UW_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = oneM_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_point(data = oneM_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                          aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
                          size = 1, alpha = as.numeric(input$oneM_SmoothPoint_MPA), show.legend = FALSE) +
-              geom_smooth(data = oneM_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_smooth(data = oneM_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                           aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
                           se = as.logical(input$oneM_SmoothSE_MPA),
                           span = input$oneM_SmoothSlide_MPA) +
@@ -1886,8 +1886,8 @@ server <- function(input, output, session) {
                              limits = c(min(as.Date(m$Date)) - 150, max(as.Date(m$Date))),
                              expand = expansion(mult = c(0.01, .01))) +
                 scale_y_continuous(expand = expansion(mult = c(0, .1)),
-                  limits = c(NA, ifelse(input$oneM_FreeOrLock_MPA == "Locked Scales", 
-                                       max(oneM_Filter_MPA()$MaxSum) + max(oneM_Filter_MPA()$MPA_SE), NA))) +
+                                   limits = c(NA, ifelse(input$oneM_FreeOrLock_MPA == "Locked Scales", 
+                                                         max(oneM_Filter_MPA()$MaxSum) + max(oneM_Filter_MPA()$MPA_SE), NA))) +
                 labs(color = "Site Name",
                      linetype = "Site Name",
                      x = "Year",
@@ -1926,20 +1926,20 @@ server <- function(input, output, session) {
       
       oneM_Filter_Two_One <- reactive({
         oneM_DF %>%
-          filter(SiteName == input$oneM_SiteName_Two,
-                 CommonName == input$oneM_SpeciesName_Two_One) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
-                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
-                 Species, SiteNumber, IslandCode, SiteCode) 
+          dplyr::filter(SiteName == input$oneM_SiteName_Two,
+                        CommonName == input$oneM_SpeciesName_Two_One) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                        StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                        Species, SiteNumber, IslandCode, SiteCode) 
       })
       
       oneM_Filter_Two_Two <- reactive({
         oneM_DF %>%
-          filter(SiteName == input$oneM_SiteName_Two,
-                 CommonName == input$oneM_SpeciesName_Two_Two) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
-                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
-                 Species, SiteNumber, IslandCode, SiteCode) 
+          dplyr::filter(SiteName == input$oneM_SiteName_Two,
+                        CommonName == input$oneM_SpeciesName_Two_Two) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                        StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                        Species, SiteNumber, IslandCode, SiteCode) 
       })
       
       output$oneM_LargeSpPhoto_Two_1 <- renderImage({
@@ -2255,7 +2255,7 @@ server <- function(input, output, session) {
       
       oneM_Filter_All <- reactive({
         oneM_DF %>%
-          filter(SiteName == input$oneM_SiteName_All) %>%
+          dplyr::filter(SiteName == input$oneM_SiteName_All) %>%
           drop_na()
       })
       
@@ -2567,36 +2567,36 @@ server <- function(input, output, session) {
       
       fiveM_Filter_One <- reactive({ 
         fiveM_DF %>%
-          filter(SiteName == input$fiveM_SiteName_One,
-                 CommonName == input$fiveM_SpeciesName_One) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
-                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
-                 Species, SiteNumber, IslandCode, SiteCode, IslandSE) 
+          dplyr::filter(SiteName == input$fiveM_SiteName_One,
+                        CommonName == input$fiveM_SpeciesName_One) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                        StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                        Species, SiteNumber, IslandCode, SiteCode, IslandSE) 
       }) # filtered one meter summary table
       
       fiveM_RawFilter_One <- reactive({ 
         fiveM_DFRaw %>%
-          filter(SiteName == input$fiveM_SiteName_One,
-                 CommonName == input$fiveM_SpeciesName_One) %>% 
-          group_by(SurveyYear) %>% 
-          mutate(Mean = mean(Count))
+          dplyr::filter(SiteName == input$fiveM_SiteName_One,
+                        CommonName == input$fiveM_SpeciesName_One) %>% 
+          dplyr::group_by(SurveyYear) %>% 
+          dplyr::mutate(Mean = mean(Count))
       }) # filtered  one Meter raw table
       
       fiveM_SpeciesClass_One <- reactive({ 
         SpeciesName %>%
-          filter(CommonName == input$fiveM_SpeciesName_One) %>%
-          select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
-                 Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
-          pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
-          select(Rank, Name)
+          dplyr::filter(CommonName == input$fiveM_SpeciesName_One) %>%
+          dplyr::select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
+                        Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
+          dplyr::select(Rank, Name)
       }) # filtered Species classification table
       
       fiveM_SpeciesDescription_One <- reactive({
         SpeciesName %>%
-          filter(CommonName == input$fiveM_SpeciesName_One) %>%
-          select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
-          pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
-          select(Category, Information)
+          dplyr::filter(CommonName == input$fiveM_SpeciesName_One) %>%
+          dplyr::select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
+          dplyr::select(Category, Information)
       }) # filtered Species Description table  
       
       output$fiveM_TopPhoto_One <- renderImage({
@@ -3011,25 +3011,25 @@ server <- function(input, output, session) {
       
       fiveM_Filter_Isl <- reactive({
         fiveM_DF <- fiveM_DF %>%
-          filter(CommonName == input$fiveM_SpeciesName_Isl) %>%
-          group_by(SurveyYear, IslandName) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = sum(MeanDensity_sqm)) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanDensity_sqm)))
+          dplyr::filter(CommonName == input$fiveM_SpeciesName_Isl) %>%
+          dplyr::group_by(SurveyYear, IslandName) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = sum(MeanDensity_sqm)) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanDensity_sqm)))
         
       })
       
       fiveM_FilterByIsl_Isl <- reactive({
         fiveM_DF %>%
-          filter(CommonName == input$fiveM_SpeciesName_Isl) %>%
-          group_by(IslandDate, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(IslandDate, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear, 
-                   Island_Mean_Density, IslandSD, IslandSE, IslandQuads, IslandAreaSurveyed, IslandTotalCount) %>%
-          ungroup() %>%
-          group_by(SurveyYear) %>%
-          mutate(IslandDate = mean(IslandDate))
+          dplyr::filter(CommonName == input$fiveM_SpeciesName_Isl) %>%
+          dplyr::group_by(IslandDate, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(IslandDate, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear, 
+                          Island_Mean_Density, IslandSD, IslandSE, IslandQuads, IslandAreaSurveyed, IslandTotalCount) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SurveyYear) %>%
+          dplyr::mutate(IslandDate = mean(IslandDate))
       })
       
       fiveM_yValue_Isl <- reactive({
@@ -3563,7 +3563,7 @@ server <- function(input, output, session) {
         else if(input$fiveM_Graph_Isl == "Bar" && input$fiveM_DataSummary_Isl == "Site Means (by Island)") {
           return({
             ggplot() +
-              geom_col(data = fiveM_Filter_Isl() %>% group_by(SurveyYear) %>% mutate(Date = mean(Date)), 
+              geom_col(data = fiveM_Filter_Isl() %>% dplyr::group_by(SurveyYear) %>% dplyr::mutate(Date = mean(Date)), 
                        aes(x = Date-75, y = MeanDensity_sqm, fill = SiteName),
                        position = input$fiveM_BarOptions_Isl,
                        width = 280) +
@@ -3687,46 +3687,46 @@ server <- function(input, output, session) {
       
       fiveM_Filter_MPA <- reactive({
         fiveM_DFMPA %>%
-          filter(CommonName == input$fiveM_SpeciesName_MPA) %>%
-          group_by(IslandCode, SurveyYear) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = max(sum(MeanDensity_sqm))) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanDensity_sqm))) %>%
+          dplyr::filter(CommonName == input$fiveM_SpeciesName_MPA) %>%
+          dplyr::group_by(IslandCode, SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = max(sum(MeanDensity_sqm))) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanDensity_sqm))) %>%
           arrange(SiteName)
       })
       
       fiveM_FilterBarSite_MPA <-reactive({
         fiveM_DFMPA %>%
-          filter(CommonName == input$fiveM_SpeciesName_MPA,
-                 SiteName != "Keyhole") %>%
-          group_by(IslandCode, SurveyYear) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = max(sum(MeanDensity_sqm))) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanDensity_sqm)))
+          dplyr::filter(CommonName == input$fiveM_SpeciesName_MPA,
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(IslandCode, SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = max(sum(MeanDensity_sqm))) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanDensity_sqm)))
       })
       
       fiveM_Inside_MPA <- reactive({
         fiveM_DFMPA %>% 
-          filter(CommonName == input$fiveM_SpeciesName_MPA,
-                 ReserveStatus == "Inside",
-                 SiteName != "Keyhole") %>%
-          group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
-                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
+          dplyr::filter(CommonName == input$fiveM_SpeciesName_MPA,
+                        ReserveStatus == "Inside",
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
+                          MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
       })
       
       fiveM_Outside_MPA <- reactive({
         fiveM_DFMPA %>%
-          filter(CommonName == input$fiveM_SpeciesName_MPA,
-                 ReserveStatus == "Outside",
-                 SiteName != "Keyhole") %>%
-          group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
-                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
+          dplyr::filter(CommonName == input$fiveM_SpeciesName_MPA,
+                        ReserveStatus == "Outside",
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
+                          MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
       })
       
       fiveM_alphaONI_MPA <- reactive({
@@ -3811,7 +3811,7 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_UW_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = fiveM_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_line(data = fiveM_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                         aes(x = MPA_Date, y = MPA_Mean, group = ReserveStatus, color = ReserveStatus, linetype = ReserveStatus),
                         size = 1) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
@@ -3968,22 +3968,22 @@ server <- function(input, output, session) {
                           position = "identity", alpha = as.numeric(fiveM_alphaPDO_UW_MPA()), show.legend = FALSE) +
                 scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
                 new_scale_fill() +
-                geom_col(data = m %>% filter(ReserveStatus == "Inside"), 
+                geom_col(data = m %>% dplyr::filter(ReserveStatus == "Inside"), 
                          aes(x = Date - 70, y = MeanDensity_sqm, fill = SiteName),
                          position = "stack", width = 140) +
-                geom_text(data = m %>% filter(ReserveStatus == "Inside") %>% 
-                            group_by(IslandName, SurveyYear) %>% mutate(SumBar = sum(MeanDensity_sqm)),
+                geom_text(data = m %>% dplyr::filter(ReserveStatus == "Inside") %>% 
+                            dplyr::group_by(IslandName, SurveyYear) %>% dplyr::mutate(SumBar = sum(MeanDensity_sqm)),
                           aes(x = Date - 70, y = SumBar, label = "In"),
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_fill_manual(values = SiteColor) +
                 labs(fill = "Inside") +
                 new_scale_fill() +
-                geom_col(data = m %>% filter(ReserveStatus == "Outside") , 
+                geom_col(data = m %>% dplyr::filter(ReserveStatus == "Outside") , 
                          aes(x = Date + 70, y = MeanDensity_sqm, fill = SiteName),
                          position = "stack", width = 140) +
-                geom_text(data = m %>% filter(ReserveStatus == "Outside") %>%
-                            group_by(IslandName, SurveyYear) %>%
-                            mutate(SumBar = sum(MeanDensity_sqm)),
+                geom_text(data = m %>% dplyr::filter(ReserveStatus == "Outside") %>%
+                            dplyr::group_by(IslandName, SurveyYear) %>%
+                            dplyr::mutate(SumBar = sum(MeanDensity_sqm)),
                           aes(x = Date + 70, y = SumBar, label = "Out"),
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_y_continuous(limits = c(0, ifelse(input$fiveM_FreeOrLock_MPA == "Locked Scales", 
@@ -4031,10 +4031,10 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(fiveM_alphaPDO_UW_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = fiveM_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_point(data = fiveM_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                          aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
                          size = 1, alpha = as.numeric(input$fiveM_SmoothPoint_MPA), show.legend = FALSE) +
-              geom_smooth(data = fiveM_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_smooth(data = fiveM_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                           aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
                           se = as.logical(input$fiveM_SmoothSE_MPA),
                           span = input$fiveM_SmoothSlide_MPA) +
@@ -4125,20 +4125,20 @@ server <- function(input, output, session) {
       
       fiveM_Filter_Two_One <- reactive({
         fiveM_DF %>%
-          filter(SiteName == input$fiveM_SiteName_Two,
-                 CommonName == input$fiveM_SpeciesName_Two_One) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
-                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
-                 Species, SiteNumber, IslandCode, SiteCode) 
+          dplyr::filter(SiteName == input$fiveM_SiteName_Two,
+                        CommonName == input$fiveM_SpeciesName_Two_One) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                        StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                        Species, SiteNumber, IslandCode, SiteCode) 
       })
       
       fiveM_Filter_Two_Two <- reactive({
         fiveM_DF %>%
-          filter(SiteName == input$fiveM_SiteName_Two,
-                 CommonName == input$fiveM_SpeciesName_Two_Two) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
-                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
-                 Species, SiteNumber, IslandCode, SiteCode) 
+          dplyr::filter(SiteName == input$fiveM_SiteName_Two,
+                        CommonName == input$fiveM_SpeciesName_Two_Two) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                        StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                        Species, SiteNumber, IslandCode, SiteCode) 
       })
       
       output$fiveM_LargeSpPhoto_Two_1 <- renderImage({
@@ -4480,7 +4480,7 @@ server <- function(input, output, session) {
       
       fiveM_Filter_All <- reactive({
         fiveM_DF %>%
-          filter(SiteName == input$fiveM_SiteNameAll) %>%
+          dplyr::filter(SiteName == input$fiveM_SiteNameAll) %>%
           drop_na()
       })
       
@@ -4834,36 +4834,36 @@ server <- function(input, output, session) {
       
       bands_Filter_One <- reactive({ 
         bands_DF %>%
-          filter(SiteName == input$bands_SiteName_One,
-                 CommonName == input$bands_SpeciesName_One) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
-                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
-                 Species, SiteNumber, IslandCode, SiteCode, IslandSE) 
+          dplyr::filter(SiteName == input$bands_SiteName_One,
+                        CommonName == input$bands_SpeciesName_One) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                        StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                        Species, SiteNumber, IslandCode, SiteCode, IslandSE) 
       }) # filtered one meter summary table
       
       bands_RawFilter_One <- reactive({ 
         bands_DFRaw %>%
-          filter(SiteName == input$bands_SiteName_One,
-                 CommonName == input$bands_SpeciesName_One) %>% 
-          group_by(SurveyYear) %>% 
-          mutate(Mean = mean(Count))
+          dplyr::filter(SiteName == input$bands_SiteName_One,
+                        CommonName == input$bands_SpeciesName_One) %>% 
+          dplyr::group_by(SurveyYear) %>% 
+          dplyr::mutate(Mean = mean(Count))
       }) # filtered  one Meter raw table
       
       bands_SpeciesClass_One <- reactive({ 
         SpeciesName %>%
-          filter(CommonName == input$bands_SpeciesName_One) %>%
-          select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
-                 Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
-          pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
-          select(Rank, Name)
+          dplyr::filter(CommonName == input$bands_SpeciesName_One) %>%
+          dplyr::select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
+                        Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
+          dplyr::select(Rank, Name)
       }) # filtered Species classification table
       
       bands_SpeciesDescription_One <- reactive({
         SpeciesName %>%
-          filter(CommonName == input$bands_SpeciesName_One) %>%
-          select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
-          pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
-          select(Category, Information)
+          dplyr::filter(CommonName == input$bands_SpeciesName_One) %>%
+          dplyr::select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
+          dplyr::select(Category, Information)
       }) # filtered Species Description table  
       
       output$bands_TopPhoto_One <- renderImage({
@@ -5303,25 +5303,25 @@ server <- function(input, output, session) {
       
       bands_Filter_Isl <- reactive({
         bands_DF <- bands_DF %>%
-          filter(CommonName == input$bands_SpeciesName_Isl) %>%
-          group_by(SurveyYear, IslandName) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = sum(MeanDensity_sqm)) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanDensity_sqm)))
+          dplyr::filter(CommonName == input$bands_SpeciesName_Isl) %>%
+          dplyr::group_by(SurveyYear, IslandName) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = sum(MeanDensity_sqm)) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanDensity_sqm)))
         
       })
       
       bands_FilterByIsl_Isl <- reactive({
         bands_DF %>%
-          filter(CommonName == input$bands_SpeciesName_Isl) %>%
-          group_by(IslandDate, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(IslandDate, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear, 
-                   Island_Mean_Density, IslandSD, IslandSE, IslandQuads, IslandAreaSurveyed, IslandTotalCount) %>%
-          ungroup() %>%
-          group_by(SurveyYear) %>%
-          mutate(IslandDate = mean(IslandDate))
+          dplyr::filter(CommonName == input$bands_SpeciesName_Isl) %>%
+          dplyr::group_by(IslandDate, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(IslandDate, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear, 
+                          Island_Mean_Density, IslandSD, IslandSE, IslandQuads, IslandAreaSurveyed, IslandTotalCount) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SurveyYear) %>%
+          dplyr::mutate(IslandDate = mean(IslandDate))
       })
       
       bands_yValue_Isl <- reactive({
@@ -5855,7 +5855,7 @@ server <- function(input, output, session) {
         else if(input$bands_Graph_Isl == "Bar" && input$bands_DataSummary_Isl == "Site Means (by Island)") {
           return({
             ggplot() +
-              geom_col(data = bands_Filter_Isl() %>% group_by(SurveyYear) %>% mutate(Date = mean(Date)), 
+              geom_col(data = bands_Filter_Isl() %>% dplyr::group_by(SurveyYear) %>% dplyr::mutate(Date = mean(Date)), 
                        aes(x = Date-75, y = MeanDensity_sqm, fill = SiteName),
                        position = input$bands_BarOptions_Isl,
                        width = 280) +
@@ -5979,46 +5979,46 @@ server <- function(input, output, session) {
       
       bands_Filter_MPA <- reactive({
         bands_DFMPA %>%
-          filter(CommonName == input$bands_SpeciesName_MPA) %>%
-          group_by(IslandCode, SurveyYear) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = max(sum(MeanDensity_sqm))) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanDensity_sqm))) %>%
+          dplyr::filter(CommonName == input$bands_SpeciesName_MPA) %>%
+          dplyr::group_by(IslandCode, SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = max(sum(MeanDensity_sqm))) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanDensity_sqm))) %>%
           arrange(SiteName)
       })
       
       bands_FilterBarSite_MPA <-reactive({
         bands_DFMPA %>%
-          filter(CommonName == input$bands_SpeciesName_MPA,
-                 SiteName != "Keyhole") %>%
-          group_by(IslandCode, SurveyYear) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = max(sum(MeanDensity_sqm))) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanDensity_sqm)))
+          dplyr::filter(CommonName == input$bands_SpeciesName_MPA,
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(IslandCode, SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = max(sum(MeanDensity_sqm))) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanDensity_sqm)))
       })
       
       bands_Inside_MPA <- reactive({
         bands_DFMPA %>% 
-          filter(CommonName == input$bands_SpeciesName_MPA,
-                 ReserveStatus == "Inside",
-                 SiteName != "Keyhole") %>%
-          group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
-                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
+          dplyr::filter(CommonName == input$bands_SpeciesName_MPA,
+                        ReserveStatus == "Inside",
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
+                          MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
       })
       
       bands_Outside_MPA <- reactive({
         bands_DFMPA %>%
-          filter(CommonName == input$bands_SpeciesName_MPA,
-                 ReserveStatus == "Outside",
-                 SiteName != "Keyhole") %>%
-          group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
-                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
+          dplyr::filter(CommonName == input$bands_SpeciesName_MPA,
+                        ReserveStatus == "Outside",
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
+                          MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
       })
       
       bands_alphaONI_MPA <- reactive({
@@ -6103,7 +6103,7 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_UW_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = bands_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_line(data = bands_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                         aes(x = MPA_Date, y = MPA_Mean, group = ReserveStatus, color = ReserveStatus, linetype = ReserveStatus),
                         size = 1) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
@@ -6260,22 +6260,22 @@ server <- function(input, output, session) {
                           position = "identity", alpha = as.numeric(bands_alphaPDO_UW_MPA()), show.legend = FALSE) +
                 scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
                 new_scale_fill() +
-                geom_col(data = m %>% filter(ReserveStatus == "Inside"), 
+                geom_col(data = m %>% dplyr::filter(ReserveStatus == "Inside"), 
                          aes(x = Date - 70, y = MeanDensity_sqm, fill = SiteName),
                          position = "stack", width = 140) +
-                geom_text(data = m %>% filter(ReserveStatus == "Inside") %>% 
-                            group_by(IslandName, SurveyYear) %>% mutate(SumBar = sum(MeanDensity_sqm)),
+                geom_text(data = m %>% dplyr::filter(ReserveStatus == "Inside") %>% 
+                            dplyr::group_by(IslandName, SurveyYear) %>% dplyr::mutate(SumBar = sum(MeanDensity_sqm)),
                           aes(x = Date - 70, y = SumBar, label = "In"),
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_fill_manual(values = SiteColor) +
                 labs(fill = "Inside") +
                 new_scale_fill() +
-                geom_col(data = m %>% filter(ReserveStatus == "Outside") , 
+                geom_col(data = m %>% dplyr::filter(ReserveStatus == "Outside") , 
                          aes(x = Date + 70, y = MeanDensity_sqm, fill = SiteName),
                          position = "stack", width = 140) +
-                geom_text(data = m %>% filter(ReserveStatus == "Outside") %>%
-                            group_by(IslandName, SurveyYear) %>%
-                            mutate(SumBar = sum(MeanDensity_sqm)),
+                geom_text(data = m %>% dplyr::filter(ReserveStatus == "Outside") %>%
+                            dplyr::group_by(IslandName, SurveyYear) %>%
+                            dplyr::mutate(SumBar = sum(MeanDensity_sqm)),
                           aes(x = Date + 70, y = SumBar, label = "Out"),
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_y_continuous(limits = c(0, ifelse(input$bands_FreeOrLock_MPA == "Locked Scales", 
@@ -6323,10 +6323,10 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(bands_alphaPDO_UW_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = bands_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_point(data = bands_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                          aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
                          size = 1, alpha = as.numeric(input$bands_SmoothPoint_MPA), show.legend = FALSE) +
-              geom_smooth(data = bands_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_smooth(data = bands_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                           aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
                           se = as.logical(input$bands_SmoothSE_MPA),
                           span = input$bands_SmoothSlide_MPA) +
@@ -6417,20 +6417,20 @@ server <- function(input, output, session) {
       
       bands_Filter_Two_One <- reactive({
         bands_DF %>%
-          filter(SiteName == input$bands_SiteName_Two,
-                 CommonName == input$bands_SpeciesName_Two_One) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
-                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
-                 Species, SiteNumber, IslandCode, SiteCode) 
+          dplyr::filter(SiteName == input$bands_SiteName_Two,
+                        CommonName == input$bands_SpeciesName_Two_One) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                        StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                        Species, SiteNumber, IslandCode, SiteCode) 
       })
       
       bands_Filter_Two_Two <- reactive({
         bands_DF %>%
-          filter(SiteName == input$bands_SiteName_Two,
-                 CommonName == input$bands_SpeciesName_Two_Two) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
-                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
-                 Species, SiteNumber, IslandCode, SiteCode) 
+          dplyr::filter(SiteName == input$bands_SiteName_Two,
+                        CommonName == input$bands_SpeciesName_Two_Two) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                        StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                        Species, SiteNumber, IslandCode, SiteCode) 
       })
       
       output$bands_LargeSpPhoto_Two_1 <- renderImage({
@@ -6772,7 +6772,7 @@ server <- function(input, output, session) {
       
       bands_Filter_All <- reactive({
         bands_DF %>%
-          filter(SiteName == input$bands_SiteNameAll) %>%
+          dplyr::filter(SiteName == input$bands_SiteNameAll) %>%
           drop_na()
       })
       
@@ -7014,20 +7014,20 @@ server <- function(input, output, session) {
       
       core_Filter_Two_One <- reactive({
         core_DF %>%
-          filter(SiteName == input$core_SiteName_Two,
-                 CommonName == input$core_SpeciesName_Two_One) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
-                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
-                 Species, SiteNumber, IslandCode, SiteCode, SurveyType) 
+          dplyr::filter(SiteName == input$core_SiteName_Two,
+                        CommonName == input$core_SpeciesName_Two_One) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                        StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                        Species, SiteNumber, IslandCode, SiteCode, SurveyType) 
       })
       
       core_Filter_Two_Two <- reactive({
         core_DF %>%
-          filter(SiteName == input$core_SiteName_Two,
-                 CommonName == input$core_SpeciesName_Two_Two) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
-                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
-                 Species, SiteNumber, IslandCode, SiteCode, SurveyType) 
+          dplyr::filter(SiteName == input$core_SiteName_Two,
+                        CommonName == input$core_SpeciesName_Two_Two) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                        StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                        Species, SiteNumber, IslandCode, SiteCode, SurveyType) 
       })
       
       output$core_TopPhoto_One <- renderImage({ # species image - small one at the top
@@ -7454,18 +7454,18 @@ server <- function(input, output, session) {
       
       core_Filter_Isl_One <- reactive({
         core_DF <- core_DF %>%
-          filter(CommonName == input$core_SpeciesName_Isl_One,
-                 IslandName == input$core_IslandName_Isl) %>%
-          group_by(SurveyYear) %>%
-          mutate(Date = mean(Date))
+          dplyr::filter(CommonName == input$core_SpeciesName_Isl_One,
+                        IslandName == input$core_IslandName_Isl) %>%
+          dplyr::group_by(SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date))
       })
       
       core_Filter_Isl_Two <- reactive({
         core_DF <- core_DF %>%
-          filter(CommonName == input$core_SpeciesName_Isl_Two,
-                 IslandName == input$core_IslandName_Isl) %>%
-          group_by(SurveyYear) %>%
-          mutate(Date = mean(Date)) 
+          dplyr::filter(CommonName == input$core_SpeciesName_Isl_Two,
+                        IslandName == input$core_IslandName_Isl) %>%
+          dplyr::group_by(SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date)) 
       })
       
       core_alphaONI_Isl <- reactive({
@@ -7695,18 +7695,18 @@ server <- function(input, output, session) {
       
       core_Filter_MPA_One <- reactive({
         core_DFMPA <- core_DFMPA %>%
-          filter(CommonName == input$core_SpeciesName_MPA_One,
-                 IslandName == input$core_IslandName_MPA) %>%
-          group_by(SurveyYear) %>%
-          mutate(Date = mean(Date))
+          dplyr::filter(CommonName == input$core_SpeciesName_MPA_One,
+                        IslandName == input$core_IslandName_MPA) %>%
+          dplyr::group_by(SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date))
       })
       
       core_Filter_MPA_Two <- reactive({
         core_DFMPA <- core_DFMPA %>%
-          filter(CommonName == input$core_SpeciesName_MPA_Two,
-                 IslandName == input$core_IslandName_MPA) %>%
-          group_by(SurveyYear) %>%
-          mutate(Date = mean(Date)) 
+          dplyr::filter(CommonName == input$core_SpeciesName_MPA_Two,
+                        IslandName == input$core_IslandName_MPA) %>%
+          dplyr::group_by(SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date)) 
       })
       
       core_alphaONI_MPA <- reactive({
@@ -7937,6 +7937,44 @@ server <- function(input, output, session) {
     }
     
   }
+  
+  output$Biodiversity_Benthic <- renderPlot({
+    p1 <- ggplot2::ggplot(Benthic_Diversity, aes(x = SurveyYear, y = ShannonIndex, color = ReserveStatus)) +
+      ggplot2::geom_smooth(method = 'loess', formula='y~x') +
+      ggplot2::labs(title = "Shannon Index Time Series",
+                    subtitle = "A Measure of Benthic Diversity in Select MPA Reference Sites",
+                    x = NULL,
+                    y = "Shannon Index (Diversity)",
+                    color = "Reserve Status",
+                    caption = "Fig 1. Diversity by reserve status across all reference sites") +
+      ggplot2::theme_classic() +
+      ggplot2::theme(plot.title = element_text(hjust = .5),
+                     plot.subtitle = element_text(hjust = .5),
+                     plot.caption = element_text(hjust = 0),
+                     legend.justification = c(0, 0.5))
+    
+    p2 <- ggplot2::ggplot(Benthic_Diversity, aes(x = SurveyYear, y = ShannonIndex, color = IslandCode)) +
+      ggplot2::geom_smooth(method = 'loess', formula='y~x') +
+      ggplot2::labs(x = NULL,
+                    y = "Shannon Index (Diversity)",
+                    color = "Island Code",
+                    caption = "Fig 2. Diversity by island across all reference sites") +
+      ggplot2::theme_classic() +
+      ggplot2::theme(plot.caption = element_text(hjust = 0),
+                     legend.justification = c(0, 0.5))
+    
+    p3 <- ggplot2::ggplot(Benthic_Diversity, aes(x = SurveyYear, y = ShannonIndex, color = IslandCode, linetype = ReserveStatus)) +
+      ggplot2::geom_smooth(method = 'loess', formula = 'y~x', se = F) +
+      ggplot2::labs(x = "Survey Year",
+                    y = "Shannon Index (Diversity)",
+                    color = "Island Code", 
+                    linetype = "Reserve Status",
+                    caption = "Fig 3. Diversity by island and reserve status") +
+      ggplot2::theme_classic() +
+      ggplot2::theme(plot.caption = element_text(hjust = 0),
+                     legend.justification = c(0, 0.5))
+    ggarrange(p1, p2, p3, ncol = 1, align = "v")
+  })
   
   output$rpcs_UIout <- renderUI({ # rpcs_UI   ----
     if (is.null(input$rpcs_allORone))
@@ -8196,36 +8234,36 @@ server <- function(input, output, session) {
       
       rpcs_Filter_One <- reactive({ 
         rpcs_DF %>%
-          filter(SiteName == input$rpcs_SiteName_One,
-                 CommonName == input$rpcs_SpeciesName_One) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
-                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
-                 Species, SiteNumber, IslandCode, SiteCode, IslandSE) 
+          dplyr::filter(SiteName == input$rpcs_SiteName_One,
+                        CommonName == input$rpcs_SpeciesName_One) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                        StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                        Species, SiteNumber, IslandCode, SiteCode, IslandSE) 
       }) # filtered one meter summary table
       
       rpcs_RawFilter_One <- reactive({ 
         rpcs_DFRaw %>%
-          filter(SiteName == input$rpcs_SiteName_One,
-                 CommonName == input$rpcs_SpeciesName_One) %>% 
-          group_by(SurveyYear) %>% 
-          mutate(Mean = mean(Count))
+          dplyr::filter(SiteName == input$rpcs_SiteName_One,
+                        CommonName == input$rpcs_SpeciesName_One) %>% 
+          dplyr::group_by(SurveyYear) %>% 
+          dplyr::mutate(Mean = mean(Count))
       }) # filtered  one Meter raw table
       
       rpcs_SpeciesClass_One <- reactive({ 
         SpeciesName %>%
-          filter(CommonName == input$rpcs_SpeciesName_One) %>%
-          select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
-                 Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
-          pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
-          select(Rank, Name)
+          dplyr::filter(CommonName == input$rpcs_SpeciesName_One) %>%
+          dplyr::select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
+                        Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
+          dplyr::select(Rank, Name)
       }) # filtered Species classification table
       
       rpcs_SpeciesDescription_One <- reactive({
         SpeciesName %>%
-          filter(CommonName == input$rpcs_SpeciesName_One) %>%
-          select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
-          pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
-          select(Category, Information)
+          dplyr::filter(CommonName == input$rpcs_SpeciesName_One) %>%
+          dplyr::select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
+          dplyr::select(Category, Information)
       }) # filtered Species Description table  
       
       output$rpcs_TopPhoto_One <- renderImage({
@@ -8665,25 +8703,25 @@ server <- function(input, output, session) {
       
       rpcs_Filter_Isl <- reactive({
         rpcs_DF <- rpcs_DF %>%
-          filter(CommonName == input$rpcs_SpeciesName_Isl) %>%
-          group_by(SurveyYear, IslandName) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = sum(MeanDensity_sqm)) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanDensity_sqm)))
+          dplyr::filter(CommonName == input$rpcs_SpeciesName_Isl) %>%
+          dplyr::group_by(SurveyYear, IslandName) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = sum(MeanDensity_sqm)) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanDensity_sqm)))
         
       })
       
       rpcs_FilterByIsl_Isl <- reactive({
         rpcs_DF %>%
-          filter(CommonName == input$rpcs_SpeciesName_Isl) %>%
-          group_by(IslandDate, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(IslandDate, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear, 
-                   Island_Mean_Density, IslandSD, IslandSE, IslandQuads, IslandAreaSurveyed, IslandTotalCount) %>%
-          ungroup() %>%
-          group_by(SurveyYear) %>%
-          mutate(IslandDate = mean(IslandDate))
+          dplyr::filter(CommonName == input$rpcs_SpeciesName_Isl) %>%
+          dplyr::group_by(IslandDate, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(IslandDate, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear, 
+                          Island_Mean_Density, IslandSD, IslandSE, IslandQuads, IslandAreaSurveyed, IslandTotalCount) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SurveyYear) %>%
+          dplyr::mutate(IslandDate = mean(IslandDate))
       })
       
       rpcs_yValue_Isl <- reactive({
@@ -9217,7 +9255,7 @@ server <- function(input, output, session) {
         else if(input$rpcs_Graph_Isl == "Bar" && input$rpcs_DataSummary_Isl == "Site Means (by Island)") {
           return({
             ggplot() +
-              geom_col(data = rpcs_Filter_Isl() %>% group_by(SurveyYear) %>% mutate(Date = mean(Date)), 
+              geom_col(data = rpcs_Filter_Isl() %>% dplyr::group_by(SurveyYear) %>% dplyr::mutate(Date = mean(Date)), 
                        aes(x = Date-75, y = MeanDensity_sqm, fill = SiteName),
                        position = input$rpcs_BarOptions_Isl,
                        width = 280) +
@@ -9341,46 +9379,46 @@ server <- function(input, output, session) {
       
       rpcs_Filter_MPA <- reactive({
         rpcs_DFMPA %>%
-          filter(CommonName == input$rpcs_SpeciesName_MPA) %>%
-          group_by(IslandCode, SurveyYear) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = max(sum(MeanDensity_sqm))) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanDensity_sqm))) %>%
+          dplyr::filter(CommonName == input$rpcs_SpeciesName_MPA) %>%
+          dplyr::group_by(IslandCode, SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = max(sum(MeanDensity_sqm))) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanDensity_sqm))) %>%
           arrange(SiteName)
       })
       
       rpcs_FilterBarSite_MPA <-reactive({
         rpcs_DFMPA %>%
-          filter(CommonName == input$rpcs_SpeciesName_MPA,
-                 SiteName != "Keyhole") %>%
-          group_by(IslandCode, SurveyYear) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = max(sum(MeanDensity_sqm))) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanDensity_sqm)))
+          dplyr::filter(CommonName == input$rpcs_SpeciesName_MPA,
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(IslandCode, SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = max(sum(MeanDensity_sqm))) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanDensity_sqm)))
       })
       
       rpcs_Inside_MPA <- reactive({
         rpcs_DFMPA %>% 
-          filter(CommonName == input$rpcs_SpeciesName_MPA,
-                 ReserveStatus == "Inside",
-                 SiteName != "Keyhole") %>%
-          group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
-                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
+          dplyr::filter(CommonName == input$rpcs_SpeciesName_MPA,
+                        ReserveStatus == "Inside",
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
+                          MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
       })
       
       rpcs_Outside_MPA <- reactive({
         rpcs_DFMPA %>%
-          filter(CommonName == input$rpcs_SpeciesName_MPA,
-                 ReserveStatus == "Outside",
-                 SiteName != "Keyhole") %>%
-          group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
-                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
+          dplyr::filter(CommonName == input$rpcs_SpeciesName_MPA,
+                        ReserveStatus == "Outside",
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
+                          MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, MPA_Quadrats_Sampled, MPA_AreaSurveyed_sqm, .keep_all = TRUE)
       })
       
       rpcs_alphaONI_MPA <- reactive({
@@ -9465,7 +9503,7 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = rpcs_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_line(data = rpcs_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                         aes(x = MPA_Date, y = MPA_Mean, group = ReserveStatus, color = ReserveStatus, linetype = ReserveStatus),
                         size = 1) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
@@ -9622,22 +9660,22 @@ server <- function(input, output, session) {
                           position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_MPA()), show.legend = FALSE) +
                 scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
                 new_scale_fill() +
-                geom_col(data = m %>% filter(ReserveStatus == "Inside"), 
+                geom_col(data = m %>% dplyr::filter(ReserveStatus == "Inside"), 
                          aes(x = Date - 70, y = MeanDensity_sqm, fill = SiteName),
                          position = "stack", width = 140) +
-                geom_text(data = m %>% filter(ReserveStatus == "Inside") %>% 
-                            group_by(IslandName, SurveyYear) %>% mutate(SumBar = sum(MeanDensity_sqm)),
+                geom_text(data = m %>% dplyr::filter(ReserveStatus == "Inside") %>% 
+                            dplyr::group_by(IslandName, SurveyYear) %>% dplyr::mutate(SumBar = sum(MeanDensity_sqm)),
                           aes(x = Date - 70, y = SumBar, label = "In"),
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_fill_manual(values = SiteColor) +
                 labs(fill = "Inside") +
                 new_scale_fill() +
-                geom_col(data = m %>% filter(ReserveStatus == "Outside") , 
+                geom_col(data = m %>% dplyr::filter(ReserveStatus == "Outside") , 
                          aes(x = Date + 70, y = MeanDensity_sqm, fill = SiteName),
                          position = "stack", width = 140) +
-                geom_text(data = m %>% filter(ReserveStatus == "Outside") %>%
-                            group_by(IslandName, SurveyYear) %>%
-                            mutate(SumBar = sum(MeanDensity_sqm)),
+                geom_text(data = m %>% dplyr::filter(ReserveStatus == "Outside") %>%
+                            dplyr::group_by(IslandName, SurveyYear) %>%
+                            dplyr::mutate(SumBar = sum(MeanDensity_sqm)),
                           aes(x = Date + 70, y = SumBar, label = "Out"),
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_y_continuous(limits = c(0, ifelse(input$rpcs_FreeOrLock_MPA == "Locked Scales", 
@@ -9685,10 +9723,10 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(rpcs_alphaPDO_UW_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = rpcs_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_point(data = rpcs_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                          aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
                          size = 1, alpha = as.numeric(input$rpcs_SmoothPoint_MPA), show.legend = FALSE) +
-              geom_smooth(data = rpcs_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_smooth(data = rpcs_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                           aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
                           se = as.logical(input$rpcs_SmoothSE_MPA),
                           span = input$rpcs_SmoothSlide_MPA) +
@@ -9779,20 +9817,20 @@ server <- function(input, output, session) {
       
       rpcs_Filter_Two_One <- reactive({
         rpcs_DF %>%
-          filter(SiteName == input$rpcs_SiteName_Two,
-                 CommonName == input$rpcs_SpeciesName_Two_One) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
-                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
-                 Species, SiteNumber, IslandCode, SiteCode) 
+          dplyr::filter(SiteName == input$rpcs_SiteName_Two,
+                        CommonName == input$rpcs_SpeciesName_Two_One) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                        StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                        Species, SiteNumber, IslandCode, SiteCode) 
       })
       
       rpcs_Filter_Two_Two <- reactive({
         rpcs_DF %>%
-          filter(SiteName == input$rpcs_SiteName_Two,
-                 CommonName == input$rpcs_SpeciesName_Two_Two) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
-                 StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
-                 Species, SiteNumber, IslandCode, SiteCode) 
+          dplyr::filter(SiteName == input$rpcs_SiteName_Two,
+                        CommonName == input$rpcs_SpeciesName_Two_Two) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanDensity_sqm, 
+                        StandardError, StandardError, TotalCount, AreaSurveyed_sqm, MeanDepth, Island_Mean_Density,
+                        Species, SiteNumber, IslandCode, SiteCode) 
       })
       
       output$rpcs_LargeSpPhoto_Two_1 <- renderImage({
@@ -10134,7 +10172,7 @@ server <- function(input, output, session) {
       
       rpcs_Filter_All <- reactive({
         rpcs_DF %>%
-          filter(SiteName == input$rpcs_SiteNameAll) %>%
+          dplyr::filter(SiteName == input$rpcs_SiteNameAll) %>%
           drop_na()
       })
       
@@ -10585,39 +10623,39 @@ server <- function(input, output, session) {
       NHSF_RawFilter_One <- reactive({ 
         NHSF_DFRaw %>%
           expandRows(count = "NoOfInd") %>%
-          filter(SiteName == input$NHSF_SiteName_SD_One,
-                 CommonName == input$NHSF_SpeciesName_SD_One) %>% 
-          group_by(SurveyYear) %>%
-          mutate(TotalCount = length(Size_mm)) %>%
-          select(SiteNumber, SurveyYear, Date, IslandName, SiteName, ScientificName, CommonName, 
-                 Size_mm, TotalCount, IslandCode, SiteCode, Species, ReserveStatus, MeanDepth)
+          dplyr::filter(SiteName == input$NHSF_SiteName_SD_One,
+                        CommonName == input$NHSF_SpeciesName_SD_One) %>% 
+          dplyr::group_by(SurveyYear) %>%
+          dplyr::mutate(TotalCount = length(Size_mm)) %>%
+          dplyr::select(SiteNumber, SurveyYear, Date, IslandName, SiteName, ScientificName, CommonName, 
+                        Size_mm, TotalCount, IslandCode, SiteCode, Species, ReserveStatus, MeanDepth)
       }) # filtered  NHSF raw table
       
       NHSF_RawFilterSummary_One <- reactive({ 
         NHSF_DFRaw %>%
-          filter(SiteName == input$NHSF_SiteName_SD_One,
-                 CommonName == input$NHSF_SpeciesName_SD_One) %>% 
-          group_by(SurveyYear) %>%
-          mutate(TotalCount = length(Size_mm)) %>%
-          select(SiteNumber, SurveyYear, Date, IslandName, SiteName, ScientificName, CommonName, 
-                 Size_mm, NoOfInd, TotalCount, IslandCode, SiteCode, Species, ReserveStatus, MeanDepth)
+          dplyr::filter(SiteName == input$NHSF_SiteName_SD_One,
+                        CommonName == input$NHSF_SpeciesName_SD_One) %>% 
+          dplyr::group_by(SurveyYear) %>%
+          dplyr::mutate(TotalCount = length(Size_mm)) %>%
+          dplyr::select(SiteNumber, SurveyYear, Date, IslandName, SiteName, ScientificName, CommonName, 
+                        Size_mm, NoOfInd, TotalCount, IslandCode, SiteCode, Species, ReserveStatus, MeanDepth)
       }) # filtered  NHSF raw table
       
       NHSF_SpeciesClass_SD_One <- reactive({ 
         SpeciesName %>%
-          filter(CommonName == input$NHSF_SpeciesName_SD_One) %>%
-          select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
-                 Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
-          pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
-          select(Rank, Name)
+          dplyr::filter(CommonName == input$NHSF_SpeciesName_SD_One) %>%
+          dplyr::select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
+                        Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
+          dplyr::select(Rank, Name)
       }) # filtered Species classification table
       
       NHSF_SpeciesDescription_SD_One <- reactive({
         SpeciesName %>%
-          filter(CommonName == input$NHSF_SpeciesName_SD_One) %>%
-          select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
-          pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
-          select(Category, Information)
+          dplyr::filter(CommonName == input$NHSF_SpeciesName_SD_One) %>%
+          dplyr::select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
+          dplyr::select(Category, Information)
       }) # filtered Species Description table  
       
       output$NHSF_TopPhoto_SD_One <- renderImage({
@@ -10928,13 +10966,13 @@ server <- function(input, output, session) {
       NHSF_RawFilter_Isl <- reactive({
         NHSF_DFRaw %>%
           expandRows(count = "NoOfInd") %>%
-          filter(CommonName == input$NHSF_SpeciesName_SD_Isl) %>%
-          group_by(SurveyYear) %>% 
-          mutate(Date = mean(as.Date(Date))) %>% 
-          ungroup() %>% 
-          group_by(SurveyYear, IslandName, CommonName) %>%
-          mutate(TotalCount = length(Size_mm),
-                 MeanSize = mean(Size_mm))
+          dplyr::filter(CommonName == input$NHSF_SpeciesName_SD_Isl) %>%
+          dplyr::group_by(SurveyYear) %>% 
+          dplyr::mutate(Date = mean(as.Date(Date))) %>% 
+          dplyr::ungroup() %>% 
+          dplyr::group_by(SurveyYear, IslandName, CommonName) %>%
+          dplyr::mutate(TotalCount = length(Size_mm),
+                        MeanSize = mean(Size_mm))
       })
       
       NHSF_alphaONI_SD_Isl <- reactive({
@@ -11096,14 +11134,14 @@ server <- function(input, output, session) {
       
       NHSF_RawFilter_MPA <- reactive({
         NHSF_DFRawMPA %>%
-          filter(IslandName == input$NHSF_IslandName_MPA,
-                 CommonName == input$NHSF_SpeciesName_SD_MPA) %>%
-          group_by(SurveyYear, ReserveStatus) %>%
-          mutate(TotalCount = length(Size_mm),
-                 MeanSize = mean(Size_mm)) %>% 
-          ungroup() %>% 
-          group_by(SurveyYear) %>% 
-          mutate(Date =  mean(as.Date(Date)))
+          dplyr::filter(IslandName == input$NHSF_IslandName_MPA,
+                        CommonName == input$NHSF_SpeciesName_SD_MPA) %>%
+          dplyr::group_by(SurveyYear, ReserveStatus) %>%
+          dplyr::mutate(TotalCount = length(Size_mm),
+                        MeanSize = mean(Size_mm)) %>% 
+          dplyr::ungroup() %>% 
+          dplyr::group_by(SurveyYear) %>% 
+          dplyr::mutate(Date =  mean(as.Date(Date)))
       })
       
       NHSF_alphaONI_SD_MPA <- reactive({
@@ -11266,28 +11304,28 @@ server <- function(input, output, session) {
       
       NHSF_Filter_One <- reactive({ 
         NHSF_DF %>%
-          filter(SiteName == input$NHSF_SiteName_One,
-                 CommonName == input$NHSF_SpeciesName_One) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
-                 StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
-                 Species, SiteNumber, IslandCode, SiteCode, IslandSE) 
+          dplyr::filter(SiteName == input$NHSF_SiteName_One,
+                        CommonName == input$NHSF_SpeciesName_One) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
+                        StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
+                        Species, SiteNumber, IslandCode, SiteCode, IslandSE) 
       }) # filtered one meter summary table
       
       NHSF_SpeciesClass_One <- reactive({ 
         SpeciesName %>%
-          filter(CommonName == input$NHSF_SpeciesName_One) %>%
-          select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
-                 Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
-          pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
-          select(Rank, Name)
+          dplyr::filter(CommonName == input$NHSF_SpeciesName_One) %>%
+          dplyr::select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
+                        Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
+          dplyr::select(Rank, Name)
       }) # filtered Species classification table
       
       NHSF_SpeciesDescription_One <- reactive({
         SpeciesName %>%
-          filter(CommonName == input$NHSF_SpeciesName_One) %>%
-          select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
-          pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
-          select(Category, Information)
+          dplyr::filter(CommonName == input$NHSF_SpeciesName_One) %>%
+          dplyr::select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
+          dplyr::select(Category, Information)
       }) # filtered Species Description table  
       
       output$NHSF_TopPhoto_One <- renderImage({
@@ -11657,25 +11695,25 @@ server <- function(input, output, session) {
       
       NHSF_Filter_Isl <- reactive({
         NHSF_DF <- NHSF_DF %>%
-          filter(CommonName == input$NHSF_SpeciesName_Isl) %>%
-          group_by(SurveyYear, IslandName) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = sum(MeanSize)) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanSize)))
+          dplyr::filter(CommonName == input$NHSF_SpeciesName_Isl) %>%
+          dplyr::group_by(SurveyYear, IslandName) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = sum(MeanSize)) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanSize)))
         
       })
       
       NHSF_FilterByIsl_Isl <- reactive({
         NHSF_DF %>%
-          filter(CommonName == input$NHSF_SpeciesName_Isl) %>%
-          group_by(IslandDate, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(IslandDate, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear, 
-                   Island_Mean, IslandSD, IslandSE, IslandTotalCount) %>%
-          ungroup() %>%
-          group_by(SurveyYear) %>%
-          mutate(IslandDate = mean(IslandDate))
+          dplyr::filter(CommonName == input$NHSF_SpeciesName_Isl) %>%
+          dplyr::group_by(IslandDate, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(IslandDate, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear, 
+                          Island_Mean, IslandSD, IslandSE, IslandTotalCount) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SurveyYear) %>%
+          dplyr::mutate(IslandDate = mean(IslandDate))
       })
       
       NHSF_yValue_Isl <- reactive({
@@ -12209,7 +12247,7 @@ server <- function(input, output, session) {
         else if(input$NHSF_Graph_Isl == "Bar" && input$NHSF_DataSummary_Isl == "Site Means (by Island)") {
           return({
             ggplot() +
-              geom_col(data = NHSF_Filter_Isl() %>% group_by(SurveyYear) %>% mutate(Date = mean(Date)), 
+              geom_col(data = NHSF_Filter_Isl() %>% dplyr::group_by(SurveyYear) %>% dplyr::mutate(Date = mean(Date)), 
                        aes(x = Date-75, y = MeanSize, fill = SiteName),
                        position = input$NHSF_BarOptions_Isl,
                        width = 280) +
@@ -12333,46 +12371,46 @@ server <- function(input, output, session) {
       
       NHSF_Filter_MPA <- reactive({
         NHSF_DFMPA %>%
-          filter(CommonName == input$NHSF_SpeciesName_MPA) %>%
-          group_by(IslandCode, SurveyYear) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = max(sum(MeanSize))) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanSize))) %>%
+          dplyr::filter(CommonName == input$NHSF_SpeciesName_MPA) %>%
+          dplyr::group_by(IslandCode, SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = max(sum(MeanSize))) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanSize))) %>%
           arrange(SiteName)
       })
       
       NHSF_FilterBarSite_MPA <-reactive({
         NHSF_DFMPA %>%
-          filter(CommonName == input$NHSF_SpeciesName_MPA,
-                 SiteName != "Keyhole") %>%
-          group_by(IslandCode, SurveyYear) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = max(sum(MeanSize))) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanSize)))
+          dplyr::filter(CommonName == input$NHSF_SpeciesName_MPA,
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(IslandCode, SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = max(sum(MeanSize))) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanSize)))
       })
       
       NHSF_Inside_MPA <- reactive({
         NHSF_DFMPA %>% 
-          filter(CommonName == input$NHSF_SpeciesName_MPA,
-                 ReserveStatus == "Inside",
-                 SiteName != "Keyhole") %>%
-          group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
-                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, .keep_all = TRUE)
+          dplyr::filter(CommonName == input$NHSF_SpeciesName_MPA,
+                        ReserveStatus == "Inside",
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
+                          MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, .keep_all = TRUE)
       })
       
       NHSF_Outside_MPA <- reactive({
         NHSF_DFMPA %>%
-          filter(CommonName == input$NHSF_SpeciesName_MPA,
-                 ReserveStatus == "Outside",
-                 SiteName != "Keyhole") %>%
-          group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
-          distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
-                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, .keep_all = TRUE)
+          dplyr::filter(CommonName == input$NHSF_SpeciesName_MPA,
+                        ReserveStatus == "Outside",
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(MPA_Date, IslandCode, IslandName, Species, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(MPA_Date, IslandCode, IslandName,Species, ScientificName, CommonName, SurveyYear,
+                          MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, .keep_all = TRUE)
       })
       
       NHSF_alphaONI_MPA <- reactive({
@@ -12457,7 +12495,7 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_UW_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = NHSF_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_line(data = NHSF_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                         aes(x = MPA_Date, y = MPA_Mean, group = ReserveStatus, color = ReserveStatus, linetype = ReserveStatus),
                         size = 1) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
@@ -12614,22 +12652,22 @@ server <- function(input, output, session) {
                           position = "identity", alpha = as.numeric(NHSF_alphaPDO_UW_MPA()), show.legend = FALSE) +
                 scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
                 new_scale_fill() +
-                geom_col(data = m %>% filter(ReserveStatus == "Inside"), 
+                geom_col(data = m %>% dplyr::filter(ReserveStatus == "Inside"), 
                          aes(x = Date - 70, y = MeanSize, fill = SiteName),
                          position = "stack", width = 140) +
-                geom_text(data = m %>% filter(ReserveStatus == "Inside") %>% 
-                            group_by(IslandName, SurveyYear) %>% mutate(SumBar = sum(MeanSize)),
+                geom_text(data = m %>% dplyr::filter(ReserveStatus == "Inside") %>% 
+                            dplyr::group_by(IslandName, SurveyYear) %>% dplyr::mutate(SumBar = sum(MeanSize)),
                           aes(x = Date - 70, y = SumBar, label = "In"),
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_fill_manual(values = SiteColor) +
                 labs(fill = "Inside") +
                 new_scale_fill() +
-                geom_col(data = m %>% filter(ReserveStatus == "Outside") , 
+                geom_col(data = m %>% dplyr::filter(ReserveStatus == "Outside") , 
                          aes(x = Date + 70, y = MeanSize, fill = SiteName),
                          position = "stack", width = 140) +
-                geom_text(data = m %>% filter(ReserveStatus == "Outside") %>%
-                            group_by(IslandName, SurveyYear) %>%
-                            mutate(SumBar = sum(MeanSize)),
+                geom_text(data = m %>% dplyr::filter(ReserveStatus == "Outside") %>%
+                            dplyr::group_by(IslandName, SurveyYear) %>%
+                            dplyr::mutate(SumBar = sum(MeanSize)),
                           aes(x = Date + 70, y = SumBar, label = "Out"),
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_y_continuous(limits = c(0, ifelse(input$NHSF_FreeOrLock_MPA == "Locked Scales", 
@@ -12677,10 +12715,10 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(NHSF_alphaPDO_UW_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = NHSF_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_point(data = NHSF_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                          aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
                          size = 1, alpha = as.numeric(input$NHSF_SmoothPoint_MPA), show.legend = FALSE) +
-              geom_smooth(data = NHSF_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_smooth(data = NHSF_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                           aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
                           se = as.logical(input$NHSF_SmoothSE_MPA),
                           span = input$NHSF_SmoothSlide_MPA) +
@@ -12771,20 +12809,20 @@ server <- function(input, output, session) {
       
       NHSF_Filter_Two_One <- reactive({
         NHSF_DF %>%
-          filter(SiteName == input$NHSF_SiteName_Two,
-                 CommonName == input$NHSF_SpeciesName_Two_One) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
-                 StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
-                 Species, SiteNumber, IslandCode, SiteCode) 
+          dplyr::filter(SiteName == input$NHSF_SiteName_Two,
+                        CommonName == input$NHSF_SpeciesName_Two_One) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
+                        StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
+                        Species, SiteNumber, IslandCode, SiteCode) 
       })
       
       NHSF_Filter_Two_Two <- reactive({
         NHSF_DF %>%
-          filter(SiteName == input$NHSF_SiteName_Two,
-                 CommonName == input$NHSF_SpeciesName_Two_Two) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
-                 StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
-                 Species, SiteNumber, IslandCode, SiteCode) 
+          dplyr::filter(SiteName == input$NHSF_SiteName_Two,
+                        CommonName == input$NHSF_SpeciesName_Two_Two) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
+                        StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
+                        Species, SiteNumber, IslandCode, SiteCode) 
       })
       
       output$NHSF_LargeSpPhoto_Two_1 <- renderImage({
@@ -13126,7 +13164,7 @@ server <- function(input, output, session) {
       
       NHSF_Filter_All <- reactive({
         NHSF_DF %>%
-          filter(SiteName == input$NHSF_SiteNameAll) %>%
+          dplyr::filter(SiteName == input$NHSF_SiteNameAll) %>%
           drop_na()
       })
       
@@ -13576,41 +13614,41 @@ server <- function(input, output, session) {
       
       FSF_RawFilter_One <- reactive({ 
         FSF_DFRaw %>%
-          filter(SiteName == input$FSF_SiteName_SD_One,
-                 CommonName == input$FSF_SpeciesName_SD_One) %>% 
+          dplyr::filter(SiteName == input$FSF_SiteName_SD_One,
+                        CommonName == input$FSF_SpeciesName_SD_One) %>% 
           expandRows(count = "Count") %>% 
-          group_by(SurveyYear) %>%
-          mutate(TotalCount = length(Size_cm),
-                 MeanSize = mean(Size_cm)) %>%
-          select(SiteNumber, SurveyYear, Date, IslandName, SiteName, ScientificName, CommonName, 
-                 Size_cm, TotalCount, MeanSize, IslandCode, SiteCode, ReserveStatus, MeanDepth, Species)
+          dplyr::group_by(SurveyYear) %>%
+          dplyr::mutate(TotalCount = length(Size_cm),
+                        MeanSize = mean(Size_cm)) %>%
+          dplyr::select(SiteNumber, SurveyYear, Date, IslandName, SiteName, ScientificName, CommonName, 
+                        Size_cm, TotalCount, MeanSize, IslandCode, SiteCode, ReserveStatus, MeanDepth, Species)
       }) # filtered  FSF_ raw table
       
       FSF_RawFilterSummary_One <- reactive({ 
         FSF_DFRaw %>%
-          filter(SiteName == input$FSF_SiteName_SD_One,
-                 CommonName == input$FSF_SpeciesName_SD_One) %>% 
-          group_by(SurveyYear) %>%
-          mutate(TotalCount = length(Size_cm)) %>%
-          select(SiteNumber, SurveyYear, Date, IslandName, SiteName, ScientificName, CommonName, 
-                 Size_cm, TotalCount, IslandCode, SiteCode, ReserveStatus, MeanDepth, Species)
+          dplyr::filter(SiteName == input$FSF_SiteName_SD_One,
+                        CommonName == input$FSF_SpeciesName_SD_One) %>% 
+          dplyr::group_by(SurveyYear) %>%
+          dplyr::mutate(TotalCount = length(Size_cm)) %>%
+          dplyr::select(SiteNumber, SurveyYear, Date, IslandName, SiteName, ScientificName, CommonName, 
+                        Size_cm, TotalCount, IslandCode, SiteCode, ReserveStatus, MeanDepth, Species)
       }) # filtered  FSF_ raw table
       
       FSF_SpeciesClass_SD_One <- reactive({ 
         SpeciesFish %>%
-          filter(CommonName == input$FSF_SpeciesName_SD_One) %>%
-          select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
-                 Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
-          pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
-          select(Rank, Name)
+          dplyr::filter(CommonName == input$FSF_SpeciesName_SD_One) %>%
+          dplyr::select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
+                        Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
+          dplyr::select(Rank, Name)
       }) # filtered Species classification table
       
       FSF_SpeciesDescription_SD_One <- reactive({
         SpeciesFish %>%
-          filter(CommonName == input$FSF_SpeciesName_SD_One) %>%
-          select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
-          pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
-          select(Category, Information)
+          dplyr::filter(CommonName == input$FSF_SpeciesName_SD_One) %>%
+          dplyr::select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
+          dplyr::select(Category, Information)
       }) # filtered Species Description table  
       
       output$FSF_TopPhoto_SD_One <- renderImage({
@@ -13919,13 +13957,13 @@ server <- function(input, output, session) {
       
       FSF_RawFilter_Isl <- reactive({
         FSF_DFRaw %>%
-          filter(CommonName == input$FSF_SpeciesName_SD_Isl) %>%
-          group_by(SurveyYear) %>% 
-          mutate(Date = mean(as.Date(Date))) %>% 
-          ungroup() %>% 
-          group_by(SurveyYear, IslandName, CommonName) %>%
-          mutate(TotalCount = length(Size_cm),
-                 MeanSize = mean(Size_cm))
+          dplyr::filter(CommonName == input$FSF_SpeciesName_SD_Isl) %>%
+          dplyr::group_by(SurveyYear) %>% 
+          dplyr::mutate(Date = mean(as.Date(Date))) %>% 
+          dplyr::ungroup() %>% 
+          dplyr::group_by(SurveyYear, IslandName, CommonName) %>%
+          dplyr::mutate(TotalCount = length(Size_cm),
+                        MeanSize = mean(Size_cm))
       })
       
       FSF_alphaONI_SD_Isl <- reactive({
@@ -14087,15 +14125,15 @@ server <- function(input, output, session) {
       
       FSF_RawFilter_MPA <- reactive({
         FSF_DFRawMPA %>%
-          filter(IslandName == input$FSF_IslandName_MPA,
-                 CommonName == input$FSF_SpeciesName_SD_MPA) %>%
+          dplyr::filter(IslandName == input$FSF_IslandName_MPA,
+                        CommonName == input$FSF_SpeciesName_SD_MPA) %>%
           expandRows(count = "Count") %>% 
-          group_by(SurveyYear, ReserveStatus) %>%
-          mutate(TotalCount = length(Size_cm),
-                 MeanSize = mean(Size_cm)) %>% 
-          ungroup() %>% 
-          group_by(SurveyYear) %>% 
-          mutate(Date =  mean(as.Date(Date)))
+          dplyr::group_by(SurveyYear, ReserveStatus) %>%
+          dplyr::mutate(TotalCount = length(Size_cm),
+                        MeanSize = mean(Size_cm)) %>% 
+          dplyr::ungroup() %>% 
+          dplyr::group_by(SurveyYear) %>% 
+          dplyr::mutate(Date =  mean(as.Date(Date)))
       })
       
       FSF_alphaONI_SD_MPA <- reactive({
@@ -14259,28 +14297,28 @@ server <- function(input, output, session) {
       
       FSF_Filter_One <- reactive({ 
         FSF_DF %>%
-          filter(SiteName == input$FSF_SiteName_One,
-                 CommonName == input$FSF_SpeciesName_One) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
-                 StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
-                 SiteNumber, IslandCode, SiteCode, IslandSE, Species) 
+          dplyr::filter(SiteName == input$FSF_SiteName_One,
+                        CommonName == input$FSF_SpeciesName_One) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
+                        StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
+                        SiteNumber, IslandCode, SiteCode, IslandSE, Species) 
       }) # filtered summary table
       
       FSF_SpeciesClass_One <- reactive({ 
         SpeciesFish %>%
-          filter(CommonName == input$FSF_SpeciesName_One) %>%
-          select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
-                 Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
-          pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
-          select(Rank, Name)
+          dplyr::filter(CommonName == input$FSF_SpeciesName_One) %>%
+          dplyr::select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
+                        Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
+          dplyr::select(Rank, Name)
       }) # filtered Species classification table
       
       FSF_SpeciesDescription_One <- reactive({
         SpeciesFish %>%
-          filter(CommonName == input$FSF_SpeciesName_One) %>%
-          select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
-          pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
-          select(Category, Information)
+          dplyr::filter(CommonName == input$FSF_SpeciesName_One) %>%
+          dplyr::select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
+          dplyr::select(Category, Information)
       }) # filtered Species Description table  
       
       output$FSF_TopPhoto_One <- renderImage({
@@ -14650,25 +14688,25 @@ server <- function(input, output, session) {
       
       FSF_Filter_Isl <- reactive({
         FSF_DF <- FSF_DF %>%
-          filter(CommonName == input$FSF_SpeciesName_Isl) %>%
-          group_by(SurveyYear, IslandName) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = sum(MeanSize)) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanSize)))
+          dplyr::filter(CommonName == input$FSF_SpeciesName_Isl) %>%
+          dplyr::group_by(SurveyYear, IslandName) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = sum(MeanSize)) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanSize)))
         
       })
       
       FSF_FilterByIsl_Isl <- reactive({
         FSF_DF %>%
-          filter(CommonName == input$FSF_SpeciesName_Isl) %>%
-          group_by(IslandDate, IslandCode, IslandName, ScientificName, CommonName, SurveyYear) %>%
-          distinct(IslandDate, IslandCode, IslandName, ScientificName, CommonName, SurveyYear, 
-                   Island_Mean, IslandSD, IslandSE, IslandTotalCount, Species) %>%
-          ungroup() %>%
-          group_by(SurveyYear) %>%
-          mutate(IslandDate = mean(IslandDate))
+          dplyr::filter(CommonName == input$FSF_SpeciesName_Isl) %>%
+          dplyr::group_by(IslandDate, IslandCode, IslandName, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(IslandDate, IslandCode, IslandName, ScientificName, CommonName, SurveyYear, 
+                          Island_Mean, IslandSD, IslandSE, IslandTotalCount, Species) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SurveyYear) %>%
+          dplyr::mutate(IslandDate = mean(IslandDate))
       })
       
       FSF_yValue_Isl <- reactive({
@@ -15198,7 +15236,7 @@ server <- function(input, output, session) {
         else if(input$FSF_Graph_Isl == "Bar" && input$FSF_DataSummary_Isl == "Site Means (by Island)") {
           return({
             ggplot() +
-              geom_col(data = FSF_Filter_Isl() %>% group_by(SurveyYear) %>% mutate(Date = mean(Date)), 
+              geom_col(data = FSF_Filter_Isl() %>% dplyr::group_by(SurveyYear) %>% dplyr::mutate(Date = mean(Date)), 
                        aes(x = Date-75, y = MeanSize, fill = SiteName),
                        position = input$FSF_BarOptions_Isl,
                        width = 280) +
@@ -15322,46 +15360,46 @@ server <- function(input, output, session) {
       
       FSF_Filter_MPA <- reactive({
         FSF_DFMPA %>%
-          filter(CommonName == input$FSF_SpeciesName_MPA) %>%
-          group_by(IslandCode, SurveyYear) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = max(sum(MeanSize))) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanSize))) %>%
+          dplyr::filter(CommonName == input$FSF_SpeciesName_MPA) %>%
+          dplyr::group_by(IslandCode, SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = max(sum(MeanSize))) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanSize))) %>%
           arrange(SiteName)
       })
       
       FSF_FilterBarSite_MPA <-reactive({
         FSF_DFMPA %>%
-          filter(CommonName == input$FSF_SpeciesName_MPA,
-                 SiteName != "Keyhole") %>%
-          group_by(IslandCode, SurveyYear) %>%
-          mutate(Date = mean(Date),
-                 MaxSumBar = max(sum(MeanSize))) %>%
-          ungroup() %>%
-          group_by(SiteName, SurveyYear) %>%
-          mutate(MaxSum = max(sum(MeanSize)))
+          dplyr::filter(CommonName == input$FSF_SpeciesName_MPA,
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(IslandCode, SurveyYear) %>%
+          dplyr::mutate(Date = mean(Date),
+                        MaxSumBar = max(sum(MeanSize))) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(SiteName, SurveyYear) %>%
+          dplyr::mutate(MaxSum = max(sum(MeanSize)))
       })
       
       FSF_Inside_MPA <- reactive({
         FSF_DFMPA %>% 
-          filter(CommonName == input$FSF_SpeciesName_MPA,
-                 ReserveStatus == "Inside",
-                 SiteName != "Keyhole") %>%
-          group_by(MPA_Date, IslandCode, IslandName, ScientificName, CommonName, SurveyYear) %>%
-          distinct(MPA_Date, IslandCode, IslandName, ScientificName, CommonName, SurveyYear,
-                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, .keep_all = TRUE)
+          dplyr::filter(CommonName == input$FSF_SpeciesName_MPA,
+                        ReserveStatus == "Inside",
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(MPA_Date, IslandCode, IslandName, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(MPA_Date, IslandCode, IslandName, ScientificName, CommonName, SurveyYear,
+                          MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, .keep_all = TRUE)
       })
       
       FSF_Outside_MPA <- reactive({
         FSF_DFMPA %>%
-          filter(CommonName == input$FSF_SpeciesName_MPA,
-                 ReserveStatus == "Outside",
-                 SiteName != "Keyhole") %>%
-          group_by(MPA_Date, IslandCode, IslandName, ScientificName, CommonName, SurveyYear) %>%
-          distinct(MPA_Date, IslandCode, IslandName, ScientificName, CommonName, SurveyYear,
-                   MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, .keep_all = TRUE)
+          dplyr::filter(CommonName == input$FSF_SpeciesName_MPA,
+                        ReserveStatus == "Outside",
+                        SiteName != "Keyhole") %>%
+          dplyr::group_by(MPA_Date, IslandCode, IslandName, ScientificName, CommonName, SurveyYear) %>%
+          dplyr::distinct(MPA_Date, IslandCode, IslandName, ScientificName, CommonName, SurveyYear,
+                          MPA_TotalCount, MPA_Mean, MPA_SD, MPA_SE, .keep_all = TRUE)
       })
       
       FSF_alphaONI_MPA <- reactive({
@@ -15446,7 +15484,7 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_line(data = FSF_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_line(data = FSF_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                         aes(x = MPA_Date, y = MPA_Mean, group = ReserveStatus, color = ReserveStatus, linetype = ReserveStatus),
                         size = 1) +
               scale_x_date(date_labels = "%Y", date_breaks = '1 year',
@@ -15603,22 +15641,22 @@ server <- function(input, output, session) {
                           position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_MPA()), show.legend = FALSE) +
                 scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
                 new_scale_fill() +
-                geom_col(data = m %>% filter(ReserveStatus == "Inside"), 
+                geom_col(data = m %>% dplyr::filter(ReserveStatus == "Inside"), 
                          aes(x = Date - 70, y = MeanSize, fill = SiteName),
                          position = "stack", width = 140) +
-                geom_text(data = m %>% filter(ReserveStatus == "Inside") %>% 
-                            group_by(IslandName, SurveyYear) %>% mutate(SumBar = sum(MeanSize)),
+                geom_text(data = m %>% dplyr::filter(ReserveStatus == "Inside") %>% 
+                            dplyr::group_by(IslandName, SurveyYear) %>% dplyr::mutate(SumBar = sum(MeanSize)),
                           aes(x = Date - 70, y = SumBar, label = "In"),
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_fill_manual(values = SiteColor) +
                 labs(fill = "Inside") +
                 new_scale_fill() +
-                geom_col(data = m %>% filter(ReserveStatus == "Outside") , 
+                geom_col(data = m %>% dplyr::filter(ReserveStatus == "Outside") , 
                          aes(x = Date + 70, y = MeanSize, fill = SiteName),
                          position = "stack", width = 140) +
-                geom_text(data = m %>% filter(ReserveStatus == "Outside") %>%
-                            group_by(IslandName, SurveyYear) %>%
-                            mutate(SumBar = sum(MeanSize)),
+                geom_text(data = m %>% dplyr::filter(ReserveStatus == "Outside") %>%
+                            dplyr::group_by(IslandName, SurveyYear) %>%
+                            dplyr::mutate(SumBar = sum(MeanSize)),
                           aes(x = Date + 70, y = SumBar, label = "Out"),
                           vjust = -.2, hjust = .5, angle = 0) +
                 scale_y_continuous(limits = c(0, ifelse(input$FSF_FreeOrLock_MPA == "Locked Scales", 
@@ -15666,10 +15704,10 @@ server <- function(input, output, session) {
               geom_rect(data = pdo_uw, aes(xmin= DateStart, xmax = DateEnd, ymin = 0, ymax = Inf, fill = pdoAnom), 
                         position = "identity", alpha = as.numeric(FSF_alphaPDO_UW_MPA()), show.legend = FALSE) +
               scale_fill_gradient2(high = "red3", mid = "white", low = "blue3", midpoint = 0) +
-              geom_point(data = FSF_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_point(data = FSF_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                          aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
                          size = 1, alpha = as.numeric(input$FSF_SmoothPoint_MPA), show.legend = FALSE) +
-              geom_smooth(data = FSF_Filter_MPA() %>% filter(SiteName != "Keyhole"), 
+              geom_smooth(data = FSF_Filter_MPA() %>% dplyr::filter(SiteName != "Keyhole"), 
                           aes(x= MPA_Date, y = MPA_Mean, color = ReserveStatus),
                           se = as.logical(input$FSF_SmoothSE_MPA),
                           span = input$FSF_SmoothSlide_MPA) +
@@ -15760,20 +15798,20 @@ server <- function(input, output, session) {
       
       FSF_Filter_Two_One <- reactive({
         FSF_DF %>%
-          filter(SiteName == input$FSF_SiteName_Two,
-                 CommonName == input$FSF_SpeciesName_Two_One) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
-                 StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
-                 SiteNumber, IslandCode, SiteCode, Species) 
+          dplyr::filter(SiteName == input$FSF_SiteName_Two,
+                        CommonName == input$FSF_SpeciesName_Two_One) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
+                        StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
+                        SiteNumber, IslandCode, SiteCode, Species) 
       })
       
       FSF_Filter_Two_Two <- reactive({
         FSF_DF %>%
-          filter(SiteName == input$FSF_SiteName_Two,
-                 CommonName == input$FSF_SpeciesName_Two_Two) %>%
-          select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
-                 StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
-                 SiteNumber, IslandCode, SiteCode, Species) 
+          dplyr::filter(SiteName == input$FSF_SiteName_Two,
+                        CommonName == input$FSF_SpeciesName_Two_Two) %>%
+          dplyr::select(SurveyYear, Date, SiteName, IslandName, ScientificName, CommonName, MeanSize, 
+                        StandardError, StandardError, TotalCount, MeanDepth, Island_Mean,
+                        SiteNumber, IslandCode, SiteCode, Species) 
       })
       
       output$FSF_LargeSpPhoto_Two_1 <- renderImage({
@@ -16113,7 +16151,7 @@ server <- function(input, output, session) {
       
       FSF_Filter_All <- reactive({
         FSF_DF %>%
-          filter(SiteName == input$FSF_SiteNameAll) %>%
+          dplyr::filter(SiteName == input$FSF_SiteNameAll) %>%
           drop_na()
       })
       
@@ -16257,27 +16295,27 @@ server <- function(input, output, session) {
     
     RDFC_Filter_One <- reactive({ 
       RDFC_DF %>%
-        filter(SiteName == input$RDFC_SiteName_One,
-               CommonName == input$RDFC_SpeciesName_One,
-               ExperienceLevel == "E") %>% 
-        group_by(SurveyYear, IslandName, SiteName, ScientificName, CommonName) %>%
-        mutate(Low_Count = min(Count),
-               High_Count = max(Count),
-               Mean_Count = round(mean(Count), 2),
-               StandardError = round(sd(Count)/sqrt(length(Count)), 2),
-               StandardDeviation = round(sd(Count), 2),
-               Date = mean(as.Date(Date)),
-               Observers = length(Count)) %>% 
-        select("SiteNumber", "SurveyYear", "Date", "IslandName", "SiteName", "ScientificName", "CommonName", "Score", 
-               "Abundance", "Count", "Low_Count", "High_Count", "Mean_Count", "StandardError", "StandardDeviation",  
-               "Observers", "PermanentObserverNumber", "ExperienceLevel", "IslandCode", "SiteCode", "Species", 
-               "ReserveStatus", "MeanDepth", "IslandDate")
+        dplyr::filter(SiteName == input$RDFC_SiteName_One,
+                      CommonName == input$RDFC_SpeciesName_One,
+                      ExperienceLevel == "E") %>% 
+        dplyr::group_by(SurveyYear, IslandName, SiteName, ScientificName, CommonName) %>%
+        dplyr::mutate(Low_Count = min(Count),
+                      High_Count = max(Count),
+                      Mean_Count = round(mean(Count), 2),
+                      StandardError = round(sd(Count)/sqrt(length(Count)), 2),
+                      StandardDeviation = round(sd(Count), 2),
+                      Date = mean(as.Date(Date)),
+                      Observers = length(Count)) %>% 
+        dplyr::select("SiteNumber", "SurveyYear", "Date", "IslandName", "SiteName", "ScientificName", "CommonName", "Score", 
+                      "Abundance", "Count", "Low_Count", "High_Count", "Mean_Count", "StandardError", "StandardDeviation",  
+                      "Observers", "PermanentObserverNumber", "ExperienceLevel", "IslandCode", "SiteCode", "Species", 
+                      "ReserveStatus", "MeanDepth", "IslandDate")
     }) # filtered RDFC_ summary table
     
     RDFC_SideBar_Filter <- reactive({ 
       RDFC_DF %>%
-        filter(SiteName == input$RDFC_SiteName_One,
-               ExperienceLevel == "E") 
+        dplyr::filter(SiteName == input$RDFC_SiteName_One,
+                      ExperienceLevel == "E") 
     }) # filtered RDFC_ summary table for sidebar menu
     
     output$RDFC_SideBar_One <- renderUI({
@@ -16289,19 +16327,19 @@ server <- function(input, output, session) {
     
     RDFC_SpeciesClass_One <- reactive({ 
       SpeciesFish %>%
-        filter(CommonName == input$RDFC_SpeciesName_One) %>%
-        select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
-               Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
-        pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
-        select(Rank, Name)
+        dplyr::filter(CommonName == input$RDFC_SpeciesName_One) %>%
+        dplyr::select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)",
+                      Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
+        tidyr::pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
+        dplyr::select(Rank, Name)
     }) # filtered Species classification table
     
     RDFC_SpeciesDescription_One <- reactive({
       SpeciesFish %>%
-        filter(CommonName == input$RDFC_SpeciesName_One) %>%
-        select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
-        pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
-        select(Category, Information)
+        dplyr::filter(CommonName == input$RDFC_SpeciesName_One) %>%
+        dplyr::select(ScientificName, "Geographic Range", Identification, Habitat, "Size Range", "Trophic Level", Abundance) %>%
+        tidyr::pivot_longer(-ScientificName, names_to = "Category", values_to = "Information") %>%
+        dplyr::select(Category, Information)
     }) # filtered Species Description table  
     
     output$RDFC_TopPhoto_One <- renderImage({
@@ -16642,7 +16680,7 @@ server <- function(input, output, session) {
       }, deleteFile = FALSE)
       
       temp_Filter_One <- reactive({
-        temp %>%filter(SiteName == input$SiteNameTemp)
+        temp %>%dplyr::filter(SiteName == input$SiteNameTemp)
       })
       
       temp_alphaONI_one <- reactive({
@@ -16820,7 +16858,7 @@ server <- function(input, output, session) {
       
       temp_Filter_Isl <- reactive({
         tempByIsland %>%
-          filter(IslandName == input$temp_IslandName_Isl)
+          dplyr::filter(IslandName == input$temp_IslandName_Isl)
       })
       
       temp_alphaONI_Isl <- reactive({
@@ -17897,70 +17935,70 @@ server <- function(input, output, session) {
         if(input$statProtocol == "NHSF" && input$SiteOrIslStat == "By Site"){
           return({
             NHSF_DFRaw %>%
-              filter(SiteName == input$SiteNameECD,
-                     CommonName == input$SpeciesECD)
+              dplyr::filter(SiteName == input$SiteNameECD,
+                            CommonName == input$SpeciesECD)
           })
         }
         else if(input$statProtocol == "NHSF" && input$SiteOrIslStat == "By Island"){
           return({
             NHSF_DFRaw %>%
-              filter(IslandName == input$IslNameECD,
-                     CommonName == input$SpeciesECD1)
+              dplyr::filter(IslandName == input$IslNameECD,
+                            CommonName == input$SpeciesECD1)
           })
         }
         else if(input$statProtocol == "NHSF" && input$SiteOrIslStat == "By MPA"){
           return({
             NHSF_DFRaw %>%
-              filter(SiteNumber != '5' &
-                       SiteNumber != '6' & 
-                       SiteNumber != '7' & 
-                       SiteNumber != '8' &
-                       SiteNumber != '10',
-                     SurveyYear > 2004,
-                     IslandName == input$MPANameECD,
-                     CommonName == input$SpeciesECD2)
+              dplyr::filter(SiteNumber != '5' &
+                              SiteNumber != '6' & 
+                              SiteNumber != '7' & 
+                              SiteNumber != '8' &
+                              SiteNumber != '10',
+                            SurveyYear > 2004,
+                            IslandName == input$MPANameECD,
+                            CommonName == input$SpeciesECD2)
           })
         }
         else if(input$statProtocol == "One Meter" && input$SiteOrIslStat == "By Site"){
           return({
             oneM_DFRaw %>%
-              filter(SiteName == input$SiteNameECD,
-                     CommonName == input$SpeciesECD)
+              dplyr::filter(SiteName == input$SiteNameECD,
+                            CommonName == input$SpeciesECD)
           })
         }
         else if(input$statProtocol == "One Meter" && input$SiteOrIslStat == "By Island"){
           return({
             oneM_DFRaw %>%
-              filter(IslandName == input$IslNameECD,
-                     CommonName == input$SpeciesECD1)
+              dplyr::filter(IslandName == input$IslNameECD,
+                            CommonName == input$SpeciesECD1)
           })
         }
         else if(input$statProtocol == "Five Meter" && input$SiteOrIslStat == "By Site") {
           return({
             fiveM_DFRaw %>%
-              filter(SiteName == input$SiteNameECD,
-                     CommonName == input$SpeciesECD)
+              dplyr::filter(SiteName == input$SiteNameECD,
+                            CommonName == input$SpeciesECD)
           })
         }
         else if(input$statProtocol == "Five Meter" && input$SiteOrIslStat == "By Island") {
           return({
             fiveM_DFRaw %>%
-              filter(IslandName == input$IslNameECD,
-                     CommonName == input$SpeciesECD1)
+              dplyr::filter(IslandName == input$IslNameECD,
+                            CommonName == input$SpeciesECD1)
           })
         }
         else if(input$statProtocol == "Bands" && input$SiteOrIslStat == "By Site"){
           return({
             bands_DFRaw %>%
-              filter(SiteName == input$SiteNameECD,
-                     CommonName == input$SpeciesECD)
+              dplyr::filter(SiteName == input$SiteNameECD,
+                            CommonName == input$SpeciesECD)
           })
         }
         else if(input$statProtocol == "Bands" && input$SiteOrIslStat == "By Island"){
           return({
             bands_DFRaw %>%
-              filter(IslandName == input$IslNameECD,
-                     CommonName == input$SpeciesECD1)
+              dplyr::filter(IslandName == input$IslNameECD,
+                            CommonName == input$SpeciesECD1)
           })
         }
         
@@ -18065,7 +18103,7 @@ server <- function(input, output, session) {
     
     Protocol_filter <- reactive({
       Protocol_PDFs %>%
-        filter(Alt_SurveyType == input$protoChoice)
+        dplyr::filter(Alt_SurveyType == input$protoChoice)
     })
     
     # 1st Small species photo above plot
@@ -18141,11 +18179,11 @@ server <- function(input, output, session) {
       }
       else if(input$Proto == "Other Guides" && input$other_guides == "Santa Barbara Coastal LTER") {  # SBC_LTER PDFs   -----
         return(tags$iframe(style="height:600px; width:100%; scrolling=yes",
-                            src = "Handbook/Other_Guides/LTER FieldGuide 2015.pdf"))
+                           src = "Handbook/Other_Guides/LTER FieldGuide 2015.pdf"))
       }
       else if(input$Proto == "Other Guides" && input$other_guides == "Urchin Disease Guide") {  # Urchin Diesease PDFs   -----
         return(tags$iframe(style="height:600px; width:100%; scrolling=yes",
-                            src = "Handbook/Other_Guides/urchin_disease_guide.pdf"))
+                           src = "Handbook/Other_Guides/urchin_disease_guide.pdf"))
       }
       else if(input$Proto == "Other Guides" && input$other_guides == "PISCO UPC") {  # PISCO_UPC PDFs   -----
         return(tags$iframe(style="height:600px; width:100%; scrolling=yes",
@@ -18173,8 +18211,8 @@ server <- function(input, output, session) {
                                       inline = TRUE),
                          tags$hr(),
                          fluidRow(column(8, imageOutput(outputId = "Indicator",
-                                               height = 700)),
-                         column(3, tags$h2(tags$strong("Species Classification")),
+                                                        height = 700)),
+                                  column(3, tags$h2(tags$strong("Species Classification")),
                                          DTOutput(outputId = "DToutClassPhoto",
                                                   height = 600))))
     }
@@ -18214,10 +18252,10 @@ server <- function(input, output, session) {
                          conditionalPanel("input.disease == 'Stars'",
                                           tags$h1(tags$strong("Bat Star Wasting Disease")),
                                           fluidRow(column(1, actionButton(inputId = "Disease_previous",
-                                                                   label = "Previous")),
-                                            column(1, verbatimTextOutput(outputId = "Disease_numK")),
-                                            column(1, actionButton(inputId = "Disease_next",
-                                                                   label = "Next"))),
+                                                                          label = "Previous")),
+                                                   column(1, verbatimTextOutput(outputId = "Disease_numK")),
+                                                   column(1, actionButton(inputId = "Disease_next",
+                                                                          label = "Next"))),
                                           imageOutput(outputId = "BatWD",
                                                       height = 600)))
     }
@@ -18243,7 +18281,7 @@ server <- function(input, output, session) {
                                             column(1, actionButton(inputId = "KFS_nextL",
                                                                    label = "Next"))),
                                           imageOutput(outputId = "KFS_photo_L", 
-                                                                  height = 600)),
+                                                      height = 600)),
                          conditionalPanel("input.Photographer == 'Brett Seymour'",
                                           tags$h1(tags$strong(input$Photographer)),
                                           fluidRow(
@@ -18272,24 +18310,24 @@ server <- function(input, output, session) {
       })
       
       AlgaeInd <- reactive({
-        filter(Indicators, CommonName == input$Algae)
+        dplyr::filter(Indicators, CommonName == input$Algae)
       })
       
       InvertInd <- reactive({
-        filter(Indicators, CommonName == input$Invertebrates)
+        dplyr::filter(Indicators, CommonName == input$Invertebrates)
       })
       
       FishInd <- reactive({
-        filter(Indicators, CommonName == input$Fish)
+        dplyr::filter(Indicators, CommonName == input$Fish)
       })
       
       SpeciesClassPhoto <- reactive({
         SpeciesName %>%
-          filter(CommonName == photoName()) %>%
-          select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)", 
-                 Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
-          pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
-          select(Rank, Name)
+          dplyr::filter(CommonName == photoName()) %>%
+          dplyr::select(ScientificName, Kingdom, Phylum, Class, Order, Family, Genus, "Species (Used by KFM)", 
+                        Status, "Currently Accepted Name", "Authority (Accepted)", CommonName) %>%
+          tidyr::pivot_longer(-ScientificName, names_to = "Rank", values_to = "Name") %>%
+          dplyr::select(Rank, Name)
       })
       
       output$Indicator <- renderImage({
@@ -18510,11 +18548,7 @@ server <- function(input, output, session) {
     if(input$maptype == "Leaflet Maps") {
       dyn_ui <- tabPanel("Site Maps", value = "maps", # Maps_TP_Leaflet      ----
                          leafletOutput(outputId = "Leaflet",
-                                       height = 600, width = '100%'),
-                         verbatimTextOutput(outputId = "Map_Text"),
-                         tags$hr(),
-                         DTOutput(outputId = "Lealet_Buoy_Table")
-      )
+                                       height = 600, width = '100%'))
     }
     else if(input$maptype == "Satellite Site Maps") {
       dyn_ui <- tabPanel("Site Maps", value = "maps", # Maps_TP_Sat      ----
@@ -18545,33 +18579,6 @@ server <- function(input, output, session) {
     
     { # Leaflet Maps     ----
       
-      output$Map_Text <- renderText({
-        paste("Buoy Number:", Buoy_Num()$station, "Latitude:", event()$lat, "Longitude:", event()$lng)
-      })
-      
-      event <- reactive({input$Leaflet_marker_click})
-        
-      Buoy_Num <- reactive({
-        Buoys_List %>% 
-          filter(lat == event()$lat,
-                 lon == event()$lng)
-      })
-      
-      Buoy_Num_Data <- reactive({
-        if (Buoy_Num()$station == 46053) {
-          return(head(Buoy_46053_DF))
-        }
-        else if (Buoy_Num()$station == 46054) {
-          return(head(Buoy_46054_DF))
-        }
-        else if (Buoy_Num()$station == 46218) {
-          return(head(Buoy_46218_DF))
-        }
-        else if (Buoy_Num()$station == 46251) {
-          return(head(Buoy_46251_DF))
-        }else{NULL}
-      })
-      
       output$Leaflet <- renderLeaflet({
         leaflet() %>%
           setView(lng = -119.7277, lat = 33.76416, zoom = 9) %>%
@@ -18588,16 +18595,12 @@ server <- function(input, output, session) {
           addPolygons(data = CINMS_boundary, weight = 2, color = "blue", fill = FALSE,
                       label = "Channel Islands National Marine Sanctuary (CINMS) Boundary", group = "CINMS Boundary") %>%
           addPolylines(data = transects, group = "Transects")  %>%
-          
-          # addCircleMarkers(data = transects$start, group = "End Points") %>% 
-          
           addCircles(radius = 1, group = "Transect End Points", color = "green",
                      lng = Transect_Endpoints$Start_Long, lat = Transect_Endpoints$Start_Lat, 
                      label = Transect_Endpoints$Start_Label) %>%
           addCircles(radius = 1, group = "Transect End Points", color = "red",
                      lng = Transect_Endpoints$End_Long, lat = Transect_Endpoints$End_Lat, 
                      label = Transect_Endpoints$End_Label) %>%
-          
           addMarkers(data = siteInfo2, label = paste(siteInfo2$IslandCode, siteInfo2$SiteName), group = "Site Markers") %>% 
           addCircleMarkers(data = Buoys_List, label = Buoys_List$DC.description, group = "Buoy Stations") %>% 
           addLayersControl(
@@ -18612,26 +18615,12 @@ server <- function(input, output, session) {
                      completedColor = "#7D4479")
       })
       
-      output$Lealet_Buoy_Table <- renderDT({
-        
-        datatable(Buoy_Num_Data(), rownames = FALSE, extensions = c('Buttons', 'ColReorder'),
-                  options = list(
-                    scrollY = "100%", scrollX = TRUE, paging = FALSE,
-                    ordering = TRUE, info = FALSE, dom = 'Bfrtip', colReorder = TRUE,
-                    buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
-                    initComplete = JS("function(settings, json) {",
-                                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});", "}"),
-                    columnDefs = c(list(list(className = 'dt-center', targets = 0:7))))) %>% 
-          formatStyle(names(Buoy_Num_Data()),
-                      color = "black", backgroundColor = 'white')
-      })
-      
     }
     
     { # Satellite Site Maps  -----
       
       statMapSiteCode <- reactive({
-        siteInfo1 %>% filter(SiteName == input$SiteNameStatMaps)  
+        siteInfo1 %>% dplyr::filter(SiteName == input$SiteNameStatMaps)  
       })
       
       output$statMap <- renderImage({
@@ -18650,7 +18639,7 @@ server <- function(input, output, session) {
         
         bathsite <- reactive({
           BATHlist %>%
-            filter(SiteName == input$bathMaps)
+            dplyr::filter(SiteName == input$bathMaps)
         })
         
         if (is.null(input$bathMaps))
@@ -18676,7 +18665,7 @@ server <- function(input, output, session) {
         
         armsite <- reactive({
           ARMlist %>%
-            filter(SiteName == input$armMaps)
+            dplyr::filter(SiteName == input$armMaps)
         })
         
         if (is.null(input$armMaps))
@@ -18701,7 +18690,7 @@ server <- function(input, output, session) {
         
         SiteDescription <- reactive({
           siteInfo2 %>%
-            filter(SiteName == input$SiteDesc)
+            dplyr::filter(SiteName == input$SiteDesc)
         })
         
         tags$iframe(
@@ -18764,11 +18753,11 @@ server <- function(input, output, session) {
       dyn_ui <- tabPanel("Visit Dates", value = "VD_TP",
                          DTOutput(outputId = "VD_Trip_Itinerary"),
                          tags$hr(),
-                         leafletOutput(outputId = "Leaflet_Trip",
+                         leafletOutput(outputId = "LeafletTrip",
                                        height = 600, width = '100%'),
-                         verbatimTextOutput(outputId = "Map_Text_2"),
+                         verbatimTextOutput(outputId = "Map_Text"),
                          tags$hr(),
-                         DTOutput(outputId = "Lealet_Buoy_Table_2"), 
+                         DTOutput(outputId = "Lealet_Buoy_Table"), 
                          tags$hr())
     }
     return(dyn_ui)
@@ -18788,17 +18777,17 @@ server <- function(input, output, session) {
         if (input$VD_SurveyType_One == "All"){
           return(
             visitDates %>%
-              filter(SiteName == input$VD_SiteName_One) 
+              dplyr::filter(SiteName == input$VD_SiteName_One) 
           )
         }else if(input$VD_SurveyType_One == "Core Vs Fish"){
           visitDates$SurveyType <- visitDates$CvsF
           visitDates %>% 
-            filter(SiteName == input$VD_SiteName_One) %>% 
-            distinct(Date, SurveyType, .keep_all = TRUE)
+            dplyr::filter(SiteName == input$VD_SiteName_One) %>% 
+            dplyr::distinct(Date, SurveyType, .keep_all = TRUE)
         }else{
           visitDates %>% 
-            filter(SiteName == input$VD_SiteName_One, 
-                   SurveyType == input$VD_SurveyType_One)
+            dplyr::filter(SiteName == input$VD_SiteName_One, 
+                          SurveyType == input$VD_SurveyType_One)
         }
       })
       
@@ -18897,37 +18886,37 @@ server <- function(input, output, session) {
       
       VD_FilterDT_One <- reactive({
         visitDates %>% 
-          filter(SiteName == input$VD_SiteName_One) %>% 
-          distinct(Date, SurveyYear, SiteCode, .keep_all = TRUE) %>% 
-          select(SurveyYear, SiteNumber, IslandName, SiteName, Date, MeanDate, Day_of_Week, Month) %>% 
+          dplyr::filter(SiteName == input$VD_SiteName_One) %>% 
+          dplyr::distinct(Date, SurveyYear, SiteCode, .keep_all = TRUE) %>% 
+          dplyr::select(SurveyYear, SiteNumber, IslandName, SiteName, Date, MeanDate, Day_of_Week, Month) %>% 
           arrange(Date) 
       })
       
       VD_FilterDT_One_One <- reactive({
         visitDates %>% 
-          mutate(Day_of_Week = lubridate::wday(Date, label = TRUE, abbr = FALSE)) %>% 
-          filter(SiteName == input$VD_SiteName_One) %>%
-          distinct(Day_of_Week, Date, SurveyYear) %>%
-          mutate(Count_up_to_2004 = ifelse(SurveyYear < 2005, 1, 0),
-                 Count_after_2004 = ifelse(SurveyYear > 2004, 1, 0)) %>% 
-          group_by(Day_of_Week) %>% 
-          mutate(Count_up_to_2004 = sum(Count_up_to_2004),
-                 Count_after_2004 = sum(Count_after_2004)) %>% 
-          distinct(Day_of_Week, Count_up_to_2004, Count_after_2004) %>% 
+          dplyr::mutate(Day_of_Week = lubridate::wday(Date, label = TRUE, abbr = FALSE)) %>% 
+          dplyr::filter(SiteName == input$VD_SiteName_One) %>%
+          dplyr::distinct(Day_of_Week, Date, SurveyYear) %>%
+          dplyr::mutate(Count_up_to_2004 = ifelse(SurveyYear < 2005, 1, 0),
+                        Count_after_2004 = ifelse(SurveyYear > 2004, 1, 0)) %>% 
+          dplyr::group_by(Day_of_Week) %>% 
+          dplyr::mutate(Count_up_to_2004 = sum(Count_up_to_2004),
+                        Count_after_2004 = sum(Count_after_2004)) %>% 
+          dplyr::distinct(Day_of_Week, Count_up_to_2004, Count_after_2004) %>% 
           arrange(Day_of_Week) 
       })
       
       VD_FilterDT_One_Two <- reactive({
         visitDates %>% 
-          mutate(Month = lubridate::month(Date, label = TRUE, abbr = FALSE)) %>% 
-          filter(SiteName == input$VD_SiteName_One) %>% 
-          distinct(Month, Date, SurveyYear) %>%
-          mutate(Count_up_to_2004 = ifelse(SurveyYear < 2005, 1, 0),
-                 Count_after_2004 = ifelse(SurveyYear > 2004, 1, 0)) %>% 
-          group_by(Month) %>% 
-          mutate(Count_up_to_2004 = sum(Count_up_to_2004),
-                 Count_after_2004 = sum(Count_after_2004)) %>% 
-          distinct(Month, Count_up_to_2004, Count_after_2004) %>% 
+          dplyr::mutate(Month = lubridate::month(Date, label = TRUE, abbr = FALSE)) %>% 
+          dplyr::filter(SiteName == input$VD_SiteName_One) %>% 
+          dplyr::distinct(Month, Date, SurveyYear) %>%
+          dplyr::mutate(Count_up_to_2004 = ifelse(SurveyYear < 2005, 1, 0),
+                        Count_after_2004 = ifelse(SurveyYear > 2004, 1, 0)) %>% 
+          dplyr::group_by(Month) %>% 
+          dplyr::mutate(Count_up_to_2004 = sum(Count_up_to_2004),
+                        Count_after_2004 = sum(Count_after_2004)) %>% 
+          dplyr::distinct(Month, Count_up_to_2004, Count_after_2004) %>% 
           arrange(Month)
       })
       
@@ -19011,16 +19000,16 @@ server <- function(input, output, session) {
         if (input$VD_SurveyType_Isl == "All"){
           return(
             visitDates %>%
-              filter(IslandName == input$VD_IslandName_Isl)
+              dplyr::filter(IslandName == input$VD_IslandName_Isl)
           )
         }else if(input$VD_SurveyType_Isl == "Core Vs Fish"){
           visitDates$SurveyType <- visitDates$CvsF
           visitDates %>% 
-            filter(IslandName == input$VD_IslandName_Isl) 
+            dplyr::filter(IslandName == input$VD_IslandName_Isl) 
         }else{
           visitDates %>% 
-            filter(IslandName == input$VD_IslandName_Isl, 
-                   SurveyType == input$VD_SurveyType_Isl) 
+            dplyr::filter(IslandName == input$VD_IslandName_Isl, 
+                          SurveyType == input$VD_SurveyType_Isl) 
         }
       })
       
@@ -19055,40 +19044,40 @@ server <- function(input, output, session) {
       
       VD_FilterDT_Isl <- reactive({
         visitDates %>% 
-          group_by(SurveyYear) %>% 
-          mutate(Day_of_Week = lubridate::wday(Date, label = TRUE, abbr = FALSE),
-                 Month = lubridate::month(Date, label = TRUE, abbr = FALSE))%>% 
-          filter(IslandName == input$VD_IslandName_Isl) %>% 
-          distinct(Date, SurveyYear, SiteCode, .keep_all = TRUE) %>% 
-          select(SurveyYear, SiteNumber, IslandName, SiteName, Date, Isl_MeanDate, Day_of_Week, Month) %>% 
+          dplyr::group_by(SurveyYear) %>% 
+          dplyr::mutate(Day_of_Week = lubridate::wday(Date, label = TRUE, abbr = FALSE),
+                        Month = lubridate::month(Date, label = TRUE, abbr = FALSE))%>% 
+          dplyr::filter(IslandName == input$VD_IslandName_Isl) %>% 
+          dplyr::distinct(Date, SurveyYear, SiteCode, .keep_all = TRUE) %>% 
+          dplyr::select(SurveyYear, SiteNumber, IslandName, SiteName, Date, Isl_MeanDate, Day_of_Week, Month) %>% 
           arrange(Date) 
       })
       
       VD_FilterDT_Isl_One <- reactive({
         visitDates %>% 
-          mutate(Day_of_Week = lubridate::wday(Date, label = TRUE, abbr = FALSE)) %>% 
-          filter(IslandName == input$VD_IslandName_Isl) %>%
-          distinct(Day_of_Week, Date, SurveyYear) %>%
-          mutate(Count_up_to_2004 = ifelse(SurveyYear < 2005, 1, 0),
-                 Count_after_2004 = ifelse(SurveyYear > 2004, 1, 0)) %>% 
-          group_by(Day_of_Week) %>% 
-          mutate(Count_up_to_2004 = sum(Count_up_to_2004),
-                 Count_after_2004 = sum(Count_after_2004)) %>% 
-          distinct(Day_of_Week, Count_up_to_2004, Count_after_2004) %>% 
+          dplyr::mutate(Day_of_Week = lubridate::wday(Date, label = TRUE, abbr = FALSE)) %>% 
+          dplyr::filter(IslandName == input$VD_IslandName_Isl) %>%
+          dplyr::distinct(Day_of_Week, Date, SurveyYear) %>%
+          dplyr::mutate(Count_up_to_2004 = ifelse(SurveyYear < 2005, 1, 0),
+                        Count_after_2004 = ifelse(SurveyYear > 2004, 1, 0)) %>% 
+          dplyr::group_by(Day_of_Week) %>% 
+          dplyr::mutate(Count_up_to_2004 = sum(Count_up_to_2004),
+                        Count_after_2004 = sum(Count_after_2004)) %>% 
+          dplyr::distinct(Day_of_Week, Count_up_to_2004, Count_after_2004) %>% 
           arrange(Day_of_Week) 
       })
       
       VD_FilterDT_Isl_Two <- reactive({
         visitDates %>% 
-          mutate(Month = lubridate::month(Date, label = TRUE, abbr = FALSE)) %>% 
-          filter(IslandName == input$VD_IslandName_Isl) %>% 
-          distinct(Month, Date, SurveyYear) %>%
-          mutate(Count_up_to_2004 = ifelse(SurveyYear < 2005, 1, 0),
-                 Count_after_2004 = ifelse(SurveyYear > 2004, 1, 0)) %>% 
-          group_by(Month) %>% 
-          mutate(Count_up_to_2004 = sum(Count_up_to_2004),
-                 Count_after_2004 = sum(Count_after_2004)) %>% 
-          distinct(Month, Count_up_to_2004, Count_after_2004) %>% 
+          dplyr::mutate(Month = lubridate::month(Date, label = TRUE, abbr = FALSE)) %>% 
+          dplyr::filter(IslandName == input$VD_IslandName_Isl) %>% 
+          dplyr::distinct(Month, Date, SurveyYear) %>%
+          dplyr::mutate(Count_up_to_2004 = ifelse(SurveyYear < 2005, 1, 0),
+                        Count_after_2004 = ifelse(SurveyYear > 2004, 1, 0)) %>% 
+          dplyr::group_by(Month) %>% 
+          dplyr::mutate(Count_up_to_2004 = sum(Count_up_to_2004),
+                        Count_after_2004 = sum(Count_after_2004)) %>% 
+          dplyr::distinct(Month, Count_up_to_2004, Count_after_2004) %>% 
           arrange(Month)
       })
       
@@ -19170,18 +19159,17 @@ server <- function(input, output, session) {
       
       VD_Itinerary_SB <- reactive({
         visitDates %>%
-          filter(SurveyYear == input$VD_Year)
+          dplyr::filter(SurveyYear == input$VD_Year)
       })
       
       VD_Itinerary <- reactive({
         VD_Itinerary_SB() %>%
-          filter(Trip_Number == input$VD_TripNum) %>% 
-          distinct(Date, SiteName, .keep_all = TRUE) %>% 
-          arrange(Date) %>% 
-          group_by(SurveyYear) %>% 
-          mutate(Trip_Number = cumsum(c(TRUE, diff(Date) > 3))) %>% 
-          ungroup() %>% 
-          select(Date, SiteNumber, SiteName, IslandName, Day_of_Week, Month, Latitude, Longitude)
+          dplyr::filter(Trip_Number == input$VD_TripNum) %>% 
+          dplyr::distinct(Date, SiteName, .keep_all = TRUE) %>% 
+          dplyr::group_by(SurveyYear) %>% 
+          dplyr::mutate(Trip_Number = cumsum(c(TRUE, diff(Date) > 3))) %>% 
+          dplyr::ungroup() %>% 
+          dplyr::select(Date, SiteNumber, SiteName, IslandName, Day_of_Week, Month, Latitude, Longitude)
       })
       
       output$VD_Trip_Itinerary <- renderDT({
@@ -19191,13 +19179,13 @@ server <- function(input, output, session) {
                     ordering = TRUE, info = FALSE, dom = 'Bfrtip', colReorder = TRUE,
                     buttons =  c('copy', 'csv', 'excel', 'pdf', 'print'),
                     initComplete = JS("function(settings, json) {",
-                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});", "}"),
+                                      "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});", "}"),
                     columnDefs = c(list(list(className = 'dt-center', targets = 0:7))))) %>% 
           formatStyle(names(VD_Itinerary()),
                       color = "black", backgroundColor = 'white')
       }) 
       
-      output$Leaflet_Trip <- renderLeaflet({
+      output$LeafletTrip <- renderLeaflet({
         leaflet() %>%
           setView(lng = -119.7277, lat = 33.76416, zoom = 9) %>%
           addTiles(group = "OSM (default)") %>%
@@ -19233,40 +19221,56 @@ server <- function(input, output, session) {
                      completedColor = "#7D4479")
       })
       
-      output$Map_Text_2 <- renderText({
-        paste("Buoy Number:", Buoy_Num_2()$station, "Latitude:", event_2()$lat, "Longitude:", event_2()$lng)
+      output$Map_Text <- renderText({
+        paste("Buoy Number:", Buoy_Num()$station, 
+              "Latitude:", input$LeafletTrip_marker_click$lat, 
+              "Longitude:", input$LeafletTrip_marker_click$lng)
       })
       
-      event_2 <- reactive({input$Leaflet_Trip_marker_click})
+      event <- reactive({input$LeafletTrip_marker_click})
       
-      Buoy_Num_2 <- reactive({
+      Buoy_Num <- reactive({
         Buoys_List %>% 
-          filter(lat == event_2()$lat,
-                 lon == event_2()$lng)
+          dplyr::filter(lat == input$LeafletTrip_marker_click$lat,
+                        lon == input$LeafletTrip_marker_click$lng)
       })
       
-      Buoy_Num_Data_2 <- reactive({
-        if (Buoy_Num_2()$station == 46053) {
+      Buoy_Num_Data <- reactive({
+        if (Buoy_Num()$station == 46053) {
           return({
             Buoy_46053_DF %>% 
-              filter(Date == subset(Buoy_46053_DF$Date, Date >= min(VD_Itinerary()$Date)  & Date <= max(VD_Itinerary()$Date)))
-            })
+              dplyr::filter(Date == subset(Buoy_46053_DF$Date, Date >= min(VD_Itinerary()$Date) & Date <= max(VD_Itinerary()$Date)))
+          })
         }
-        else if (Buoy_Num_2()$station == 46054) {
-          return(head(Buoy_46054_DF))
+        else if (Buoy_Num()$station == 46054) {
+          return({
+            Buoy_46054_DF %>% 
+              dplyr::filter(Date == subset(Buoy_46054_DF$Date, Date >= min(VD_Itinerary()$Date) & Date <= max(VD_Itinerary()$Date)))
+          })
         }
-        else if (Buoy_Num_2()$station == 46218) {
-          return(head(Buoy_46218_DF))
+        else if (Buoy_Num()$station == 46218) {
+          return({
+            Buoy_46218_DF %>% 
+              dplyr::filter(Date == subset(Buoy_46218_DF$Date, Date >= min(VD_Itinerary()$Date) & Date <= max(VD_Itinerary()$Date)))
+          })
         }
-        else if (Buoy_Num_2()$station == 46251) {
-          return(head(Buoy_46251_DF))
-        }else{NULL}
+        else if (Buoy_Num()$station == 46251) {
+          return({
+            Buoy_46251_DF %>% 
+              dplyr::filter(Date == subset(Buoy_46251_DF$Date, Date >= min(VD_Itinerary()$Date) & Date <= max(VD_Itinerary()$Date)))
+          })
+        }
+        else{
+          return({
+            Buoy_46053_DF %>% 
+              dplyr::filter(Date == subset(Buoy_46053_DF$Date, Date >= min(VD_Itinerary()$Date) & Date <= max(VD_Itinerary()$Date)))
+          })
+        }
       })
       
-      
-      output$Lealet_Buoy_Table_2 <- renderDT({
+      output$Lealet_Buoy_Table <- renderDT({
         
-        datatable(Buoy_Num_Data_2(), rownames = FALSE, extensions = c('Buttons', 'ColReorder'),
+        datatable(Buoy_Num_Data(), rownames = FALSE, extensions = c('Buttons', 'ColReorder'),
                   options = list(
                     scrollY = "500px", scrollX = TRUE, paging = FALSE,
                     ordering = TRUE, info = FALSE, dom = 'Bfrtip', colReorder = TRUE,
@@ -19274,7 +19278,7 @@ server <- function(input, output, session) {
                     initComplete = JS("function(settings, json) {",
                                       "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});", "}"),
                     columnDefs = c(list(list(className = 'dt-center', targets = 0:7))))) %>% 
-          formatStyle(names(Buoy_Num_Data_2()),
+          formatStyle(names(Buoy_Num_Data()),
                       color = "black", backgroundColor = 'white')
       })
       

@@ -1106,7 +1106,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "green",# UI   ----
       conditionalPanel(condition = "input.tabselected == 'reports'", 
                        selectInput(inputId = "Reports",
                                     label = "Choose a year to view an annual report",
-                                    choices = c(2012:1990, "1982-1989"))
+                                    choices = c(2013:1990, "1982-1989"))
       ),
       # ~ VD_Conditional  ----
       # ...... By Site ----
@@ -1314,6 +1314,31 @@ ui <- dashboardPage(title = "KFM App",  skin = "green",# UI   ----
                 tags$hr(), 
                 imageOutput(outputId = "core_LargeSitePhoto_One",
                             height = 625)),
+       tabPanel("Biodiversity", value = "biodiversity_TP", # ** Core_TP       ----
+                tags$hr(),
+                tags$h1(tags$strong("Biodiversity Metrics")),
+                fluidRow(column(3, radioButtons(inputId = "core_allORone",
+                                                label = "What would you like to view?",
+                                                choices = c("Benthic Diversity",
+                                                            "Fish Diversity"),
+                                                inline = FALSE))
+                         # ,
+                         # column(2, imageOutput(outputId = "core_TopPhoto_One",
+                         #                       height = 200)),
+                         # column(2, imageOutput(outputId = "core_TopPhoto_Two",
+                         #                      height = 200)),
+                         # column(2, imageOutput(outputId = "core_TopSitePhoto_Two",
+                         #                       height = 200))
+                         ),
+                tags$hr(),
+                plotOutput(outputId = "Biodiversity_Benthic",
+                           height = 750),
+                # uiOutput(outputId = "core_UIout"),
+                tags$hr()
+                # , 
+                # imageOutput(outputId = "core_LargeSitePhoto_One",
+                #             height = 625)
+                ),
        tabPanel("RPCs", value = "rpcs_TP", # ** rpcs_TP         ---- 
                 tags$hr(),
                 tags$h1(tags$strong("Random Point Contacts Percent Cover")),

@@ -5,11 +5,11 @@
 { # Library    ----
   
   library(shiny) 
+  library(tidyverse)
   library(lubridate)
   library(glue)
   library(raster)
   library(ggridges)
-  library(tidyverse)
   library(shinydashboard)
   library(shinyWidgets)
   library(splitstackshape)
@@ -103,6 +103,11 @@
   oneM_DF$SiteName <- factor(oneM_DF$SiteName, levels = unique(siteInfo2$SiteName))
   oneM_DF$CommonName <- factor(oneM_DF$CommonName, levels = oneM_Levels)
   
+  # oneM_filter <- oneM_DF %>% 
+  #   filter(Species == 11011 | Species == 11002,
+  #          SurveyYear == 2018) %>% 
+  #   write_csv("oneMeter_2018_PIS_GIG.csv")
+  
   oneM_DFMPA <- read_csv("oneM_MPA.csv")
   oneM_DFMPA$IslandName <- factor(oneM_DFMPA$IslandName, levels = MPA_Levels)
   oneM_DFMPA$SiteName <- factor(oneM_DFMPA$SiteName, levels = as.character(MPA_Site_levels$SiteName))
@@ -126,6 +131,11 @@
   fiveM_DF$SiteName <- factor(fiveM_DF$SiteName, levels = unique(siteInfo2$SiteName))
   fiveM_DF$CommonName <- factor(fiveM_DF$CommonName, levels = fiveM_Levels)
 
+  # fiveM_filter <- fiveM_DF %>% 
+  #   filter(Species == 11011 | Species == 11002,
+  #          SurveyYear == 2018) %>% 
+  #   write_csv("fiveMeter_2018_PIS_GIG_and_PIS_OCH.csv")
+  
   fiveM_DFMPA <- read_csv("fiveM_MPA.csv")
   fiveM_DFMPA$IslandName <- factor(fiveM_DFMPA$IslandName, levels = MPA_Levels)
   fiveM_DFMPA$SiteName <- factor(fiveM_DFMPA$SiteName, levels = as.character(MPA_Site_levels$SiteName))
@@ -146,6 +156,11 @@
   bands_DF$SiteName <- factor(bands_DF$SiteName, levels = unique(siteInfo2$SiteName))
   bands_DF$CommonName <- factor(bands_DF$CommonName, levels = bands_Levels)
   
+  # bands_filter <- bands_DF %>% 
+  #   filter(Species == 11011 | Species == 11002,
+  #          SurveyYear == 2018) %>% 
+  #   write_csv("bands_2018_PIS_GIG_and_PIS_OCH.csv")
+  
   bands_DFMPA <- read_csv("bands_MPA.csv")
   bands_DFMPA$IslandName <- factor(bands_DFMPA$IslandName, levels = MPA_Levels)
   bands_DFMPA$SiteName <- factor(bands_DFMPA$SiteName, levels = as.character(MPA_Site_levels$SiteName))
@@ -156,6 +171,20 @@
   bands_DFRaw$SiteName <- factor(bands_DFRaw$SiteName, levels = unique(siteInfo2$SiteName))
   bands_DFRaw$CommonName <- factor(bands_DFRaw$CommonName, levels = bands_Levels)
   
+}
+
+{ # Benthic Diversity   ----
+  Benthic_Data <- readr::read_csv("Benthic_Diversity_Table.csv")
+  
+  Benthic_Shannon_Index <- Benthic_Data %>%
+    dplyr::select(-IslandCode, - IslandName, - SiteCode, -SiteName, - SurveyYear, - ReserveStatus) %>%
+    vegan::diversity()
+  
+  Benthic_Site_Info <- dplyr::select(Benthic_Data, IslandCode, IslandName, 
+                              SiteCode, SiteName, SurveyYear, ReserveStatus) 
+  Benthic_Diversity <- cbind(Benthic_Site_Info,
+                             "ShannonIndex" = Benthic_Shannon_Index,
+                             "Pycnopodia" = Benthic_Data$`Pycnopodia helianthoides`) 
 }
 
 { # .. Core_DF   ----
@@ -251,12 +280,12 @@
   pdo_noaa <- read_csv("PDO_NOAA.csv")
   
   # PDO <- read.table("https://www.ncdc.noaa.gov/teleconnections/pdo/data.csv",
-  #                   skip = 1, header = T, sep = ",") %>% 
-  #   separate(Date, c('Year','Month'), sep = 4) %>% 
-  #   mutate(Date = as.Date(ISOdate(PDO$Year, PDO$Month, 1))) %>% 
+  #                   skip = 1, header = T, sep = ",") %>%
+  #   separate(Date, c('Year','Month'), sep = 4) %>%
+  #   mutate(Date = as.Date(ISOdate(PDO$Year, PDO$Month, 1))) %>%
   #   dplyr::rename(pdoAnom = Value)
   # PDO$DateStart <- as.Date(ISOdate(PDO$Year, PDO$Month, 1))
-  # PDO$DateEnd <- ceiling_date(PDO$DateStart, "month") 
+  # PDO$DateEnd <- ceiling_date(PDO$DateStart, "month")
   # write_csv(PDO, path = "PDO_NOAA.csv")
   
   scrippsTemp <- read_csv("SIO_Temp_Weekly.csv")
@@ -284,7 +313,6 @@
   
   transects <- st_read("KFM_Transects_SmoothLine5.shp")  %>%
     st_as_sf() %>%
-    group_by(Site_Code) %>% 
     mutate(geometry = st_transform(geometry, "+proj=longlat +ellps=WGS84 +datum=WGS84"))
   
   Transect_Endpoints <- read_csv('transect_0_100.csv')
@@ -516,112 +544,23 @@
   }
   
   { # 46053 EAST SANTA BARBARA  ----
-    Buoy_46053_DF <- read_csv(
-      "Buoy_46053.csv",
-      col_types = cols(
-        Date = col_date(format = ""),
-        Time = col_time(format = ""),
-        lat = col_double(),
-        lon = col_double(),
-        wind_dir = col_double(),
-        wind_spd = col_double(),
-        gust = col_double(),
-        wave_height = col_double(),
-        dominant_wpd = col_double(),
-        average_wpd = col_double(),
-        mean_wave_dir = col_double(),
-        air_pressure = col_double(),
-        air_temperature = col_double(),
-        sea_surface_temperature = col_double(),
-        dewpt_temperature = col_double(),
-        visibility = col_double(),
-        water_level = col_double()
-      ))  %>% 
-      arrange(desc(Date), desc(Time))
-    # Buoy_46053_DF <- Buoy_46053_DF[Buoy_46053_DF$Date %in% visitDates$Date, ]
-    # write_csv(Buoy_46053_DF, "Buoy_46053.csv")
-
+    Buoy_46053_DF <- read_csv("Buoy_46053_Sum.csv") %>% 
+      arrange(desc(Date), desc(Quarter))
   }
 
   { # 46054 WEST SANTA BARBARA  ----
-    Buoy_46054_DF <- read_csv(
-      "Buoy_46054.csv",
-      col_types = cols(
-        Date = col_date(format = ""),
-        Time = col_time(format = ""),
-        lat = col_double(),
-        lon = col_double(),
-        wind_dir = col_double(),
-        wind_spd = col_double(),
-        gust = col_double(),
-        wave_height = col_double(),
-        dominant_wpd = col_double(),
-        average_wpd = col_double(),
-        mean_wave_dir = col_double(),
-        air_pressure = col_double(),
-        air_temperature = col_double(),
-        sea_surface_temperature = col_double(),
-        dewpt_temperature = col_double(),
-        visibility = col_double(),
-        water_level = col_double()
-      )) %>% 
-      arrange(desc(Date), desc(Time))
-    # Buoy_46054_DF <- Buoy_46054_DF[Buoy_46054_DF$Date %in% visitDates$Date, ]
-    # write_csv(Buoy_46054_DF, "Buoy_46054.csv")
+    Buoy_46054_DF <- read_csv("Buoy_46054_Sum.csv") %>% 
+      arrange(desc(Date), desc(Quarter))
   }
 
   { # 46218 (Platform) Harvest SIO 071 ----
-    Buoy_46218_DF <- read_csv(
-      "Buoy_46218.csv",
-      col_types = cols(
-        Date = col_date(format = ""),
-        Time = col_time(format = ""),
-        lat = col_double(),
-        lon = col_double(),
-        wind_dir = col_double(),
-        wind_spd = col_double(),
-        gust = col_double(),
-        wave_height = col_double(),
-        dominant_wpd = col_double(),
-        average_wpd = col_double(),
-        mean_wave_dir = col_double(),
-        air_pressure = col_double(),
-        air_temperature = col_double(),
-        sea_surface_temperature = col_double(),
-        dewpt_temperature = col_double(),
-        visibility = col_double(),
-        water_level = col_double()
-      )) %>% 
-      arrange(desc(Date), desc(Time))
-    # Buoy_46218_DF <- Buoy_46218_DF[Buoy_46218_DF$Date %in% visitDates$Date, ]
-    # write_csv(Buoy_46218_DF, "Buoy_46218.csv")
+    Buoy_46218_DF <- read_csv("Buoy_46218_Sum.csv") %>% 
+      arrange(desc(Date), desc(Quarter))
   }
 
   { # 46251 Santa Cruz Basin SIO 203   ----
-    Buoy_46251_DF <- read_csv(
-      "Buoy_46251.csv",
-      col_types = cols(
-        Date = col_date(format = ""),
-        Time = col_time(format = ""),
-        lat = col_double(),
-        lon = col_double(),
-        wind_dir = col_double(),
-        wind_spd = col_double(),
-        gust = col_double(),
-        wave_height = col_double(),
-        dominant_wpd = col_double(),
-        average_wpd = col_double(),
-        mean_wave_dir = col_double(),
-        air_pressure = col_double(),
-        air_temperature = col_double(),
-        sea_surface_temperature = col_double(),
-        dewpt_temperature = col_double(),
-        visibility = col_double(),
-        water_level = col_double()
-      )) %>% 
-      arrange(desc(Date), desc(Time))
-    # Buoy_46251_DF <- Buoy_46251_DF[Buoy_46251_DF$Date %in% visitDates$Date, ]
-    # write_csv(Buoy_46251_DF, "Buoy_46251.csv")
+    Buoy_46251_DF <- read_csv("Buoy_46251_Sum.csv") %>% 
+      arrange(desc(Date), desc(Quarter))
   }
 
 
