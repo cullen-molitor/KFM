@@ -17055,7 +17055,7 @@ server <- function(input, output, session) {
                              "green3", "gold2", "orange2", "red", "red4")) +
         geom_vline(size = 1, xintercept = as.Date("1982-01-01", format = "%Y-%m-%d")) +
         geom_label(x = as.Date("1982-01-01", format = "%Y-%m-%d"), 
-                   y= 2.5, aes(label = "KFM begins"),
+                   y = 2.5, aes(label = "KFM begins"),
                    hjust = 0,
                    vjust = 0,
                    inherit.aes = FALSE) +
