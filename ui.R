@@ -1187,7 +1187,7 @@ ui <- dashboardPage(title = "KFM App",  skin = "green",# UI   ----
        tabPanel("About", value = "about", # ** About_TP     ----
                          tags$hr(), includeMarkdown(path = "about.md"), tags$hr(),
                          tags$img(height = 900, width = 1250,
-                                  src = "Kelp Forest Sites - With names.jpg"),
+                                  src = "CINP.jpg"),
                          tags$hr()),
        tabPanel("Program History", value = 'hist',   # ** History_TP    ----
                 tags$hr(),
@@ -1316,28 +1316,11 @@ ui <- dashboardPage(title = "KFM App",  skin = "green",# UI   ----
                             height = 625)),
        tabPanel("Biodiversity", value = "biodiversity_TP", # ** Core_TP       ----
                 tags$hr(),
-                tags$h1(tags$strong("Biodiversity Metrics")),
-                fluidRow(column(3, radioButtons(inputId = "core_allORone",
-                                                label = "What would you like to view?",
-                                                choices = c("Benthic Diversity",
-                                                            "Fish Diversity"),
-                                                inline = FALSE))
-                         # ,
-                         # column(2, imageOutput(outputId = "core_TopPhoto_One",
-                         #                       height = 200)),
-                         # column(2, imageOutput(outputId = "core_TopPhoto_Two",
-                         #                      height = 200)),
-                         # column(2, imageOutput(outputId = "core_TopSitePhoto_Two",
-                         #                       height = 200))
-                         ),
+                tags$h1(tags$strong("Biodiversity Metrics (Work in progress...")),
                 tags$hr(),
                 plotOutput(outputId = "Biodiversity_Benthic",
                            height = 750),
-                # uiOutput(outputId = "core_UIout"),
                 tags$hr()
-                # , 
-                # imageOutput(outputId = "core_LargeSitePhoto_One",
-                #             height = 625)
                 ),
        tabPanel("RPCs", value = "rpcs_TP", # ** rpcs_TP         ---- 
                 tags$hr(),

@@ -21,7 +21,9 @@
   library(ggnewscale)
   library(cowplot)
   library(ncdf4)
-  library(rnoaa)
+  # library(rnoaa)
+  library(ggpubr)
+  library(vegan)
   # library(plyr)
   # library(grid)
   # library(gridExtra)
@@ -35,8 +37,8 @@
 }
 
 { # .. SiteInfo_DF   ----
-  siteInfo1 <- read_csv("Site_info.csv")
-  siteInfo2 <- read_csv("Site_info2.csv")
+  siteInfo1 <- readr::read_csv("Data/Site_info.csv")
+  siteInfo2 <- readr::read_csv("Data/Site_info2.csv")
   
   IslandLevels <- c("San Miguel Island", "Santa Rosa Island", "Santa Cruz Island", "Anacapa Island",  "Santa Barbara Island")
   MPA_Levels <- c("Santa Rosa Island", "Santa Cruz Island", "Anacapa Island",  "Santa Barbara Island")
@@ -62,15 +64,15 @@
   SiteLine <- c(as.character(siteInfo1$LineType), "dashed", "dashed", "dashed", "dashed", "dashed")
   names(SiteLine) <- c(siteInfo1$SiteName, IslandLevels)
   
-  visitDates <- read_csv("VisitDates.csv")
+  visitDates <- readr::read_csv("Data/VisitDates.csv")
   visitDates$SurveyType <- factor(visitDates$SurveyType, levels = Survey_Levels)
 }
 
 { # .. Species_Info    ----
   
-  SpeciesName <- read_csv("SpeciesComplete.csv")
+  SpeciesName <- readr::read_csv("Data/SpeciesComplete.csv")
   
-  SpeciesFish <- read_csv("Species_Fish.csv")
+  SpeciesFish <- readr::read_csv("Data/Species_Fish.csv")
   
   Indicators <- SpeciesName %>%
     drop_na(Species) 
@@ -78,13 +80,13 @@
   fish <- Indicators %>%
     filter(Classification == "Fish")
   
-  oneM_species <- read_csv('oneM_Species.csv')
-  fiveM_species <- read_csv("fiveM_Species.csv")
-  bands_species <- read_csv("bands_Species.csv")
-  all_species <- read_csv("core_Species.csv")
+  oneM_species <- readr::read_csv("Data/oneM_Species.csv")
+  fiveM_species <- readr::read_csv("Data/fiveM_Species.csv")
+  bands_species <- readr::read_csv("Data/bands_Species.csv")
+  all_species <- readr::read_csv("Data/core_Species.csv")
   core_species <- as.character(all_species$CommonName)
   names(core_species) <- glue("{all_species$Protocol} - {all_species$CommonName}")
-  rpcs_species <- read_csv("rpcs_Species.csv")
+  rpcs_species <- readr::read_csv("Data/rpcs_Species.csv")
   
   
   SpeciesColor <- c(as.character(SpeciesName$Color), "blue3", "forestgreen", "gold", "orangered", "red3")
@@ -97,7 +99,7 @@
 
 { # .. 1m_DF  ----
   
-  oneM_DF <- read_csv("oneM_Summary.csv")
+  oneM_DF <- readr::read_csv("Data/oneM_Summary.csv")
   oneM_Levels <- unique(oneM_species$CommonName)
   oneM_DF$IslandName <- factor(oneM_DF$IslandName, levels = IslandLevels)
   oneM_DF$SiteName <- factor(oneM_DF$SiteName, levels = unique(siteInfo2$SiteName))
@@ -108,12 +110,12 @@
   #          SurveyYear == 2018) %>% 
   #   write_csv("oneMeter_2018_PIS_GIG.csv")
   
-  oneM_DFMPA <- read_csv("oneM_MPA.csv")
+  oneM_DFMPA <- readr::read_csv("Data/oneM_MPA.csv")
   oneM_DFMPA$IslandName <- factor(oneM_DFMPA$IslandName, levels = MPA_Levels)
   oneM_DFMPA$SiteName <- factor(oneM_DFMPA$SiteName, levels = as.character(MPA_Site_levels$SiteName))
   oneM_DFMPA$CommonName <- factor(oneM_DFMPA$CommonName, levels = oneM_Levels)
   
-  oneM_DFRaw <- read_csv("oneM_RAW.csv")
+  oneM_DFRaw <- readr::read_csv("Data/oneM_RAW.csv")
   oneM_DFRaw$IslandName <- factor(oneM_DFRaw$IslandName, levels = IslandLevels)
   oneM_DFRaw$SiteName <- factor(oneM_DFRaw$SiteName, levels = unique(siteInfo2$SiteName))
   oneM_DFRaw$CommonName <- factor(oneM_DFRaw$CommonName, levels = oneM_Levels)
@@ -123,7 +125,7 @@
 
 { # .. 5m_DF  ----
   
-  fiveM_DF <- read_csv("fiveM_Summary.csv", col_types = cols(
+  fiveM_DF <- readr::read_csv("Data/fiveM_Summary.csv", col_types = cols(
     QuadratsSampled = col_double(),
     IslandQuads = col_double()))
   fiveM_Levels <- unique(fiveM_species$CommonName)
@@ -136,12 +138,12 @@
   #          SurveyYear == 2018) %>% 
   #   write_csv("fiveMeter_2018_PIS_GIG_and_PIS_OCH.csv")
   
-  fiveM_DFMPA <- read_csv("fiveM_MPA.csv")
+  fiveM_DFMPA <- readr::read_csv("Data/fiveM_MPA.csv")
   fiveM_DFMPA$IslandName <- factor(fiveM_DFMPA$IslandName, levels = MPA_Levels)
   fiveM_DFMPA$SiteName <- factor(fiveM_DFMPA$SiteName, levels = as.character(MPA_Site_levels$SiteName))
   fiveM_DFMPA$CommonName <- factor(fiveM_DFMPA$CommonName, levels = fiveM_Levels)
 
-  fiveM_DFRaw <- read_csv("fiveM_Raw.csv")
+  fiveM_DFRaw <- readr::read_csv("Data/fiveM_Raw.csv")
   fiveM_DFRaw$IslandName <- factor(fiveM_DFRaw$IslandName, levels = IslandLevels)
   fiveM_DFRaw$SiteName <- factor(fiveM_DFRaw$SiteName, levels = unique(siteInfo2$SiteName))
   fiveM_DFRaw$CommonName <- factor(fiveM_DFRaw$CommonName, levels = fiveM_Levels)
@@ -150,7 +152,7 @@
 
 { # .. Bands_DF   ----
   
-  bands_DF <- read_csv("bands_Summary.csv")
+  bands_DF <- readr::read_csv("Data/bands_Summary.csv")
   bands_Levels <- unique(bands_species$CommonName)
   bands_DF$IslandName <- factor(bands_DF$IslandName, levels = IslandLevels)
   bands_DF$SiteName <- factor(bands_DF$SiteName, levels = unique(siteInfo2$SiteName))
@@ -161,12 +163,12 @@
   #          SurveyYear == 2018) %>% 
   #   write_csv("bands_2018_PIS_GIG_and_PIS_OCH.csv")
   
-  bands_DFMPA <- read_csv("bands_MPA.csv")
+  bands_DFMPA <- readr::read_csv("Data/bands_MPA.csv")
   bands_DFMPA$IslandName <- factor(bands_DFMPA$IslandName, levels = MPA_Levels)
   bands_DFMPA$SiteName <- factor(bands_DFMPA$SiteName, levels = as.character(MPA_Site_levels$SiteName))
   bands_DFMPA$CommonName <- factor(bands_DFMPA$CommonName, levels = bands_Levels)
   
-  bands_DFRaw <- read_csv("bands_RAW.csv")
+  bands_DFRaw <- readr::read_csv("Data/bands_RAW.csv")
   bands_DFRaw$IslandName <- factor(bands_DFRaw$IslandName, levels = IslandLevels)
   bands_DFRaw$SiteName <- factor(bands_DFRaw$SiteName, levels = unique(siteInfo2$SiteName))
   bands_DFRaw$CommonName <- factor(bands_DFRaw$CommonName, levels = bands_Levels)
@@ -174,7 +176,7 @@
 }
 
 { # Benthic Diversity   ----
-  Benthic_Data <- readr::read_csv("Benthic_Diversity_Table.csv")
+  Benthic_Data <- readr::read_csv("Data/Benthic_Diversity_Table.csv")
   
   Benthic_Shannon_Index <- Benthic_Data %>%
     dplyr::select(-IslandCode, - IslandName, - SiteCode, -SiteName, - SurveyYear, - ReserveStatus) %>%
@@ -191,46 +193,46 @@
   
   # core_DF <- rbind(oneM_DF, fiveM_DF, bands_DF)
   
-  core_DF <- read_csv("core_Summary.csv")
+  core_DF <- readr::read_csv("Data/core_Summary.csv")
   core_Levels <- unique(all_species$CommonName)
   core_DF$IslandName <- factor(core_DF$IslandName, levels = IslandLevels)
   core_DF$SiteName <- factor(core_DF$SiteName, levels = unique(siteInfo2$SiteName))
   core_DF$CommonName <- factor(core_DF$CommonName, levels = core_Levels)
   
-  core_DFMPA <- read_csv("core_MPA.csv") %>% 
+  core_DFMPA <- readr::read_csv("Data/core_MPA.csv") %>% 
     filter(SiteCode != "KH") 
 }
 
 { # .. NHSF_DF   ----
   
-  NHSF_DF <- read_csv("NHSF_Summary.csv")
+  NHSF_DF <- readr::read_csv("Data/NHSF_Summary.csv")
   NHSF_DF$IslandName <- factor(NHSF_DF$IslandName, levels = IslandLevels)
   
-  NHSF_DFRaw<- read_csv("NHSF_Raw.csv") 
+  NHSF_DFRaw<- readr::read_csv("Data/NHSF_Raw.csv") 
   NHSF_DFRaw$IslandName <- factor(NHSF_DFRaw$IslandName, levels = IslandLevels)
   
-  NHSF_DFMPA <- read_csv("NHSF_MPA.csv")
+  NHSF_DFMPA <- readr::read_csv("Data/NHSF_MPA.csv")
   NHSF_DFMPA$IslandName <- factor(NHSF_DFMPA$IslandName, levels = MPA_Levels)
   
-  NHSF_DFRawMPA <- read_csv("NHSF_MPA_Raw.csv") 
+  NHSF_DFRawMPA <- readr::read_csv("Data/NHSF_MPA_Raw.csv") 
   NHSF_DFRawMPA$IslandName <- factor(NHSF_DFRawMPA$IslandName, levels = MPA_Levels)
   
 } 
 
 { # .. RPC_DF   ----
   
-  rpcs_DF <- read_csv("rpcs_Summary.csv")
+  rpcs_DF <- readr::read_csv("Data/rpcs_Summary.csv")
   rpcs_Levels <- unique(rpcs_species$CommonName)
   rpcs_DF$IslandName <- factor(rpcs_DF$IslandName, levels = IslandLevels)
   rpcs_DF$SiteName <- factor(rpcs_DF$SiteName, levels = unique(siteInfo2$SiteName))
   rpcs_DF$CommonName <- factor(rpcs_DF$CommonName, levels = rpcs_Levels)
   
-  rpcs_DFMPA <- read_csv("rpcs_MPA.csv")
+  rpcs_DFMPA <- readr::read_csv("Data/rpcs_MPA.csv")
   rpcs_DFMPA$IslandName <- factor(rpcs_DFMPA$IslandName, levels = MPA_Levels)
   rpcs_DFMPA$SiteName <- factor(rpcs_DFMPA$SiteName, levels = as.character(MPA_Site_levels$SiteName))
   rpcs_DFMPA$CommonName <- factor(rpcs_DFMPA$CommonName, levels = rpcs_Levels)
 
-  # rpcs_DFRaw <- read_csv("rpcs_RAW.csv")
+  # rpcs_DFRaw <- readr::read_csv("Data/rpcs_RAW.csv")
   # rpcs_DFRaw$IslandName <- factor(rpcs_DFRaw$IslandName, levels = IslandLevels)
   # rpcs_DFRaw$SiteName <- factor(rpcs_DFRaw$SiteName, levels = unique(siteInfo2$SiteName))
   # rpcs_DFRaw$CommonName <- factor(rpcs_DFRaw$CommonName, levels = rpcs_Levels)
@@ -239,36 +241,36 @@
 
 { # .. FSF_DF   ----
   
-  FSF_DF <- read_csv("FSF_Summary.csv") 
+  FSF_DF <- readr::read_csv("Data/FSF_Summary.csv") 
   FSF_DF$IslandName <- factor(FSF_DF$IslandName, levels = IslandLevels)
   
-  FSF_DFMPA <- read_csv("FSF_MPA.csv")
+  FSF_DFMPA <- readr::read_csv("Data/FSF_MPA.csv")
   FSF_DFMPA$IslandName <- factor(FSF_DFMPA$IslandName, levels = MPA_Levels)
   
-  FSF_DFRaw <- read_csv("FSF_Raw.csv")
+  FSF_DFRaw <- readr::read_csv("Data/FSF_Raw.csv")
   FSF_DFRaw$IslandName <- factor(FSF_DFRaw$IslandName, levels = IslandLevels)
   
-  FSF_DFRawMPA <- read_csv("FSF_MPA_Raw.csv")
+  FSF_DFRawMPA <- readr::read_csv("Data/FSF_MPA_Raw.csv")
   FSF_DFRawMPA$IslandName <- factor(FSF_DFRawMPA$IslandName, levels = MPA_Levels)
 }
 
 { # .. RDFC_DF   ----
 
-  RDFC_DF <- read_csv("RDFC_Summary.csv")
+  RDFC_DF <- readr::read_csv("Data/RDFC_Summary.csv")
   RDFC_DF$IslandName <- factor(RDFC_DF$IslandName, levels = IslandLevels)
 
 }
 
 { # .. Temperature_DF   ----
   
-  temp <- read_csv("Temp_weekly_summary.csv")
+  temp <- readr::read_csv("Data/Temp_weekly_summary.csv")
   
-  tempByIsland <- read_csv("Temp_weekly_summary_byIsl.csv")
+  tempByIsland <- readr::read_csv("Data/Temp_weekly_summary_byIsl.csv")
   # %>% 
   #   mutate(Date = as.Date(Date, format='%m/%d/%Y')) %>% 
   #   write_csv("Temp_weekly_summary_byIsl.csv")
   
-  oni <- read_csv("nino34.csv")
+  oni <- readr::read_csv("Data/nino34.csv")
   
   # oni <- read.table("https://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/detrend.nino34.ascii.txt", header = T) %>%
   #   mutate(Date = as.Date(ISOdate(oni$YR, oni$MON, 1))) 
@@ -276,8 +278,8 @@
   # oni$DateEnd <- ceiling_date(oni$DateStart, "month")
   # write_csv(oni, path = "nino34.csv")
   
-  pdo_uw <- read_csv("PDO_UW.csv") 
-  pdo_noaa <- read_csv("PDO_NOAA.csv")
+  pdo_uw <- readr::read_csv("Data/PDO_UW.csv") 
+  pdo_noaa <- readr::read_csv("Data/PDO_NOAA.csv")
   
   # PDO <- read.table("https://www.ncdc.noaa.gov/teleconnections/pdo/data.csv",
   #                   skip = 1, header = T, sep = ",") %>%
@@ -288,14 +290,14 @@
   # PDO$DateEnd <- ceiling_date(PDO$DateStart, "month")
   # write_csv(PDO, path = "PDO_NOAA.csv")
   
-  scrippsTemp <- read_csv("SIO_Temp_Weekly.csv")
+  scrippsTemp <- readr::read_csv("Data/SIO_Temp_Weekly.csv")
   
-  scrippsSalt <- read_csv("SIO_Salt_Weekly.csv")
+  scrippsSalt <- readr::read_csv("Data/SIO_Salt_Weekly.csv")
 }
 
 { # .. Maps_DF   ----
   
-  mpa <- st_read("California_Marine_Protected_Areas.shp")
+  mpa <- st_read("GIS/California_Marine_Protected_Areas.shp")
 
   mpa <- st_as_sf(mpa)
 
@@ -311,22 +313,22 @@
   TransectSites <- siteInfo2 %>% 
     filter(SiteNumber != 1 & SiteNumber != 5 & SiteNumber != 11) 
   
-  transects <- st_read("KFM_Transects_SmoothLine5.shp")  %>%
+  transects <- st_read("GIS/KFM_Transects_SmoothLine5.shp")  %>%
     st_as_sf() %>%
     mutate(geometry = st_transform(geometry, "+proj=longlat +ellps=WGS84 +datum=WGS84"))
   
-  Transect_Endpoints <- read_csv('transect_0_100.csv')
+  Transect_Endpoints <- readr::read_csv("GIS/transect_0_100.csv")
   
-  NPS_boundary <- st_read("nps_boundary.shp") %>%
+  NPS_boundary <- st_read("GIS/nps_boundary.shp") %>%
     st_as_sf()
   
-  CINMS_boundary <- st_read("cinms_py.shp") %>%
+  CINMS_boundary <- st_read("GIS/cinms_py.shp") %>%
     st_as_sf()
 
 }
 
 { # .. Protocol_DF ----
-  Protocol_PDFs <- read_csv("Protocols.csv")
+  Protocol_PDFs <- readr::read_csv("Data/Protocols.csv")
 }
 
 { # .. TAGS  ----
@@ -540,26 +542,26 @@
 { # .. Buoys  ----
 
   { # Buoy Stations ----
-    Buoys_List <- read_csv("Buoy_Stations.csv")
+    Buoys_List <- readr::read_csv("Data/Buoy_Stations.csv")
   }
   
   { # 46053 EAST SANTA BARBARA  ----
-    Buoy_46053_DF <- read_csv("Buoy_46053_Sum.csv") %>% 
+    Buoy_46053_DF <- readr::read_csv("Data/Buoy_46053_Sum.csv") %>% 
       arrange(desc(Date), desc(Quarter))
   }
 
   { # 46054 WEST SANTA BARBARA  ----
-    Buoy_46054_DF <- read_csv("Buoy_46054_Sum.csv") %>% 
+    Buoy_46054_DF <- readr::read_csv("Data/Buoy_46054_Sum.csv") %>% 
       arrange(desc(Date), desc(Quarter))
   }
 
   { # 46218 (Platform) Harvest SIO 071 ----
-    Buoy_46218_DF <- read_csv("Buoy_46218_Sum.csv") %>% 
+    Buoy_46218_DF <- readr::read_csv("Data/Buoy_46218_Sum.csv") %>% 
       arrange(desc(Date), desc(Quarter))
   }
 
   { # 46251 Santa Cruz Basin SIO 203   ----
-    Buoy_46251_DF <- read_csv("Buoy_46251_Sum.csv") %>% 
+    Buoy_46251_DF <- readr::read_csv("Data/Buoy_46251_Sum.csv") %>% 
       arrange(desc(Date), desc(Quarter))
   }
 

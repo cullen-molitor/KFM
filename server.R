@@ -7938,7 +7938,8 @@ server <- function(input, output, session) {
     
   }
   
-  output$Biodiversity_Benthic <- renderPlot({
+  
+  output$Biodiversity_Benthic <- renderPlot({ # Biodiversity  ----
     p1 <- ggplot2::ggplot(Benthic_Diversity, aes(x = SurveyYear, y = ShannonIndex, color = ReserveStatus)) +
       ggplot2::geom_smooth(method = 'loess', formula='y~x') +
       ggplot2::labs(title = "Shannon Index Time Series",
@@ -7948,9 +7949,11 @@ server <- function(input, output, session) {
                     color = "Reserve Status",
                     caption = "Fig 1. Diversity by reserve status across all reference sites") +
       ggplot2::theme_classic() +
-      ggplot2::theme(plot.title = element_text(hjust = .5),
-                     plot.subtitle = element_text(hjust = .5),
+      ggplot2::theme(plot.title = element_text(hjust = .5, size = 18),
+                     plot.subtitle = element_text(hjust = .5, size = 16),
                      plot.caption = element_text(hjust = 0),
+                     axis.text = element_text(size = 12),
+                     axis.title = element_text(size = 14),
                      legend.justification = c(0, 0.5))
     
     p2 <- ggplot2::ggplot(Benthic_Diversity, aes(x = SurveyYear, y = ShannonIndex, color = IslandCode)) +
@@ -7961,6 +7964,8 @@ server <- function(input, output, session) {
                     caption = "Fig 2. Diversity by island across all reference sites") +
       ggplot2::theme_classic() +
       ggplot2::theme(plot.caption = element_text(hjust = 0),
+                     axis.text = element_text(size = 12),
+                     axis.title = element_text(size = 14),
                      legend.justification = c(0, 0.5))
     
     p3 <- ggplot2::ggplot(Benthic_Diversity, aes(x = SurveyYear, y = ShannonIndex, color = IslandCode, linetype = ReserveStatus)) +
@@ -7972,6 +7977,8 @@ server <- function(input, output, session) {
                     caption = "Fig 3. Diversity by island and reserve status") +
       ggplot2::theme_classic() +
       ggplot2::theme(plot.caption = element_text(hjust = 0),
+                     axis.text = element_text(size = 12),
+                     axis.title = element_text(size = 14),
                      legend.justification = c(0, 0.5))
     ggarrange(p1, p2, p3, ncol = 1, align = "v")
   })
